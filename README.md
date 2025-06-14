@@ -1,52 +1,3 @@
-<html>
-<head>
-<title>Glowing Text</title>
-<style>
-body {
-margin: 0;
-overflow: hidden; /* Hide scrollbars /
-background-color: #001f3f; / Dark background /
-display: flex;
-justify-content: center;
-align-items: center;
-min-height: 100vh;
-animation: wave 5s infinite alternate; / Apply the wave animation */
-}
-.container {
-padding: 20px 40px;
-border-radius: 10px;
-}
-.text {
-font-family: sans-serif;
-font-size: 2em;
-color: #fff;
-text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; /* Glowing text effect */
-}
-@keyframes wave {
-0% {
-transform: translateY(0);
-background-color: #001f3f;
-}
-50% {
-transform: translateY(-20px);
-background-color: #1a5276;
-}
-100% {
-transform: translateY(0);
-background-color: #001f3f;
-}
-}
-</style>
-</head>
-<body>
-<div class="container">
-<h1 class="text">SHADOW-XTECH WHATSAPP BOT</h1>
-</div>
-</body>
-</html>
-
-
-
 <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Black+Ops+One&size=100&pause=1000&color=FF0000&center=true&width=1000&height=200&lines=XTREME-TECH_X" alt="Typing SVG" /></a>
   </p>
 +
@@ -96,7 +47,7 @@ Click the button below to fork:
 
 ## ɢᴇᴛ ᴘᴀɪʀɪɴɢ ᴄᴏᴅᴇ
   <p align="left">  
-<a href='https://popkidsessgenerator.onrender.com/pair' target="_blank"><img alt='Get Pairing Code' src='https://img.shields.io/badge/Get%20Pairing%20Code-000000?style=for-the-badge&logo=codefactor&logoColor=yellow'/></a>  
+<a href='https://pair-case-inqp.onrender.com' target="_blank"><img alt='Get Pairing Code' src='https://img.shields.io/badge/Get%20Pairing%20Code-000000?style=for-the-badge&logo=codefactor&logoColor=yellow'/></a>  
 </p>  
 
 
