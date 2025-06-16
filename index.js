@@ -130,25 +130,22 @@ const port = process.env.PORT || 9090;
   }
   // ------------------------------
 
-  let up = `╭══════════════⊷
-┃ ⚡𝗣𝗢𝗣𝗞𝗜𝗗 𝗫𝗧𝗘𝗖𝗛 𝗕𝗢𝗧
-╰══════════════⊷
-╭══════════════⊷
-┃ 🪆𝗥𝗘𝗣𝗢
-┃https://github.com/Popkiddevs/POPKID-XTECH
-╰══════════════⊷
-╭══════════════⊷
-┃ ❤️‍🩹𝗦𝗘𝗦𝗦𝗜𝗢𝗡 𝗜𝗗
-┃https://popkidpairfine.onrender.com/pair
-╰══════════════⊷
-╭══════════════⊷
-┃ ғᴏʀᴋ ᴀɴᴅ sᴛᴀʀ ᴏᴜʀ ʀᴇᴘᴏ
-┃ ғᴏʀ ᴄᴏᴜʀᴀɢᴇ ᴘ𝗹𝗲𝗮sᴇ
-╰══════════════⊷
-╭══════════════⊷
-┃ 𝐏𝐎𝐏𝐊𝐈𝐃
-┃+254732297194
-╰══════════════⊷`;
+  let up = `*✨ Hello, Shadow-Xtech User! ✨*
+
+╭─〔 *🤖 SHADOW XTECH BOT* 〕  
+├─▸ *Ultrasonic, Speed and Power By Black-Tappy!*  
+╰─➤ *Your New WhatsApp Sidekick is Here!*
+
+*🩷Thank you for Choosing Shadow-Xtech!*
+
+╭──〔 🔗 *Quick Links* 〕  
+├─ 📢 *Join Our Channel:*  
+│   Click [**Here**](https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10) to join!  
+├─ ⭐ *Give Us a Star:*  
+│   Star Us [**Here**](https://github.com/Tappy-Black/Shadow-Xtech-V1)!  
+╰─🛠️ *Prefix:* \`${prefix}\`
+
+> _© *Powered By Black-Tappy*_`;
     conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/og4tsk.jpg` }, caption: up })
   }
   })
