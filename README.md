@@ -4,7 +4,7 @@
 
 > **`Updated` SHADOW-XTECH with Latest Features**
 
-## CONTACT XTREME-TECH_X OWNER
+## CONTACT SHADOW-XTECH OWNER
   
 <a href="https://wa.me/254759000340"> <img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="13%"> </a>
   <a href="https://chat.whatsapp.com/GbpVWoHH0XLHOHJsYLtbjH"> <img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="13%"> </a>
