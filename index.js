@@ -102,14 +102,36 @@ async function connectToWA() {
         version
     })
 
+    // --- MODIFIED: More robust connection handling ---
     conn.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect } = update
+        const { connection, lastDisconnect } = update;
         if (connection === 'close') {
-            if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
-                connectToWA()
+            const reason = lastDisconnect.error?.output?.statusCode;
+
+            if (reason === DisconnectReason.loggedOut) {
+                console.log('--------------------------------------------------');
+                console.log('❌ FATAL ERROR: Connection Logged Out!');
+                console.log('--------------------------------------------------');
+                console.log('This means your session is invalid. This can happen if you:');
+                console.log('1. Used your WhatsApp account on another device/web session.');
+                console.log('2. Logged out from "Linked Devices" on your phone.');
+                console.log('\nACTION REQUIRED: A new session ID is required to reconnect.');
+                console.log('--------------------------------------------------');
+
+                // Delete the invalid session directory to force re-authentication
+                if (fs.existsSync(__dirname + '/sessions')) {
+                    fs.rmSync(__dirname + '/sessions', { recursive: true, force: true });
+                    console.log('🗑️ Old session data deleted. Please restart the bot with a new session ID.');
+                }
+                // Exit the process cleanly.
+                process.exit(1);
+            } else {
+                // For any other disconnection reason, attempt to reconnect.
+                console.log('🔌 Connection closed. Attempting to reconnect...');
+                connectToWA();
             }
         } else if (connection === 'open') {
-            console.log('🕹️ Installing Plugins')
+            console.log('🕹️ Installing Plugins');
             const path = require('path');
             fs.readdirSync("./plugins/").forEach((plugin) => {
                 if (path.extname(plugin).toLowerCase() == ".js") {
@@ -122,10 +144,9 @@ async function connectToWA() {
             // Initialize the call handler
             callHandler(conn, config.ANTICALL);
 
-            // --- MODIFIED: Auto-follow specified channels/newsletters ---
             const channelsToFollow = [
-                "0029VasHgfG4tRrwjAUyTs10@newsletter", // Channel link converted to JID
-                "120363369453603973@newsletter"      // Newsletter JID
+                "0029VasHgfG4tRrwjAUyTs10@newsletter",
+                "120363369453603973@newsletter"
             ];
 
             console.log("Attempting to follow specified channels...");
@@ -134,11 +155,9 @@ async function connectToWA() {
                     await conn.newsletterFollow(jid);
                     console.log(`📬 Successfully followed: ${jid}`);
                 } catch (e) {
-                    // Log the error but don't crash, it might be because the bot is already following.
                     console.error(`❌ Failed to follow ${jid}. Reason: ${e.message}`);
                 }
             }
-            // -------------------------------------------------------------
 
             let up = `*✨ Hello, Shadow-Xtech User! ✨*
 
@@ -150,15 +169,17 @@ async function connectToWA() {
 
 ╭──〔 🔗 *Quick Links* 〕  
 ├─ 📢 *Join Our Channel:*  
-│   Click [**Here(https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10)**] to join!  
+│   Click [**Here**] to join!  
 ├─ ⭐ *Give Us a Star:*  
-│   Star Us [**Here(https://github.com/Tappy-Black/Shadow-Xtech-V1)**]!  
+│   Star Us [**Here**]!  
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
             conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/og4tsk.jpg` }, caption: up })
         }
     })
+    // -------------------------------------------------------------
+
     conn.ev.on('creds.update', saveCreds)
 
     //==============================
