@@ -169,9 +169,9 @@ async function connectToWA() {
 
 ╭──〔 🔗 *Quick Links* 〕  
 ├─ 📢 *Join Our Channel:*  
-│   Click [**Here**] to join!  
+│   Click [**Here**](https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10) to join!  
 ├─ ⭐ *Give Us a Star:*  
-│   Star Us [**Here**]!  
+│   Star Us [**Here**](https://github.com/Tappy-Black/Shadow-Xtech-V1)!  
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
