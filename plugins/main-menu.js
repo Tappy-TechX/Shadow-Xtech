@@ -80,7 +80,7 @@ async (conn, mek, m, { from, reply }) => {
 ┆ ◦ • 🎀 Dev : *Black-Tappy*
 ┆ ◦ • 🚀 Version : *4.0.0 Mᴇᴛᴀ*
 ╰────────────────┈⊷
-${randomLoadingMessage}
+> ${randomLoadingMessage}
 ╭──·๏[📥 *ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴇɴᴜ*📥]
 ┆ ◦ 
 ┆ ◦  🟦 facebook
