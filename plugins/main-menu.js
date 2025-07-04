@@ -1,4 +1,4 @@
-const config = require('../config');
+Const config = require('../config');
 const { cmd, commands } = require('../command');
 const os = require("os");
 const { runtime } = require('../lib/functions');
@@ -50,7 +50,8 @@ const MENU_AUDIO_URLS = [
 // --- END OF CONFIGURATION ---
 
 cmd({
-    pattern: "menu",
+    // Updated pattern to allow for optional prefix (e.g., .menu, menu, or !menu)
+    pattern: `(?:${config.PREFIX})?menu|allmenu|fullmenu`,
     alias: ["allmenu", "fullmenu"],
     use: '.menu',
     desc: "Show all bot commands",
@@ -61,7 +62,14 @@ cmd({
 async (conn, mek, m, { from, reply }) => {
     try {
         // --- STEP 1: PROVIDE INSTANT FEEDBACK FOR ULTRA SPEED ---
-        await reply("📜 Fetching commands... Please wait a moment!");
+        // Dynamically choose a response message for fast feedback
+        const fastReplyMessages = [
+            "Just a moment, fetching your commands!",
+            "Hang tight, loading the menu!",
+            "Almost there, preparing the command list!"
+        ];
+        const fastReplyMessage = fastReplyMessages[Math.floor(Math.random() * fastReplyMessages.length)];
+        await reply(`📜 ${fastReplyMessage}`);
 
         // --- STEP 2: PREPARE DYNAMIC CONTENT ---
         const selectedImageUrl = MENU_IMAGES[Math.floor(Math.random() * MENU_IMAGES.length)];

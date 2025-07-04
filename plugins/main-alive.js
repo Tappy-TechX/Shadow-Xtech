@@ -1,4 +1,4 @@
-const { cmd } = require("../command");
+Const { cmd } = require("../command");
 const moment = require("moment");
 
 let botStartTime = Date.now(); // Enregistrement de l'heure de démarrage du bot
@@ -33,16 +33,20 @@ const getRandomQuote = () => {
 };
 
 cmd({
-    pattern: "alive",
+    // Updated pattern to allow for optional prefix (e.g., .alive, alive)
+    pattern: `(?:${config.PREFIX})?alive`,
     desc: "Check if the bot is active.",
     category: "info",
     react: "🎀",
     filename: __filename
 }, async (conn, mek, m, { reply, from }) => {
     try {
+        // --- IMMEDIATE FAST RESPONSE ---
+        await reply("Checking bot status... One moment! 🚀");
+
         const pushname = m.pushName || "User"; // Nom de l'utilisateur ou valeur par défaut
         const currentTime = moment().format("HH:mm:ss");
-        const currentDate = moment().format("dddd, MMMM Do YYYY"); // Added YYYY for full date
+        const currentDate = moment().format("dddd, MMMM Do YYYY"); // Fixed to include full year
 
         const runtimeMilliseconds = Date.now() - botStartTime;
         const runtimeSeconds = Math.floor((runtimeMilliseconds / 1000) % 60);
