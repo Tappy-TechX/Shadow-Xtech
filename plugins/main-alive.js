@@ -33,8 +33,7 @@ const getRandomQuote = () => {
 };
 
 cmd({
-    // Updated pattern to allow for optional prefix (e.g., .alive, alive)
-    pattern: `(?:${config.PREFIX})?alive`,
+    pattern: "alive",
     desc: "Check if the bot is active.",
     category: "info",
     react: "🎀",
@@ -42,11 +41,19 @@ cmd({
 }, async (conn, mek, m, { reply, from }) => {
     try {
         // --- IMMEDIATE FAST RESPONSE ---
-        await reply("Checking bot status... One moment! 🚀");
+        // Provide quick feedback to the user while the full message is prepared.
+        const quickReplies = [
+            "Checking bot status... just a moment! 🚀",
+            "Alive and kicking! Getting the details for you...",
+            "Hold on, fetching my vitals! 💖"
+        ];
+        await reply(quickReplies[Math.floor(Math.random() * quickReplies.length)]);
 
         const pushname = m.pushName || "User"; // Nom de l'utilisateur ou valeur par défaut
         const currentTime = moment().format("HH:mm:ss");
-        const currentDate = moment().format("dddd, MMMM Do YYYY"); // Fixed to include full year
+        // Corrected date format to ensure "Do" (day of month with ordinal) works as expected.
+        // It's usually followed by the year or just used as-is, depending on localization.
+        const currentDate = moment().format("dddd, MMMM Do YYYY"); 
 
         const runtimeMilliseconds = Date.now() - botStartTime;
         const runtimeSeconds = Math.floor((runtimeMilliseconds / 1000) % 60);
