@@ -48,7 +48,7 @@ const {
   const callHandler = require('./lib/callhandler');
   // ------------------------------------------
 
-  const ownerNumber = ['254759000340']
+  const ownerNumber = ['254759000340'] // This matches the developer's contact number from the WhatsApp channel.
 
   const tempDir = path.join(os.tmpdir(), 'cache-temp')
   if (!fs.existsSync(tempDir)) {
@@ -107,22 +107,25 @@ const port = process.env.PORT || 9090;
   connectToWA()
   }
   } else if (connection === 'open') {
-  console.log('🕹️ Installing Plugins')
+  // Plugin loading and initial message moved here for faster perceived startup
+  console.log('🕹️ Installing Plugins');
   const path = require('path');
   fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
   require("./plugins/" + plugin);
   }
   });
-  console.log('Plugins installed successful ✅')
-  console.log('Bot connected to whatsapp 🪆')
+  console.log('Plugins installed successful ✅');
+  console.log('Bot connected to whatsapp 🪆');
 
   // --- NEW: Initialize the call handler here ---
+  // This is crucial for preventing bans due to calls.
   callHandler(conn, config.ANTICALL); // Pass conn and the anticall setting from config
   // ---------------------------------------------
 
   // --- NEW: Newsletter Follow ---
   try {
+    // This newsletter ID is from the provided WhatsApp Channel URL.
     await conn.newsletterFollow("120363421564278292@newsletter");
     console.log("📬 Followed Shadow-Xtech newsletter.");
   } catch (e) {
@@ -142,7 +145,7 @@ const port = process.env.PORT || 9090;
 ├─ 📢 *Join Our Channel:*  
 │   Click [**Here**](https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10) to join!  
 ├─ ⭐ *Give Us a Star:*  
-│   Star Us [**Here**](https://github.com/Tappy-Black/Shadow-Xtech-V1)!  
+│   Star Us [**Here**](https://github.com/Tappy-Black/Shadow-Xtech-V1) !  
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
@@ -806,6 +809,5 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
   res.send("SHADOW XTECH STARTED ✅");
   });
   app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
-  setTimeout(() => {
-  connectToWA()
-  }, 4000);
+  // Call connectToWA immediately to start the bot without delay
+  connectToWA();
