@@ -129,7 +129,7 @@ const {
 
               // --- Newsletter Follow ---
               const newsletterChannels = [
-                "120363369453603973@newsletter", 
+                "120363369453603973@newsletter",
               ];
               const followedChannels = [];
               const failedChannels = [];
@@ -159,7 +159,7 @@ const {
               console.log(newsletterStatus.trim());
 
               // Construct and send the initial welcome message
-              let welcomeMessage = `*✨ Hello, Shadow-Xtech User! ✨*
+              let up = `*✨ Hello, Shadow-Xtech User! ✨*
 
 ╭─〔 *🤖 SHADOW XTECH BOT* 〕  
 ├─▸ *Ultrasonic, Speed and Power By Black-Tappy!*  
@@ -175,10 +175,9 @@ const {
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
-
-              welcomeMessage += `\n\n${newsletterStatus}`;
+              up += `\n\n${newsletterStatus}`; // Append newsletter status
               // Sending the welcome message with an image
-              await conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/og4glg.jpg` }, caption: welcomeMessage });
+              await conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/og4tsk.jpg` }, caption: up });
               // ------------------------------
 
               // --- Initialize the call handler ---
