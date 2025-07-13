@@ -1,27 +1,26 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
+const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
+
 cmd({
     pattern: "ping",
-    alias: ["speed", "pong"], // Aliases for the command
-    use: '.ping', // Usage example
-    desc: "Check bot's response time, load, and stability.", // Description of the command
-    category: "main", // Command category
-    react: "⚡", // Reaction to be sent when the command is triggered
-    filename: __filename // Path to the current file, useful for logging
+    alias: ["speed", "pong"], 
+    use: '.ping', 
+    desc: "Check bot's response time, load, and stability.", 
+    category: "main", 
+    react: "⚡", 
+    filename: __filename 
 },
 async (conn, mek, m, { from, quoted, sender, reply }) => {
     try {
         // --- Latency Measurement ---
-        // Record the time when the command was received to calculate the round-trip time (latency).
         const start = Date.now();
 
         // --- Status Indicators ---
-        // Stylish Emojis for visual appeal in the response.
         const statusEmojis = ['✅', '🟢', '✨', '📶', '🔋'];
-        
+
         // --- Fancy Loading Messages ---
-        // Array of dynamic, stylish messages to display while the bot is processing.
         const loadingMessages = [
             "*〘⚡ Analyzing bot speed... 〙*",
             "*〘🚀 Calculating latency... 〙*",
@@ -36,7 +35,6 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
         const randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
 
         // --- Speed and Latency Quotes ---
-        // Dynamic, speed and latency-focused quotes for a more engaging and personalized response.
         const speedLatencyQuotes = [
             "“✨Speed is key in the digital realm.✨”",
             "“🟢Latency is the silent killer of user experience.🎀”",
@@ -72,27 +70,39 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
             profilePicUrl = 'https://i.ibb.co/gdpjw5w/pp-wa-3.jpg'; // Example fallback image URL
         }
         const stylishText = `
-╭─❏ *『 BOT PERFORMANCE REPORT 』*
-│
-├─🤖 *Bot Name:* ${config.botname || 'SHADOW-XTECH'}
-├─⚡ *Latency:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs}ms
-├─📶 *Bot Load:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${memoryUsageMB.toFixed(2)} MB
-├─✨ *Stability:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${stabilityStatus}
-├─⏱️ *Checked At:* ${new Date().toLocaleTimeString()}
-│
-╰─❏ *${randomQuote}!*
+╭───────◇
+│ *🛠️ Bot Response and Speed 🛜*
+╰───────◇
+╭──〔 🌐 *Network Status* 〕──◇
+├─ 🤖 *Bot Name:* ${config.botname || 'SHADOW-XTECH'}
+├─ ⚡ *Latency:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs}ms
+├─ 📶 *Bot Load:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${memoryUsageMB.toFixed(2)} MB
+├─ ✨ *Stability:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${stabilityStatus}
+╰─ ⏱️ *Checked At:* *${new Date().toLocaleTimeString()}*
+╭───────◇
+│ *${randomQuote}!*
+╰───────◇
         `.trim(); // .trim() removes any leading/trailing whitespace.
         await conn.sendMessage(from, {
             image: { url: profilePicUrl },
-            caption: stylishText, 
+            caption: stylishText,
             contextInfo: {
-                mentionedJid: [sender], 
-                forwardingScore: 999, 
+                mentionedJid: [sender],
+                forwardingScore: 999,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363369453603973@newsletter',
                     newsletterName: "𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ",
                     serverMessageId: 143
+                },
+                // Added externalAdReply object here
+                externalAdReply: {
+                    title: "Shadow-Xtech Speed",
+                    body: "Powered By Black-Tappy",
+                    thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
+                    sourceUrl: whatsappChannelLink,
+                    mediaType: 1, // 1 typically represents an image
+                    renderLargerThumbnail: false,
                 }
             }
         }, { quoted: mek }); // Reply to the original message

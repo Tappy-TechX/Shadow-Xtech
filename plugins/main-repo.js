@@ -22,13 +22,13 @@ async (conn, mek, m, { from, reply }) => {
         "https://files.catbox.moe/og4tsk.jpg"  // **Replace with actual URL**
     ];
 
-    // Array of random quotes
+    // Array of random quotes related to bot health and encouraging repo forks
     const quotes = [
-        "✨The best way to predict the future is to create it✨. - Peter Drucker",
-        "🌐Success is not final, failure is not fatal: it is the courage to continue that counts🎁. - Winston Churchill",
-        "🍁The only way to do great work is to love what you do📶. - Steve Jobs",
-        "📶Innovation distinguishes between a leader and a followe🎧r. - Steve Jobs",
-        "🎵Life is what happens when you're busy making other plans🌌. - John Lennon"
+        "Our bot's performance is just Superb! Explore its core health in our repo. Fork it! 🚀✨",
+        "Keeping the bot's systems in tip-top shape! See the magic behind it – fork our repo! 🌬️💻",
+        "Deep dive into bot health! Our repo is open for you. Give it a fork and contribute! 💡🌟",
+        "Bot health check: Optimal! Want to see the code? Head to our repo and fork away! 🩺✅",
+        "Fresh code, fresh air for our bot! Get inspired, fork our repo, and join the innovation! 🔥🚀"
     ];
 
     // Helper function to get a random element from an array
@@ -70,7 +70,7 @@ async (conn, mek, m, { from, reply }) => {
 > ${config.DESCRIPTION}`;
 
         // Format 2: Minimalist
-        const style2 = `•——[ GITHUB INFO ]——•
+        const style2 = `•----[ GITHUB INFO ]----•
   │
   ├─ 🏷️ ${repoData.name}
   ├─ 👤 ${repoData.owner.login}
@@ -78,7 +78,7 @@ async (conn, mek, m, { from, reply }) => {
   ├─ ⑂ ${repoData.forks_count} Forks
   │
   ├─ 💬 _"${selectedQuote}"_
-  •——[ ${config.BOT_NAME} ]——•
+  •----[ ${config.BOT_NAME} ]----•
   > ${config.DESCRIPTION}`;
 
         // Format 3: Fancy Borders

@@ -17,13 +17,16 @@ const getRandomWallpaper = () => {
     return FALLBACK_WALLPAPERS[randomIndex];
 };
 
-// Array of fancy quotes
+// Array of fancy quotes related to bot status with added emojis
 const FANCY_QUOTES = [
-    "\"✨The only way to do great work is to love what you do.🩷\" - Steve Jobs",
-    "\"🎀Innovation distinguishes between a leader and a followe💞r.\" - Steve Jobs",
-    "\"🟢The future belongs to those who believe in the beauty of their dreams✨.\" - Eleanor Roosevelt",
-    "\"✅Success is not final, failure is not fatal: It is the courage to continue that counts📊.\" - Winston Churchill",
-    "\"📸The greatest glory in living lies not in never falling, but in rising every time we fall.⏳\" - Nelson Mandela"
+    "🟢✨ System online, ready to serve! ✨🟢",
+    "💖🚀 Heartbeat detected: Bot is alive and kicking! 🚀💖",
+    "✅🌟 All systems nominal. Ready for your commands. 🌟✅",
+    "✨💡 Status check: Operational and responsive. 💡✨",
+    "🚀🤖 The bot is awake and processing requests! 🤖🚀",
+    "🌟🎉 Alive and well, at your service! 🎉🌟",
+    "💯✅ Bot status: All clear and operational! ✅💯",
+    "💫🔮 Checking in: The bot is active and ready! 🔮💫"
 ];
 
 // Function to get a random fancy quote

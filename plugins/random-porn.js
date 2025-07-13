@@ -48,14 +48,16 @@ cmd({
         }
 
         // 5. Create the caption for the video preview
-        const caption = (
-            `╭════ 〔 *📤 SHADOW-XTECH 📤* 〕══❐\n` +
-            `┃▸ *🏷️ Title:* ${title}\n` +
-            `┃▸ *🔎 Category:* ${category}\n` +
-            `┃▸ *🕵️ Views:* ${views_count}\n` +
-            `╰═════════════════❐\n\n` +
-            `> ©Powered by Black-Tappy😇\n` +
-            `🔗 *Join our channel:* *https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10*`
+        const caption = (`     
+╭───────◇
+│ *🟠 Shadow-Xtech Nasty-Hub 😋🍑🔞*
+╰───────◇
+╭──〔 😋 *Video Info* 〕──◇
+├─ *🏷️ Title:* *${title}*
+├─ *🔎 Category:* *${category}*
+╰─ *🕵️ Views:* *${views_count}*               
+- 🔗 *Join our channel:* *https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10*    
+> Powered By Black-Tappy 🏷️ `
         );
 
         // 6. Send the video preview and store the message ID
