@@ -65,7 +65,6 @@ const {
   // --- END NEW ---
 
   // --- NEW: Define externalAdReply ---
-  // The WhatsApp channel link provided in the content.
   const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
   // The externalAdReply object for rich previews.
   const externalAdReply = {
