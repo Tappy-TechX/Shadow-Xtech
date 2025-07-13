@@ -19,14 +19,14 @@ const getRandomWallpaper = () => {
 
 // Array of fancy quotes related to bot status with added emojis
 const FANCY_QUOTES = [
-    "🟢✨ System online, ready to serve! ✨🟢",
-    "💖🚀 Heartbeat detected: Bot is alive and kicking! 🚀💖",
-    "✅🌟 All systems nominal. Ready for your commands. 🌟✅",
-    "✨💡 Status check: Operational and responsive. 💡✨",
-    "🚀🤖 The bot is awake and processing requests! 🤖🚀",
-    "🌟🎉 Alive and well, at your service! 🎉🌟",
-    "💯✅ Bot status: All clear and operational! ✅💯",
-    "💫🔮 Checking in: The bot is active and ready! 🔮💫"
+    "🟢 System online, ready to serve! ✨",
+    "💖 Heartbeat detected: Bot is alive and kicking! 🚀",
+    "🌟 All systems nominal. Ready for your commands. ✅",
+    "✨ Status check: Operational and responsive. 💡",
+    "🚀 The bot is awake and processing requests! 🤖",
+    "🌟 Alive and well, at your service! 🎉",
+    "✅ Bot status: All clear and operational! 💯",
+    "💫 Checking in: The bot is active and ready! 🔮"
 ];
 
 // Function to get a random fancy quote
