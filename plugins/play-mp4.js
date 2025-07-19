@@ -83,6 +83,7 @@ cmd({
 
         const song = yt.results[0];
 
+        // Construct the API URL for downloading the song.
         const apiUrl = `https://api.vreden.my.id/api/ytplaymp3?query=${encodeURIComponent(song.title)}`;
 
         // Classier reply when the song is found and preparation begins
@@ -109,7 +110,7 @@ cmd({
             audio: { url: songRes.result.downloadUrl }, 
             mimetype: "audio/mpeg", 
             fileName: `${song.title}.mp3`, 
-        }, { 
+        }, { // Start of options object
             quoted: mek, 
             contextInfo: {
                 // Enhanced "Fancy Box" details as provided in the latest prompt
@@ -134,8 +135,13 @@ cmd({
               serverMessageId: 143 
             }
         }); 
-
         // Classier reply upon successful sending of the song
         await reply(`✅ **Your song is ready!** May the rhythm and melody bring you immense pleasure. 🎧\n\n_For exclusive updates, consider joining our WhatsApp Channel! ${whatsappChannelLink}_`);
 
-    } catch (error)
+    } catch (error) {
+        // Log the error for debugging purposes
+        console.error("Error in song command:", error);
+        // Classier reply for any errors that occur during the process
+        reply("💔 **An unforeseen error has occurred.** My sincerest apologies, the music playback has been interrupted. Kindly try again at your earliest convenience. 😥");
+    }
+});
