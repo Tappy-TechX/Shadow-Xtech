@@ -54,6 +54,7 @@ cmd({
 
 // MP3 song download - Optimized for faster response
 
+const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 cmd({
     pattern: "song",
     alias: ["play", "mp3"],
@@ -64,47 +65,77 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, sender, reply, q }) => {
     try {
-        if (!q) return reply("🎶 **Oops! No tune in mind?** Please tell me the song name or drop a YouTube link so I can fetch your rhythm! 🎵");
+        // Classier reply when no query is provided
+        if (!q) {
+            return reply("🎶 **Awaiting your selection!** Please provide the song title or a YouTube link, and I shall fetch your desired melody. 🎵");
+        }
 
-        await reply("🔍 **Searching for your musical masterpiece...** Hang tight! 🎼");
+        // Classier reply indicating the search process has started
+        await reply("🔍 **Curating your audio experience...** Please bear with me as I locate the perfect track. 🎼");
 
+        // Fetch search results from YouTube
         const yt = await ytsearch(q);
-        if (!yt.results.length) return reply("❌ **Melody not found!** I couldn't find any results for that. Try a different query? 😔");
+
+        // Classier reply if no results are found
+        if (!yt || !yt.results || yt.results.length === 0) {
+            return reply("❌ **Melody not found.** I regret to inform you that the requested track could not be located. Perhaps a different query would yield results? 😔");
+        }
 
         const song = yt.results[0];
-        const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
 
-        await reply(`✨ **Found it!** Preparing to download "${song.title}" for you. This might take a moment. 🚀`);
+        const apiUrl = `https://api.vreden.my.id/api/ytplaymp3?query=${encodeURIComponent(song.title)}`;
 
-        // Fetch song data concurrently
+        // Classier reply when the song is found and preparation begins
+        await reply(`✨ **Track located!** Preparing to download "${song.title}" for your enjoyment. This process may require a brief moment. 🚀`);
+
+        // Fetch song data from the API.
         let [songRes] = await Promise.all([
-            fetch(apiUrl).then((res) => res.json())
+            fetch(apiUrl).then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
         ]);
 
-        if (!songRes?.result?.downloadUrl) return reply("⚠️ **Download hiccup!** The melody slipped away. Please try again later. 🤷‍♀️");
+        // Classier reply if the download URL is not available
+        if (!songRes?.result?.downloadUrl) {
+            console.error("API response missing downloadUrl:", songRes);
+            return reply("⚠️ **A slight interruption occurred.** The download link seems to have encountered an issue. Please attempt your request again shortly. 🤷‍♀️");
+        }
 
+        // Send the audio message with the specified context information.
         await conn.sendMessage(from, {
-            audio: { url: songRes.result.downloadUrl },
-            mimetype: "audio/mpeg",
-            fileName: `${song.title}.mp3`,
+            audio: { url: songRes.result.downloadUrl }, 
+            mimetype: "audio/mpeg", 
+            fileName: `${song.title}.mp3`, 
+        }, { 
+            quoted: mek, 
             contextInfo: {
+                // Enhanced "Fancy Box" details as provided in the latest prompt
                 externalAdReply: {
-                    // Enhanced "Fancy Box" details
                     title: `🎶 ${song.title.length > 25 ? `${song.title.substring(0, 22)}...` : song.title} 🎵`, // Added emojis
                     body: `Artist: ${song.author}\nViews: ${song.views}\nDuration: ${song.timestamp}\n\nTap to discover more tunes!`, // More song info + call to action
-                    mediaType: 1, // 1 for image, 2 for video (though we're sending audio, this is for the preview)
-                    thumbnailUrl: song.thumbnail.replace('default.jpg', 'hqdefault.jpg'), // Higher quality thumbnail
-                    sourceUrl: song.url, // Link directly to the YouTube video of the song
-                    renderLargerThumbnail: true, // Make the thumbnail prominent
-                    showAdAttribution: false // Often makes the "Ad" label disappear, which can look cleaner
+                    mediaType: 1, 
+                    // Using a higher quality thumbnail if available.
+                    thumbnailUrl: song.thumbnail.replace('default.jpg', 'hqdefault.jpg'),
+                    sourceUrl: song.url, 
+                    renderLargerThumbnail: true, 
+                    showAdAttribution: false 
                 }
+            },
+            // Added context information as requested by the user
+            mentionedJid: [m.sender],
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: '120363369453603973@newsletter',
+              newsletterName: "ֆཏɑɖօա-𝕏Ե𝖾𝖼ཏ", 
+              serverMessageId: 143 
             }
-        }, { quoted: mek });
+        }); 
 
-        await reply("✅ **Enjoy your song!** Let the good vibes flow! 🎧\n\n_Don't forget to join our WhatsApp Channel for more updates!_");
+        // Classier reply upon successful sending of the song
+        await reply(`✅ **Your song is ready!** May the rhythm and melody bring you immense pleasure. 🎧\n\n_For exclusive updates, consider joining our WhatsApp Channel! ${whatsappChannelLink}_`);
 
-    } catch (error) {
-        console.error(error);
-        reply("💔 **Oh no! An error occurred!** My apologies, the music stopped. Please try again soon. 😥");
-    }
-});
+    } catch (error)
