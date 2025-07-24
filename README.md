@@ -47,7 +47,7 @@ Click the button below to fork:
 
 ## ɢᴇᴛ ᴘᴀɪʀɪɴɢ ᴄᴏᴅᴇ
   <p align="left">  
-<a href='https://frost-byte-42h2.onrender.com/' target="_blank"><img alt='Get Pairing Code' src='https://img.shields.io/badge/Get%20Pairing%20Code-000000?style=for-the-badge&logo=codefactor&logoColor=yellow'/></a>  
+<a href='https://pair-case-vpax.onrender.com/' target="_blank"><img alt='Get Pairing Code' src='https://img.shields.io/badge/Get%20Pairing%20Code-000000?style=for-the-badge&logo=codefactor&logoColor=yellow'/></a>  
 </p>  
 
 
