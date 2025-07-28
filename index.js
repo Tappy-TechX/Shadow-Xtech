@@ -64,10 +64,17 @@ const fancyMessages = [
 ];
 // --- END NEW ---
 
-// --- NEW: Define externalAdReply and related variables ---
+// --- NEW: Define externalAdReply ---
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
-// WhatsApp channel IDs typically follow the format 'ID@newsletter'.
-const whatsappChannelId = '120363369453603973@newsletter'; // Derived from the provided URL.
+// The externalAdReply object for rich previews.
+const externalAdReply = {
+    title: "Shadow-Xtech Speed",
+    body: "Powered By Black-Tappy",
+    thumbnailUrl: 'https://files.catbox.moe/og4tsk.jpg', // This is the same URL as the image in the original code.
+    sourceUrl: whatsappChannelLink,
+    mediaType: 1, // 1 typically represents an image
+    renderLargerThumbnail: false,
+};
 // --- END NEW ---
 
 // Temporary directory for caching
@@ -191,8 +198,8 @@ async function connectToWA() {
             // Select a random fancy message
             const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
 
-            // Construct the new caption string
-            const caption = `
+            // Construct the initial welcome message with markdown links and random message
+            let up = `
 ╭───────◇
 │ *✨ Hello, Shadow-Xtech User! ✨*
 ╰───────◇
@@ -215,27 +222,11 @@ async function connectToWA() {
 
 > _© *Powered By Black-Tappy*_`;
 
-            // Sending the welcome message with the new image, caption, and contextInfo
-            await conn.sendMessage(conn.user.id, {
-                image: { url: "https://files.catbox.moe/og4tsk.jpg" }, // New image URL
-                caption: caption, // Use the new caption
+            // Sending the welcome message with an image and externalAdReply
+            await conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/og4tsk.jpg` }, caption: up }, {
                 contextInfo: {
-                    isForwarded: true,
-                    forwardingScore: 999,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: whatsappChannelId, // Use the defined whatsappChannelId
-                        newsletterName: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
-                        serverMessageId: -1,
-                    },
-                    externalAdReply: { // Define the new externalAdReply inline
-                        title: "Shadow-Xtech Bot",
-                        body: "Powered By Black-Tappy",
-                        thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
-                        sourceUrl: whatsappChannelLink, // Use the existing whatsappChannelLink
-                        mediaType: 1,
-                        renderLargerThumbnail: false,
-                    },
-                },
+                    externalAdReply: externalAdReply
+                }
             });
 
             // --- Initialize the call handler ---
@@ -930,16 +921,6 @@ async function connectToWA() {
     conn.serializeM = mek => sms(conn, mek, store); // Assuming 'store' is globally available or passed correctly
 }
 
-// --- NEW: Keep-Alive Endpoint ---
-app.get("/keep-alive", (req, res) => {
-    res.json({
-        status: "alive",
-        message: "[🟢]Shadow-Xtech is running.",
-        timestamp: new Date().toISOString()
-    });
-});
-// --- END NEW ---
-
 // Serve the HTML file from lib/shadow.html for the root path
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "./lib/shadow.html"));
@@ -950,3 +931,4 @@ app.listen(port, () => console.log(`[🟢] Server listening on port http://local
 
 // Call connectToWA immediately to start the bot without delay
 connectToWA();
+

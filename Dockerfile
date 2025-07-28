@@ -1,7 +1,7 @@
-FROM node:lts-bullseye
-RUN git clone https://github.com/Tappy-Black/Shadow-Xtech/root/shadowxtech
-WORKDIR /root/shadowxtech
-RUN npm install && npm install -g pm2 || yarn install --network-concurrency 1
+FROM node:lts-buster
+WORKDIR /app
+COPY package*.json ./
+RUN npm install && npm install -g qrcode-terminal pm2
 COPY . .
-EXPOSE 9090
+EXPOSE 3000
 CMD ["npm", "start"]
