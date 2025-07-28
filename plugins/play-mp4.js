@@ -62,26 +62,22 @@ cmd({
     category: "main",
     use: '.song <query>',
     filename: __filename
-}, async (conn, mek, m, { from, sender, reply, q }) => {
+}, async (conn, mek, m, { from, reply, q }) => {
     try {
-        if (!q) return reply("🎶 **Oops! No tune in mind?** Please tell me the song name or drop a YouTube link so I can fetch your rhythm! 🎵");
+        if (!q) return reply(`🎶 *ENTER TRACK NAME OR LINK!*\nExample: *.song calm down*`);
 
-        await reply("🔍 **Curating your audio experience...** Please bear with me as I locate the perfect track. 🎼");
+        await reply(`🎧 *SCANNING MUSIC GRID...*\n🔍 Query: "${q}"`);
 
         const yt = await ytsearch(q);
-        if (!yt.results.length) return reply("❌ **Melody not found.** I regret to inform you that the requested track could not be located. Perhaps a different query would yield results? 😔");
+        if (!yt.results.length) return reply(`❌ *TRACK NOT FOUND!*\nTry a different keyword.`);
 
         const song = yt.results[0];
         const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
 
-        await reply(`✨ **Track located!** Preparing to download "${song.title}" for your enjoyment. This process may require a brief moment. 🚀`);
+        await reply(`✅ *LOADED: ${song.title}*\n🔄 Fetching audio...`);
 
-        // Fetch song data concurrently
-        let [songRes] = await Promise.all([
-            fetch(apiUrl).then((res) => res.json())
-        ]);
-
-        if (!songRes?.result?.downloadUrl) return reply("⚠️ **A slight interruption occurred.** The download link seems to have encountered an issue. Please attempt your request again shortly. 🤷‍♀️");
+        const songRes = await fetch(apiUrl).then(res => res.json());
+        if (!songRes?.result?.downloadUrl) return reply(`⚠️ *DOWNLOAD FAILED!*\nTry again later.`);
 
         await conn.sendMessage(from, {
             audio: { url: songRes.result.downloadUrl },
@@ -89,22 +85,94 @@ cmd({
             fileName: `${song.title}.mp3`,
             contextInfo: {
                 externalAdReply: {
-                    // Enhanced "Fancy Box" details
-                    title: `🎶 ${song.title.length > 25 ? `${song.title.substring(0, 22)}...` : song.title} 🎵`, // Added emojis
-                    body: `Artist: ${song.author}\nViews: ${song.views}\nDuration: ${song.timestamp}\n\nTap to discover more tunes!`, // More song info + call to action
-                    mediaType: 1, // 1 for image, 2 for video (though we're sending audio, this is for the preview)
-                    thumbnailUrl: song.thumbnail.replace('default.jpg', 'hqdefault.jpg'), // Higher quality thumbnail
-                    sourceUrl: song.url, // Link directly to the YouTube video of the song
-                    renderLargerThumbnail: true, // Make the thumbnail prominent
-                    showAdAttribution: false // Often makes the "Ad" label disappear, which can look cleaner
+                    title: `🎵 ${song.title.length > 25 ? song.title.slice(0, 22) + "..." : song.title}`,
+                    body: `🎙 ${song.author} • ⏱ ${song.timestamp} • 👁 ${song.views}`,
+                    thumbnailUrl: song.thumbnail.replace("default.jpg", "hqdefault.jpg"),
+                    sourceUrl: song.url,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    showAdAttribution: false
                 }
             }
         }, { quoted: mek });
 
-        await reply("✅ **Your song is ready!** May the rhythm and melody bring you immense pleasure. 🎧\n\n_For exclusive updates, consider joining our WhatsApp Channel! https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10");
-
+        await reply(`✅ *DELIVERED!*\n🎧 Enjoy the frequency drop.\n🔗 Join updates: https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10`);
+        
     } catch (error) {
         console.error(error);
-        reply("💔 **An unforeseen error has occurred.** My sincerest apologies, the music playback has been interrupted. Kindly try again at your earliest convenience. 😥");
+        reply(`💥 *SONIC ERROR!*\nSomething glitched. Retry shortly.`);
+    }
+});
+
+cmd({
+    pattern: "play3",
+    alias: ["ytmp3", "music"],
+    react: "🎵",
+    desc: "Play song from YouTube",
+    category: "main",
+    use: ".play <song name>",
+    filename: __filename
+}, async (conn, mek, m, { from, reply, q }) => {
+    if (!q) return reply(`🎵✨ *Hey buddy!* What song are you vibing to today?\nJust type the name and I’ll fetch the magic for you!`);
+
+    try {
+        const search = await yts(q);
+        const link = search.all[0].url;
+
+        const apis = [
+            `https://xploader-api.vercel.app/ytmp3?url=${link}`,
+            `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,
+            `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`,
+            `https://api.dreaded.site/api/ytdl/audio?url=${link}`
+        ];
+
+        for (const api of apis) {
+            try {
+                const data = await fetchJson(api);
+
+                if (data.status === 200 || data.success) {
+                    const videoUrl = data.result?.downloadUrl || data.url;
+                    const title = search.all[0].title.replace(/[^a-zA-Z0-9 ]/g, "");
+                    const outputFileName = `${title}.mp3`;
+                    const outputPath = path.join(__dirname, outputFileName);
+
+                    const response = await axios({
+                        url: videoUrl,
+                        method: "GET",
+                        responseType: "stream"
+                    });
+
+                    if (response.status !== 200) {
+                        await reply("⚠️ *This API didn’t vibe well.* Trying the next one...");
+                        continue;
+                    }
+
+                    ffmpeg(response.data)
+                        .toFormat("mp3")
+                        .save(outputPath)
+                        .on("end", async () => {
+                            await conn.sendMessage(from, {
+                                document: { url: outputPath },
+                                mimetype: "audio/mp3",
+                                caption: `🎧 *Track Loaded Successfully!*\n\n🎶 _Here's your song served fresh from the cloud_ ☁️\n\n💌 *Shadow-Xtech* at your service!`,
+                                fileName: outputFileName,
+                            }, { quoted: mek });
+
+                            fs.unlinkSync(outputPath);
+                        })
+                        .on("error", (err) => {
+                            reply(`💥 *Audio tuning failed!*\n\n🔧 Error: *${err.message}*`);
+                        });
+
+                    return;
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+
+        reply(`😢 *Yikes!* None of my magical APIs delivered a tune this time.\nPlease try again later or tweak the song title.`);
+    } catch (error) {
+        reply(`💔 *Oopsie!* Couldn't complete the download.\n\n🔧 *Error:* ${error.message}`);
     }
 });
