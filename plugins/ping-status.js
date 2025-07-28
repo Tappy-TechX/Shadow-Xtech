@@ -5,84 +5,89 @@ const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 
 cmd({
     pattern: "ping",
-    alias: ["speed", "pong"], 
-    use: '.ping', 
-    desc: "Check bot's response time, load, and stability.", 
-    category: "main", 
-    react: "⚡", 
-    filename: __filename 
-},
-async (conn, mek, m, { from, quoted, sender, reply }) => {
+    alias: ["speed", "pong"],
+    use: '.ping',
+    desc: "Check bot's response time, load, and stability.",
+    category: "main",
+    react: "⚡",
+    filename: __filename
+}, async (conn, mek, m, { from, quoted, sender, reply }) => {
     try {
-        // --- Latency Measurement ---
         const start = Date.now();
 
-        // --- Status Indicators ---
-        const statusEmojis = ['✅', '🟢', '✨', '📶', '🔋'];
-
-        // --- Fancy Loading Messages ---
         const loadingMessages = [
-            "*〘⚡ Analyzing bot speed... 〙*",
-            "*〘🚀 Calculating latency... 〙*",
-            "*〘📊 Checking system load... 〙*",
-            "*〘✨ Performing diagnostics... 〙*",
-            "*〘⚙️ Optimizing response... 〙*",
-            "*〘⏳ Gathering performance data... 〙*",
-            "*〘📡 Fetching real-time metrics... 〙*",
-            "*〘💡 Assessing bot health... 〙*"
+            "*⎾⟪ ⚡ Initializing diagnostic scan... ⟫⏌*",
+            "*⎾⟪ 🚀 Engaging latency protocol... ⟫⏌*",
+            "*⎾⟪ 📊 Probing system integrity... ⟫⏌*",
+            "*⎾⟪ ⚙️ Optimizing digital threads... ⟫⏌*",
+            "*⎾⟪ 🧠 Booting quantum core... ⟫⏌*",
+            "*⎾⟪ 💡 Gathering neural response... ⟫⏌*",
+            "*⎾⟪ 📡 Syncing data flux... ⟫⏌*",
+            "*⎾⟪ ✨ Running chrono-lag check... ⟫⏌*"
         ];
-        // Select a random loading message to display.
-        const randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
 
-        // --- Speed and Latency Quotes ---
         const speedLatencyQuotes = [
-            "“✨Speed is key in the digital realm.✨”",
-            "“🟢Latency is the silent killer of user experience.🎀”",
-            "“❤️Fast responses make a happy user.💞”",
-            "“🤔The quicker the bot, the better the service.🥹”",
-            "“✅Measuring performance, one ping at a time.📊”",
-            "“📆Where there's speed, there's progress.🟢”",
-            "“🚀Battling latency, one millisecond at a time.⚡”",
-            "“💡The art of the bot is in its swiftness.🌟”",
-            "“📈Performance is not just about speed, but consistency.⚙️”",
-            "“👑In the world of bots, speed is king.👑”",
-            "“💨Don't let latency slow you down!💨”",
-            "“⚡Our bot runs at the speed of thought... almost!⚡”"
+            "“🔋 *Speed defines intelligence.*”",
+            "“🛰️ *Latency is the language of performance.*”",
+            "“👾 *Bots that blink are bots that win.*”",
+            "“💡 *Digital flow never waits.*”",
+            "“⏱️ *Milliseconds matter in the matrix.*”",
+            "“⚡ *Optimized to outrun time.*”",
+            "“🔧 *You ping, I race.*”",
+            "“🛠️ *Diagnostics complete — all systems nominal.*”",
+            "“🎯 *Real-time. Right now.*”"
         ];
-        // Select a random quote to display.
+
+        const statusEmojis = ['✅', '🟢', '✨', '📶', '🔋'];
+        const stableEmojis = ['🟢', '✅', '🧠', '📶', '🛰️'];
+        const moderateEmojis = ['🟡', '🌀', '⚠️', '🔁', '📡'];
+        const slowEmojis = ['🔴', '🐌', '❗', '🚨', '💤'];
+
+        const randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
         const randomQuote = speedLatencyQuotes[Math.floor(Math.random() * speedLatencyQuotes.length)];
 
-        // Send the randomly selected "fancy" loading message.
-        await conn.sendMessage(from, {
-            text: randomLoadingMessage
-        });
+        await conn.sendMessage(from, { text: randomLoadingMessage });
+
         const end = Date.now();
-        const latencyMs = end - start; // This variable represents the bot's response latency in milliseconds.
-        let stabilityStatus = "Stable";
-        if (latencyMs > 1000) stabilityStatus = "Slow"; // Latency over 1 second
-        else if (latencyMs > 500) stabilityStatus = "Moderate"; // Latency between 500ms and 1000ms
+        const latencyMs = end - start;
+
+        let stabilityEmoji = '';
+        let stabilityText = '';
+
+        if (latencyMs > 1000) {
+            stabilityText = "Slow 🔴";
+            stabilityEmoji = slowEmojis[Math.floor(Math.random() * slowEmojis.length)];
+        } else if (latencyMs > 500) {
+            stabilityText = "Moderate 🟡";
+            stabilityEmoji = moderateEmojis[Math.floor(Math.random() * moderateEmojis.length)];
+        } else {
+            stabilityText = "Stable 🟢";
+            stabilityEmoji = stableEmojis[Math.floor(Math.random() * stableEmojis.length)];
+        }
+
         const memoryUsage = process.memoryUsage();
-        const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024; // Convert bytes to Megabytes for readability.
+        const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024;
+
         let profilePicUrl;
         try {
             profilePicUrl = await conn.profilePictureUrl(sender, 'image');
         } catch {
-            profilePicUrl = 'https://i.ibb.co/gdpjw5w/pp-wa-3.jpg'; // Example fallback image URL
+            profilePicUrl = 'https://i.ibb.co/gdpjw5w/pp-wa-3.jpg';
         }
+
         const stylishText = `
-╭───────◇
-│ *🛠️ Bot Response and Speed 🛜*
-╰───────◇
-╭──〔 🌐 *Network Status* 〕──◇
-├─ 🤖 *Bot Name:* ${config.botname || 'SHADOW-XTECH'}
-├─ ⚡ *Latency:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs}ms
-├─ 📶 *Bot Load:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${memoryUsageMB.toFixed(2)} MB
-├─ ✨ *Stability:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${stabilityStatus}
-╰─ ⏱️ *Checked At:* *${new Date().toLocaleTimeString()}*
-╭───────◇
-│ *${randomQuote}!*
-╰───────◇
-        `.trim(); // .trim() removes any leading/trailing whitespace.
+⎾===========================================⏌
+📡 SYSTEM DIAGNOSTICS — PULSE REPORT
+⌬━━━━━━━━━━━━━━━━━━━⌬
+◉ Bot ID       » ${config.botname || "SHADOW-XTECH"}
+◉ Response     » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
+◉ Load Memory  » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB* 📦
+◉ Stability    » ${stabilityEmoji} *${stabilityText}*
+◉ Time Sync    » ${new Date().toLocaleTimeString()}
+➤ ${randomQuote}
+⎿===========================================⏋
+        `.trim();
+
         await conn.sendMessage(from, {
             image: { url: profilePicUrl },
             caption: stylishText,
@@ -95,17 +100,16 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
                     newsletterName: "𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ",
                     serverMessageId: 143
                 },
-                // Added externalAdReply object here
                 externalAdReply: {
-                    title: "Shadow-Xtech Speed",
-                    body: "Powered By Black-Tappy",
+                    title: "⚙️ Shadow-Xtech | System Pulse",
+                    body: "Speed • Stability • Sync",
                     thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
                     sourceUrl: whatsappChannelLink,
-                    mediaType: 1, // 1 typically represents an image
+                    mediaType: 1,
                     renderLargerThumbnail: false,
                 }
             }
-        }, { quoted: mek }); // Reply to the original message
+        }, { quoted: mek });
 
     } catch (e) {
         console.error("Error in ping command:", e);
