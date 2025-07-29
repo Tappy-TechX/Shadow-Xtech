@@ -1,10 +1,10 @@
 const config = require('../config')
 const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions')
 
 cmd({
     pattern: "tagall",
-    react: "🔊",
+    react: "📡",
     alias: ["gc_tagall"],
     desc: "To Tag all Members",
     category: "group",
@@ -13,44 +13,54 @@ cmd({
 },
 async (conn, mek, m, { from, participants, reply, isGroup, senderNumber, groupAdmins, prefix, command, args, body }) => {
     try {
-        if (!isGroup) return reply("❌ This command can only be used in groups.");
-        
-        const botOwner = conn.user.id.split(":")[0]; // Extract bot owner's number
+        if (!isGroup) return reply("⛔ *Access Denied!*📍 *This protocol can only be executed inside group environments.*");
+
+        const botOwner = conn.user.id.split(":")[0];
         const senderJid = senderNumber + "@s.whatsapp.net";
 
         if (!groupAdmins.includes(senderJid) && senderNumber !== botOwner) {
-            return reply("❌ Only group admins or the bot owner can use this command.");
+            return reply("🔐 *Unauthorized Access!*🛡️ *Only admins or the Supreme Core Operator may deploy this protocol.*");
         }
 
-        // Ensure group metadata is fetched properly
         let groupInfo = await conn.groupMetadata(from).catch(() => null);
-        if (!groupInfo) return reply("❌ Failed to fetch group information.");
+        if (!groupInfo) return reply("⚠️ *System Fault!*. *Failed to interface with group metadata core.*");
 
-        let groupName = groupInfo.subject || "Unknown Group";
-        let totalMembers = participants ? participants.length : 0;
-        if (totalMembers === 0) return reply("❌ No members found in this group.");
+        const groupName = groupInfo.subject || "Unknown User";
+        const totalMembers = participants ? participants.length : 0;
+        if (totalMembers === 0) return reply("🚫 *Zero User Found in Current Node!*");
 
-        let emojis = ['📢', '🔊', '🌐', '🔰', '❤‍🩹', '🤍', '🖤', '🩵', '📝', '💗', '🔖', '🪩', '📦', '🎉', '🛡️', '💸', '⏳', '🗿', '🚀', '🎧', '🪀', '⚡', '🚩', '🍁', '🗣️', '👻', '⚠️', '🔥'];
+        let emojis = ['📡', '🔊', '⚡', '🚨', '🧬', '🪐', '💠', '🎯', '🔗', '🛠️', '🌀', '💻', '🔧', '🔭', '⏳', '🗿', '🚀', '🎧', '🪀', '🍁', '🗣️', '👻', '⚠️', '🔥'];
         let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // Proper message extraction
         let message = body.slice(body.indexOf(command) + command.length).trim();
-        if (!message) message = "Attention Everyone"; // Default message
+        if (!message) message = "⚡ All Members — Status Sync Required!";
 
-        let teks = `▢ Group : *${groupName}*\n▢ Members : *${totalMembers}*\n▢ Message: *${message}*\n\n┌───⊷ *MENTIONS*\n`;
+        let teks = `
+⎾⦿========================================⏌
+  🛰️ *TAG ALL MODULE — BROADCAST MODE*
+⎿==========================================⏋
+
+  🌐 *GROUP NAME*   : ${groupName}
+  👤 *TOTAL MEMBERS*  : ${totalMembers}
+  💬 *TAGGED MESSAGE* : ${message}
+
+ ⧉ *MENTION PROTOCOL INITIATED...*
+`;
 
         for (let mem of participants) {
-            if (!mem.id) continue; // Prevent undefined errors
+            if (!mem.id) continue;
             teks += `${randomEmoji} @${mem.id.split('@')[0]}\n`;
         }
 
-        teks += "└──✪ Shadow ┃ Xtech ✪──";
+        teks += `
+⎾==========================================⏌
+  ⚙️ *TRANSMISSION CORE*[SHADOW-XTECH]
+⎿==========================================⏋`;
 
         conn.sendMessage(from, { text: teks, mentions: participants.map(a => a.id) }, { quoted: mek });
 
     } catch (e) {
         console.error("TagAll Error:", e);
-        reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
+        reply(`❌ *SYSTEM FAILURE DETECTED!*🧾 *Error Trace:*${e.message || e}`);
     }
 });
-

@@ -77,14 +77,15 @@ cmd({
 
         const stylishText = `
 ⎾===========================================⏌
-📡 SYSTEM DIAGNOSTICS — PULSE REPORT
-⌬━━━━━━━━━━━━━━━━━━━⌬
-◉ Bot ID       » ${config.botname || "SHADOW-XTECH"}
-◉ Response     » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
-◉ Load Memory  » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB* 📦
-◉ Stability    » ${stabilityEmoji} *${stabilityText}*
-◉ Time Sync    » ${new Date().toLocaleTimeString()}
-➤ ${randomQuote}
+ 📡 SYSTEM DIAGNOSTICS — PULSE REPORT
+ ⌬━━━━━━━━━━━━━━━━━━━⌬
+  ◉ Bot ID       » ${config.botname || "SHADOW-XTECH"}
+  ◉ Response     » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
+  ◉ Load Memory  » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB* 📦
+  ◉ Stability    » ${stabilityEmoji} *${stabilityText}*
+  ◉ Time Sync    » ${new Date().toLocaleTimeString()}
+ ⌬━━━━━━━━━━━━━━━━━━━⌬
+ ➤ ${randomQuote}
 ⎿===========================================⏋
         `.trim();
 
@@ -103,7 +104,7 @@ cmd({
                 externalAdReply: {
                     title: "⚙️ Shadow-Xtech | System Pulse",
                     body: "Speed • Stability • Sync",
-                    thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
+                    thumbnailUrl: 'https://files.catbox.moe/3l3qgq.jpg',
                     sourceUrl: whatsappChannelLink,
                     mediaType: 1,
                     renderLargerThumbnail: false,

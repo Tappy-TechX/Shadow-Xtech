@@ -1,6 +1,8 @@
 const { cmd } = require('../command');
 const { ytsearch } = require('@dark-yasiya/yt-dl.js');
 
+const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
+
 cmd({ 
     pattern: "mp4", 
     alias: ["video"], 
@@ -13,42 +15,72 @@ cmd({
     try { 
         if (!q) return await reply("Please provide a YouTube URL or video name.");
         
-        const yt = await ytsearch(q); // Search for video in parallel
+        const yt = await ytsearch(q);
         if (yt.results.length < 1) return reply("No results found!");
         
         let yts = yt.results[0];  
         let apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(yts.url)}`;
 
-        // Start the API fetch concurrently
         let [videoRes] = await Promise.all([
-            fetch(apiUrl).then((res) => res.json())  // Fetch the video data
+            fetch(apiUrl).then((res) => res.json())
         ]);
         
         if (videoRes.status !== 200 || !videoRes.success || !videoRes.result.download_url) {
             return reply("Failed to fetch the video. Please try again later.");
         }
 
-        let ytmsg = `📹 *Shadow-Xtech Video Downloader*
-🎬 *Title:* ${yts.title}
-⏳ *Duration:* ${yts.timestamp}
-👀 *Views:* ${yts.views}
-👤 *Author:* ${yts.author.name}
-🔗 *Link:* ${yts.url}
-> Powered by Shadow-Xtech 🩷`;
+        let ytmsg = `
+⎾⦿=======================================⏌
+  ⚙️ SHADOW INTERCEPT — YT NODE CAPTURE
+⎿==========================================⏋
 
-        // Send video directly with caption
+  📡 STREAM TYPE     : YouTube/DataGrid
+  🌐 DATA TRACE      : ${yts.url}
+  🧾 SIGNAL STATUS   : 🟢 LINK VERIFIED
+
+ ⧉ PACKET FEED
+    🎬 TITLE          : ${yts.title}
+    ⏳ LENGTH         : ${yts.timestamp}
+    👀 VIEWS          : ${yts.views}
+    👤 UPLOADER       : ${yts.author.name}
+
+ 🧬 UPLINK_ID        : shadow.yt.grid://ΨX7K1
+
+⎾==========================================⏌
+  ✅ MEDIA READY — TRANSMIT TO CLIENT
+⎿==========================================⏋
+`;
+
         await conn.sendMessage(
             from, 
-            { 
-                video: { url: videoRes.result.download_url }, 
+            {
+                video: { url: videoRes.result.download_url },
                 caption: ytmsg,
-                mimetype: "video/mp4"
-            }, 
+                mimetype: "video/mp4",
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363369453603973@newsletter',
+                        newsletterName: 'ֆཏɑɖօա-𝕏Ե𝖾𝖼ཏ',
+                        serverMessageId: 143
+                    },
+                    externalAdReply: {
+                        title: "🎥 YT Video Downloaded via SHADOW-XTECH",
+                        body: "Fast. Clean. No Watermark.",
+                        thumbnailUrl: yts.thumbnail,
+                        sourceUrl: whatsappChannelLink,
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
+            },
             { quoted: mek }
         );
     } catch (e) {
         console.log(e);
-        reply("An error occurred. Please try again later.");
+        reply("❌ An error occurred. Please try again later.");
     }
 });
 
@@ -64,20 +96,20 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, q }) => {
     try {
-        if (!q) return reply(`🎶 *ENTER TRACK NAME OR LINK!*\nExample: *.song calm down*`);
+        if (!q) return reply(`🎶 *Enter Track Name Or Link!* *Example:" *.song calm down*`);
 
-        await reply(`🎧 *SCANNING MUSIC GRID...*\n🔍 Query: "${q}"`);
+        await reply(`🎧 *Scanning Music Grid...*🔍 *Query: "${q}"*`);
 
         const yt = await ytsearch(q);
-        if (!yt.results.length) return reply(`❌ *TRACK NOT FOUND!*\nTry a different keyword.`);
+        if (!yt.results.length) return reply(`❌ *Track Not Found!* *Try A Different Song.*`);
 
         const song = yt.results[0];
         const apiUrl = `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(song.url)}`;
 
-        await reply(`✅ *LOADED: ${song.title}*\n🔄 Fetching audio...`);
+        await reply(`⏳ *Downloading: ${song.title}* *🔄 Please wait a moment...*`);
 
         const songRes = await fetch(apiUrl).then(res => res.json());
-        if (!songRes?.result?.downloadUrl) return reply(`⚠️ *DOWNLOAD FAILED!*\nTry again later.`);
+        if (!songRes?.result?.downloadUrl) return reply(`🚫 *Download Failed!*\nTry again later.`);
 
         await conn.sendMessage(from, {
             audio: { url: songRes.result.downloadUrl },
@@ -96,7 +128,7 @@ cmd({
             }
         }, { quoted: mek });
 
-        await reply(`✅ *DELIVERED!*\n🎧 Enjoy the frequency drop.\n🔗 Join updates: https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10`);
+        await reply(`📥 *Media Downloaded Successful!* *🎧 Enjoy the frequency drop.*\n🔗 Join updates: https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10`);
         
     } catch (error) {
         console.error(error);
