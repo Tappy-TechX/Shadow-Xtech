@@ -19,7 +19,7 @@ cmd({
         if (yt.results.length < 1) return reply("No results found!");
         
         let yts = yt.results[0];  
-        let apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(yts.url)}`;
+        let apiUrl = `https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(yts.url)}`;
 
         let [videoRes] = await Promise.all([
             fetch(apiUrl).then((res) => res.json())

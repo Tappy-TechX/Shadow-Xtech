@@ -18,7 +18,14 @@ cmd({
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    const apiUrl = `https://api.dreaded.site/api/facebook?url=${encodeURIComponent(q)}`;
+    // Randomly select one API endpoint
+    const apiEndpoints = [
+      `https://apis.davidcyriltech.my.id/facebook?url=${encodeURIComponent(q)}`,
+      `https://apis.davidcyriltech.my.id/facebook2?url=${encodeURIComponent(q)}`,
+      `https://apis.davidcyriltech.my.id/facebook3?url=${encodeURIComponent(q)}`
+    ];
+    const apiUrl = apiEndpoints[Math.floor(Math.random() * apiEndpoints.length)];
+
     const { data } = await axios.get(apiUrl);
 
     if (!data.status || !data.data || !data.data.url) {

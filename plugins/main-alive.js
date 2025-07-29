@@ -1,7 +1,7 @@
 const { cmd } = require("../command");
 const moment = require("moment");
 
-let botStartTime = Date.now(); // Enregistrement de l'heure de démarrage du bot
+let botStartTime = Date.now(); // Bot launch time
 
 const FALLBACK_WALLPAPERS = [
     "https://files.catbox.moe/og4tsk.jpg",
@@ -9,11 +9,6 @@ const FALLBACK_WALLPAPERS = [
     "https://files.catbox.moe/95n1x6.jpg",
     "https://files.catbox.moe/0w7hqx.jpg"
 ];
-
-const getRandomWallpaper = () => {
-    const randomIndex = Math.floor(Math.random() * FALLBACK_WALLPAPERS.length);
-    return FALLBACK_WALLPAPERS[randomIndex];
-};
 
 const FANCY_QUOTES = [
     "🧬 Neural grid stable — systems running within optimal range.",
@@ -26,10 +21,9 @@ const FANCY_QUOTES = [
     "🌐 Multi-thread ops: — No anomalies detected."
 ];
 
-const getRandomQuote = () => {
-    const randomIndex = Math.floor(Math.random() * FANCY_QUOTES.length);
-    return FANCY_QUOTES[randomIndex];
-};
+// Helpers
+const getRandomWallpaper = () => FALLBACK_WALLPAPERS[Math.floor(Math.random() * FALLBACK_WALLPAPERS.length)];
+const getRandomQuote = () => FANCY_QUOTES[Math.floor(Math.random() * FANCY_QUOTES.length)];
 
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 
@@ -45,31 +39,30 @@ cmd({
         const currentTime = moment().format("HH:mm:ss");
         const currentDate = moment().format("dddd, MMMM Do YYYY");
 
-        const runtimeMilliseconds = Date.now() - botStartTime;
-        const runtimeSeconds = Math.floor((runtimeMilliseconds / 1000) % 60);
-        const runtimeMinutes = Math.floor((runtimeMilliseconds / (1000 * 60)) % 60);
-        const runtimeHours = Math.floor(runtimeMilliseconds / (1000 * 60 * 60));
+        const runtimeMs = Date.now() - botStartTime;
+        const runtime = {
+            hours: Math.floor(runtimeMs / (1000 * 60 * 60)),
+            minutes: Math.floor((runtimeMs / (1000 * 60)) % 60),
+            seconds: Math.floor((runtimeMs / 1000) % 60),
+        };
 
-        const randomQuote = getRandomQuote();
-        const wallpaperUrl = getRandomWallpaper();
-
-        const formattedInfo = `
+        const caption = `
 🌟 *SHADOW-XTECH STATUS* 🌟
 Hey 👋🏻 ${pushname}
 🕒 *Time*: ${currentTime}
 📅 *Date*: ${currentDate}
-⏳ *Uptime*: ${runtimeHours} hours, ${runtimeMinutes} minutes, ${runtimeSeconds} seconds
+⏳ *Uptime*: ${runtime.hours}h ${runtime.minutes}m ${runtime.seconds}s
 
 *🤖Status*: *Bot is alive and healthy🛠️*
 
-"${randomQuote}"
+"${getRandomQuote()}"
 
 *🔹 Powered by Black-Tappy 🔹*
         `.trim();
 
         await conn.sendMessage(from, {
-            image: { url: wallpaperUrl },
-            caption: formattedInfo,
+            image: { url: getRandomWallpaper() },
+            caption,
             contextInfo: {
                 mentionedJid: [m.sender],
                 forwardingScore: 999,
@@ -82,19 +75,18 @@ Hey 👋🏻 ${pushname}
                 externalAdReply: {
                     title: "⚙️ SHADOW-XTECH SYSTEM STATUS",
                     body: "Bot is live and operational — stay connected!",
-                    thumbnailUrl: wallpaperUrl,
+                    thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
                     sourceUrl: whatsappChannelLink,
                     mediaType: 1,
-                    renderLargerThumbnail: true
+                    renderLargerThumbnail: false
                 }
             }
         }, { quoted: mek });
 
     } catch (error) {
         console.error("Error in alive command: ", error);
-
         const errorMessage = `
-❌ An error occurred while processing the alive command.
+❌ An error occurred while processing the *alive* command.
 🛠 *Error Details*:
 ${error.message}
 

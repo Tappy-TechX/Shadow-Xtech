@@ -17,7 +17,7 @@ cmd({
 
         reply("⏳ Downloading video, please wait...");
 
-        const apiUrl = `https://bk9.fun/download/tiktok?url=${q}`;
+        const apiUrl = `https://delirius-apiofc.vercel.app/download/tiktok?url=${q}`;
         const { data } = await axios.get(apiUrl);
 
         if (!data.status || !data.data) return reply("⚠️ Failed to fetch TikTok video.");
