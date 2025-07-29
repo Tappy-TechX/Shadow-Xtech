@@ -6,42 +6,134 @@ const { igdl } = require("ruhend-scraper");
 const axios = require("axios");
 const { cmd, commands } = require('../command');
 
+const processedMessages = new Set();
+
+// Quoted contact setup
+const quotedContact = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "⚙️ Insta-Reels | Verified ✅",
+      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:Shadow-Xtech\nORG:Xtech Grid;\nTEL;type=CELL:+1234567890\nEND:VCARD"
+    }
+  }
+};
+
+const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
+
 cmd({
   pattern: "ig",
-  alias: ["insta", "Instagram"],
-  desc: "To download Instagram videos.",
+  alias: ["insta", "instagram"],
+  desc: "Download Instagram videos or images.",
   react: "🎥",
   category: "download",
   filename: __filename
 }, async (conn, m, store, { from, q, reply }) => {
   try {
+    if (processedMessages.has(m.key.id)) return;
+    processedMessages.add(m.key.id);
+    setTimeout(() => processedMessages.delete(m.key.id), 5 * 60 * 1000);
+
     if (!q || !q.startsWith("http")) {
       return reply("❌ Please provide a valid Instagram link.");
+    }
+
+    const isValidUrl = [
+      /https?:\/\/(?:www\.)?instagram\.com\//,
+      /https?:\/\/(?:www\.)?instagr\.am\//,
+      /https?:\/\/(?:www\.)?instagram\.com\/p\//,
+      /https?:\/\/(?:www\.)?instagram\.com\/reel\//,
+      /https?:\/\/(?:www\.)?instagram\.com\/tv\//
+    ].some(pattern => pattern.test(q));
+
+    if (!isValidUrl) {
+      return reply("⚠️ That doesn't look like a valid Instagram link.");
     }
 
     await conn.sendMessage(from, {
       react: { text: "⏳", key: m.key }
     });
 
-    const response = await axios.get(`https://api.davidcyriltech.my.id/instagram?url=${q}`);
-    const data = response.data;
+    const data = await igdl(q);
 
-    if (!data || data.status !== 200 || !data.downloadUrl) {
-      return reply("⚠️ Failed to fetch Instagram video. Please check the link and try again.");
+    if (!data || !data.data || data.data.length === 0) {
+      return reply("❌ No media found. Please double-check the link.");
     }
 
-    await conn.sendMessage(from, {
-      video: { url: data.downloadUrl },
-      mimetype: "video/mp4",
-      caption: "📥 *Instagram Video Downloaded Successfully!*"
-    }, { quoted: m });
+    const mediaList = data.data;
+    const metadata = {
+      title: data.title || "Untitled",
+      author: {
+        nickname: data.author?.nickname || "Unknown",
+        username: data.author?.username || "unknown_handle"
+      },
+      like: data.like || "N/A",
+      comment: data.comment || "N/A",
+      share: data.share || "N/A"
+    };
+
+    for (let i = 0; i < Math.min(20, mediaList.length); i++) {
+      const media = mediaList[i];
+      const mediaUrl = media.url;
+
+      const isVideo = /\.(mp4|mov|avi|mkv|webm)$/i.test(mediaUrl) || media.type === 'video' || q.includes('/reel/') || q.includes('/tv/');
+
+      const caption = `
+*👤 USER_HANDLE: ${metadata.author.nickname} (@${metadata.author.username})*
+*📁 VIDEO_TITLE: "${metadata.title}"*
+*🌐 SOURCE_NODE: Instagram::NW*
+
+_⧉ *ENGAGEMENT_LOG*_
+♥️ *LIKES*       : *🌸 ${metadata.like}*
+💬 *COMMENTS*  : *⏳ ${metadata.comment}*
+🌐 *SHARES*     : *👤 ${metadata.share}*
+📸 *MEDIA_TYPE* : *${isVideo ? 'VIDEO/NW/HD' : 'IMAGE/NW/HD'}*
+🧬 *UPLINK_ID*  | *shadow.xtech.grid://Ω1A2Z*`;
+
+      const messageOptions = {
+        caption,
+        contextInfo: {
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363369453603973@newsletter',
+            newsletterName: "𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ",
+            serverMessageId: 143
+          },
+          externalAdReply: {
+            title: "📥 Shadow-Xtech Instagram Downloader",
+            body: "Download Instagram Reels, Posts & More",
+            thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
+            sourceUrl: whatsappChannelLink,
+            mediaType: 1,
+            renderLargerThumbnail: true
+          }
+        }
+      };
+
+      if (isVideo) {
+        await conn.sendMessage(from, {
+          video: { url: mediaUrl },
+          mimetype: "video/mp4",
+          ...messageOptions
+        }, { quoted: quotedContact });
+      } else {
+        await conn.sendMessage(from, {
+          image: { url: mediaUrl },
+          ...messageOptions
+        }, { quoted: quotedContact });
+      }
+    }
 
   } catch (error) {
-    console.error("Error:", error);
-    reply("❌ An error occurred while processing your request. Please try again.");
+    console.error("Error in .ig command:", error);
+    reply("❌ An error occurred while processing your request.");
   }
 });
-
 
 // twitter-dl
 

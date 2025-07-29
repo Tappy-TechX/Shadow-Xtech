@@ -3,6 +3,21 @@ const axios = require('axios');
 
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 
+// Quoted Contact Object
+const quotedContact = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "⚙️ TikTok-Stream | Verified ✅",
+            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+        }
+    }
+};
+
 cmd({
     pattern: "tiktok",
     alias: ["ttdl", "tt", "tiktokdl"],
@@ -25,29 +40,17 @@ cmd({
         const { title, like, comment, share, author, meta } = data.data;
         const videoUrl = meta.media.find(v => v.type === "video").org;
 
-        const caption = 
-`⎾⦿========================================⏌
-🔗 CYBERLINK — TIKTOK FEED INTERCEPT
-⎿===========================================⏋
-
-  👤 USER_HANDLE     :: ${author.nickname} (@${author.username})
-  📁 VIDEO_TITLE     :: "${title}"
-  🌐 SOURCE_NODE     :: TikTok_NW://Stream.Decrypt
-
- ⧉ ENGAGEMENT_LOG
-  ▸ LIKES         :: ${like}
-  ▸ COMMENTS      :: ${comment}
-  ▸ SHARES        :: ${share}
-
- ⧉ STATUS_PACKET
-  ▸ STREAM_STATUS :: ✅ UNLOCKED
-  ▸ MEDIA_TYPE    :: VIDEO/NW/HD
-
- 🧬 UPLINK_ID       :: shadow.matrix.grid://Ω1A2Z
-
-⎾===========================================⏌
-🛰️ END OF TRANSMISSION – SIG/149X
-⎿===========================================⏋`;
+        const caption = `
+  *👤 USER_HANDLE: ${author.nickname} (@${author.username})*
+  *📁 VIDEO_TITLE: "${title}"*
+  *🌐 SOURCE_NODE: TikTok_NW://Stream.*
+  
+ _⧉ *ENGAGEMENT_LOG*_
+  ♥️ *LIKES*       : *🌸 ${like}*
+  💬 *COMMENTS*  : *⏳ ${comment}*
+  🌐 *SHARES*     : *👤  ${share}*
+  📸 *MEDIA_TYPE* : *VIDEO/NW/HD*
+  🧬 *UPLINK_ID* | *shadow.xtech.grid://Ω1A2Z*`;
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
@@ -58,7 +61,7 @@ cmd({
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: "ֆཏɑɖօա-𝕏Ե𝖾𝖼ཏ",
+                    newsletterName: "𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ",
                     serverMessageId: 143
                 },
                 externalAdReply: {
@@ -70,7 +73,7 @@ cmd({
                     renderLargerThumbnail: false
                 }
             }
-        }, { quoted: mek });
+        }, { quoted: quotedContact });
 
     } catch (e) {
         console.error("Error in TikTok downloader command:", e);

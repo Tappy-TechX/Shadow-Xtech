@@ -12,7 +12,7 @@ const quotedContact = {
   },
   message: {
     contactMessage: {
-      displayName: "⚙️ Shadow-Xtech | System Verified ✅",
+      displayName: "⚙️ Latency-Check | Verified ✅",
       vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
     }
   }
@@ -91,17 +91,17 @@ cmd({
     }
 
     const stylishText = `
-⎾===========================================⏌
- 📡 SYSTEM DIAGNOSTICS — PULSE REPORT
+*⎾===========================================⏌*
+ *📡 SYSTEM DIAGNOSTICS — PULSE REPORT*
  ⌬━━━━━━━━━━━━━━━━━━━⌬
-  ◉ Bot ID       » ${config.botname || "SHADOW-XTECH"}
+  ◉ Bot ID       » *${config.botname || "SHADOW-XTECH"}*
   ◉ Response     » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
   ◉ Load Memory  » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB* 📦
   ◉ Stability    » ${stabilityEmoji} *${stabilityText}*
-  ◉ Time Sync    » ${new Date().toLocaleTimeString()}
+  ◉ Time Sync    » *${new Date().toLocaleTimeString()}*
  ⌬━━━━━━━━━━━━━━━━━━━⌬
- ➤ ${randomQuote}
-⎿===========================================⏋
+ ➤ *${randomQuote}*
+*⎿===========================================⏋*
     `.trim();
 
     await conn.sendMessage(from, {
@@ -113,7 +113,7 @@ cmd({
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363369453603973@newsletter',
-          newsletterName: "ֆཏɑɖօա-𝕏Ե𝖾𝖼ཏ",
+          newsletterName: "𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ",
           serverMessageId: 143
         },
         externalAdReply: {

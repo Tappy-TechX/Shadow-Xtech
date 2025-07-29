@@ -8,13 +8,28 @@ const { runtime } = require('../lib/functions');
 // Array of random image URLs for the menu
 const MENU_IMAGES = [
     'https://files.catbox.moe/og4tsk.jpg',
-    'https://files.catbox.moe/95n1x6.jpgg',
+    'https://files.catbox.moe/95n1x6.jpg',
     'https://files.catbox.moe/0w7hqx.jpg',
-    'https://files.catbox.moe/3hrxbh.jpg', // Your original image URL
-    'https://files.catbox.moe/etqc8k.jpg' // Replace with another valid image URL
+    'https://files.catbox.moe/3hrxbh.jpg',
+    'https://files.catbox.moe/etqc8k.jpg'
 ];
 
-// Array of random "fancy" loading messages
+// Quoted Contact Object
+const quotedContact = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "⚙️ Menu-Frame | Verified ✅",
+      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+    }
+  }
+};
+
+// Fancy loading messages
 const LOADING_MESSAGES = [
     "Initializing connection...🌐",
     "Establishing Bot commands...📂",
@@ -39,11 +54,11 @@ const LOADING_MESSAGES = [
     "Welcome, user...👋"
 ];
 
-// Array of random audio URLs for the menu
+// Random audio URLs for the menu
 const MENU_AUDIO_URLS = [
     'https://files.catbox.moe/ddmjyy.mp3',
     'https://files.catbox.moe/mexjrq.mp3',
-    'https://files.catbox.moe/4yqp5m.mp3', // It's a video, but can be sent as audio
+    'https://files.catbox.moe/4yqp5m.mp3',
     'https://files.catbox.moe/k41qij.mp3'
 ];
 
@@ -57,18 +72,16 @@ cmd({
     category: "menu",
     react: "📜",
     filename: __filename
-}, 
-async (conn, mek, m, { from, reply }) => {
+}, async (conn, mek, m, { from, reply }) => {
     try {
-        // --- STEP 1: PROVIDE INSTANT FEEDBACK FOR ULTRA SPEED ---
         await reply("📜 Fetching commands... Please wait a moment!");
 
-        // --- STEP 2: PREPARE DYNAMIC CONTENT ---
+        // Select dynamic values
         const selectedImageUrl = MENU_IMAGES[Math.floor(Math.random() * MENU_IMAGES.length)];
         const randomLoadingMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
         const selectedAudioUrl = MENU_AUDIO_URLS[Math.floor(Math.random() * MENU_AUDIO_URLS.length)];
 
-        // --- STEP 3: BUILD THE MENU CAPTION ---
+        // Compose menu caption (truncated for brevity in this snippet, but you can include full menu)
         const menuCaption = `╭──⭘💈 *${config.BOT_NAME}* 💈─·⭘
 ┆ ◦ 
 ┆ ◦ • 👑 Owner : *${config.OWNER_NAME}*
@@ -469,33 +482,29 @@ async (conn, mek, m, { from, reply }) => {
 ╰─┈⊷
 > ${config.DESCRIPTION}`;
 
-        // --- STEP 4: SEND THE FULL MENU WITH IMAGE ---
-        await conn.sendMessage(
-            from,
-            {
-                image: { url: selectedImageUrl },
-                caption: menuCaption,
-                contextInfo: {
-                    mentionedJid: [m.sender],
-                    forwardingScore: 999,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363369453603973@newsletter',
-                        newsletterName: config.BOT_NAME,
-                        serverMessageId: 143
-                    }
+        // Send menu image
+        await conn.sendMessage(from, {
+            image: { url: selectedImageUrl },
+            caption: menuCaption,
+            contextInfo: {
+                mentionedJid: [m.sender],
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363369453603973@newsletter',
+                    newsletterName: config.BOT_NAME,
+                    serverMessageId: 143
                 }
-            },
-            { quoted: mek }
-        );
+            }
+        }, { quoted: quotedContact });
 
-        // --- STEP 5: SEND THE RANDOM AUDIO ---
+        // Send menu audio
         await conn.sendMessage(from, {
             audio: { url: selectedAudioUrl },
             mimetype: 'audio/mp4',
-            ptt: true // Send as a voice note
-        }, { quoted: mek });
-        
+            ptt: true
+        }, { quoted: quotedContact });
+
     } catch (e) {
         console.error("Menu Command Error:", e);
         reply(`❌ An error occurred while displaying the menu. Please try again later.`);

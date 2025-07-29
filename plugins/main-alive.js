@@ -21,7 +21,21 @@ const FANCY_QUOTES = [
     "🌐 Multi-thread ops: — No anomalies detected."
 ];
 
-// Helpers
+// Quoted contact to show as reference
+const quotedContact = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "⚙️ System-Status | Verified ✅",
+            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+        }
+    }
+};
+
 const getRandomWallpaper = () => FALLBACK_WALLPAPERS[Math.floor(Math.random() * FALLBACK_WALLPAPERS.length)];
 const getRandomQuote = () => FANCY_QUOTES[Math.floor(Math.random() * FANCY_QUOTES.length)];
 
@@ -69,7 +83,7 @@ Hey 👋🏻 ${pushname}
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: 'ֆཏɑɖօա-𝕏Ե𝖾𝖼ཏ',
+                    newsletterName: '𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ',
                     serverMessageId: 143
                 },
                 externalAdReply: {
@@ -81,7 +95,7 @@ Hey 👋🏻 ${pushname}
                     renderLargerThumbnail: false
                 }
             }
-        }, { quoted: mek });
+        }, { quoted: quotedContact });
 
     } catch (error) {
         console.error("Error in alive command: ", error);

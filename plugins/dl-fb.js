@@ -3,6 +3,21 @@ const { cmd } = require("../command");
 
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 
+// Quoted Contact to use for the reply
+const quotedContact = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "⚙️ Meta Extractor | Verified ✅",
+      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+    }
+  }
+};
+
 cmd({
   pattern: "fb",
   alias: ["facebook", "fbdl"],
@@ -13,19 +28,13 @@ cmd({
 }, async (conn, m, store, { from, args, q, reply }) => {
   try {
     if (!q || !q.startsWith("http")) {
-      return reply("*`Need a valid Facebook URL`*\n\nExample: `.fb https://www.facebook.com/...`");
+      return reply("*`Need a valid Facebook URL`* *Example: `.fb https://www.facebook.com/...`*");
     }
 
     await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
 
-    // Randomly select one API endpoint
-    const apiEndpoints = [
-      `https://apis.davidcyriltech.my.id/facebook?url=${encodeURIComponent(q)}`,
-      `https://apis.davidcyriltech.my.id/facebook2?url=${encodeURIComponent(q)}`,
-      `https://apis.davidcyriltech.my.id/facebook3?url=${encodeURIComponent(q)}`
-    ];
-    const apiUrl = apiEndpoints[Math.floor(Math.random() * apiEndpoints.length)];
-
+    // Use a single, stable API endpoint
+    const apiUrl = `https://api.dreaded.site/api/facebook?url=${encodeURIComponent(q)}`;
     const { data } = await axios.get(apiUrl);
 
     if (!data.status || !data.data || !data.data.url) {
@@ -35,24 +44,18 @@ cmd({
     const videoUrl = data.data.url;
 
     const caption = 
-`⎾⦿=======================================⏌
-  🛰️ SHADOW INTERCEPT — FB NODE CAPTURE
-⎿==========================================⏋
-
-  📡 STREAM TYPE     :: Facebook/Meta-Grid
-  🌐 DATA TRACE      :: ${q.split('?')[0]}
-  🧾 SIGNAL STATUS   :: 🟢 LINK VERIFIED
-
- ⧉ PACKET FEED
-    ▸ RETRIEVAL_MODE :: DEEP SCAN
-    ▸ STATUS_CODE    :: 200_OK
-    ▸ DECRYPTION     :: COMPLETE
-
- 🧬 UPLINK_ID        :: shadow.fb.grid://ΩF8Z2
-
-⎾==========================================⏌
-  ✅ MEDIA READY — TRANSMIT TO CLIENT
-⎿==========================================⏋`;
+`*⎾⦿======================================⏌*
+  *🛰️ SHADOW XTECH — FB NODE CAPTURE*
+  *⌬━━━━━━━━━━━━━━━━━━⌬*
+   *📡 STREAM TYPE : Facebook/Meta-Grid*
+   *🌐 DATA TRACE : ${q.split('?')[0]}*
+   *🧾 SIGNAL STATUS : 🟢 LINK VERIFIED*
+  
+ _*⧉ PACKET FEED*_
+   *🧬 UPLINK_ID | shadow.fb.grid://ΩF8Z2*
+  *⌬━━━━━━━━━━━━━━━━━━⌬*
+   *✅ MEDIA READY — TRANSMIT TO CLIENT*
+*⎿========================================⏋*`;
 
     await conn.sendMessage(from, {
       video: { url: videoUrl },
@@ -63,7 +66,7 @@ cmd({
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363369453603973@newsletter',
-          newsletterName: "ֆཏɑɖօա-𝕏Ե𝖾𝖼ཏ",
+          newsletterName: "𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ",
           serverMessageId: 143
         },
         externalAdReply: {
@@ -75,7 +78,7 @@ cmd({
           renderLargerThumbnail: false
         }
       }
-    }, { quoted: m });
+    }, { quoted: quotedContact });
 
   } catch (error) {
     console.error("Error in Facebook downloader:", error);
