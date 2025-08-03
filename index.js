@@ -130,7 +130,7 @@ else if (speed > 500) status = "Moderate";
   connectToWA()
   }
   } else if (connection === 'open') {
-  console.log('[🧩] Installing Plugins')
+  console.log('🧬 Installing Plugins')
   const path = require('path');
   fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
@@ -215,11 +215,11 @@ try {
 ╰───────◇
 ╭──〔 🔗 *Quick Links* 〕──◇
 ├─ 📢 *Join Our Channel:*
-│   Click [**Here**](https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10) to join!
+│   Click [**Here**] to join!
 ├─ 🛠️ *Shadow-Xtech Developer:*
-│   Click [**Here**](https://wa.me/254759000340)
+│   Click [**Here**]
 ├─ ⭐ *Give Us a Star:*
-│   Star Us [**Here**](https://github.com/Tappy-Black/Shadow-Xtech-V1) !
+│   Star Us [**Here**] !
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
@@ -905,22 +905,10 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
     conn.serializeM = mek => sms(conn, mek, store);
   }
   
-  // --- NEW: Keep-Alive Endpoint ---
-app.get("/keep-alive", (req, res) => {
-    res.json({
-        status: "alive",
-        message: "[🟢]Shadow-Xtech is running.",
-        timestamp: new Date().toISOString()
-    });
-});
-
-// Serve the HTML file from lib/shadow.html for the root path
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "./lib/shadow.html"));
-});
-
-// Start the Express server
-app.listen(port, () => console.log(`[🟢] Server listening on port http://localhost:${port}`));
+  app.get("/", (req, res) => {
+  res.send("DML-MD  STARTED ✅");
+  });
+  app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
   setTimeout(() => {
   connectToWA()
   }, 4000);
