@@ -17,7 +17,7 @@ const quotedContact = {
   },
   message: {
     contactMessage: {
-      displayName: "⚙️ Insta-Reels | Verified ✅",
+      displayName: "⚙️ Insta | Reels 🧩",
       vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:Shadow-Xtech\nORG:Xtech Grid;\nTEL;type=CELL:+1234567890\nEND:VCARD"
     }
   }
