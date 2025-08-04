@@ -10,7 +10,7 @@ const quotedContact = {
   },
   message: {
     contactMessage: {
-      displayName: "⚙️ Shadow-Xtech | Verified ✅",
+      displayName: "⚙️ Anticall | System 📞",
       vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
     }
   }
