@@ -92,7 +92,7 @@
     "OWNER_NUMBER": {
       "description": "put the owner number for bot.",
       "required": false,
-      "value": "254759000340"
+      "value": "254756360306"
 
     }, 
 
@@ -131,7 +131,7 @@
     "DESCRIPTION": {
       "description": "add caption for menu and other",
       "required": false,
-      "value": "*© 𝐏ᴏᴡᴇʀᴇᴅ 𝐁ʏ 𝐁ʟᴀᴄᴋ-𝐓ᴀᴘᴘʏ*"
+      "value": "> _© *Powered By Black-Tappy*_"
     },
 
       "DELETE_LINKS": {
