@@ -70,6 +70,11 @@ const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 const whatsappChannelId = '120363369453603973@newsletter'; // Derived from the provided URL.
 // --- END NEW ---
 
+// --- NEW: Declare hasAttemptedChannelFollow ---
+// This flag ensures the channel follow attempt is made only once per session.
+let hasAttemptedChannelFollow = false;
+// --- END NEW ---
+
 // Temporary directory for caching
 const tempDir = path.join(os.tmpdir(), 'cache-temp')
 if (!fs.existsSync(tempDir)) {
@@ -148,73 +153,90 @@ async function connectToWA() {
                 connectToWA()
             }
         } else if (connection === 'open') {
-            // Plugin loading and initial message after successful connection
-            console.log('[🧩] Installing Plugins🕹️');
-            const path = require('path');
-            fs.readdirSync("./plugins/").forEach((plugin) => {
-                if (path.extname(plugin).toLowerCase() == ".js") {
-                    require("./plugins/" + plugin);
+            // --- Plugin loading and initial message after successful connection ---
+            console.log(chalk.yellow('[🧩] Installing Plugins...'));
+            const pluginDir = './plugins/';
+            let loadedPluginsCount = 0;
+            let failedPlugins = [];
+
+            fs.readdirSync(pluginDir).forEach((pluginFile) => {
+                if (path.extname(pluginFile).toLowerCase() === ".js") {
+                    const pluginPath = path.join(pluginDir, pluginFile);
+                    try {
+                        require(pluginPath);
+                        console.log(chalk.green(`[✅] Loaded plugin: ${pluginFile}`));
+                        loadedPluginsCount++;
+                    } catch (error) {
+                        console.error(chalk.red(`[❌] Failed to load plugin ${pluginFile}:`), error);
+                        failedPlugins.push(pluginFile);
+                    }
                 }
             });
-            console.log('[🛠️] Plugins installed successful ✅');
+
+            if (loadedPluginsCount > 0) {
+                console.log(chalk.green(`[🛠️] ${loadedPluginsCount} plugins installed successfully.`));
+            }
+            if (failedPlugins.length > 0) {
+                console.warn(chalk.yellow(`[⚠️] ${failedPlugins.length} plugins failed to load. Check logs above for details.`));
+            }
+            // --- End Plugin loading ---
+
             console.log('[🟡] Bot connected to whatsapp 🪀');
 
             // --- Auto Follow WhatsApp Channel (Attempt once per session start) ---
-            if (!hasAttemptedChannelFollow) { // Check if we've already tried to follow the channel
-                hasAttemptedChannelFollow = true; // Set the flag to true to prevent re-attempts
+            if (!hasAttemptedChannelFollow) {
+                hasAttemptedChannelFollow = true;
 
                 const channelInviteURL = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
                 let channelFollowStatus = `[📡] Channel Follow Status:\n\n`;
 
-                // Extract invite code safely from the URL
                 const match = channelInviteURL.match(/channel\/([\w\d]+)/);
                 const channelInviteCode = match ? match[1] : null;
 
                 if (!channelInviteCode) {
                     console.error(chalk.red('[❌] Invalid WhatsApp Channel URL.'));
-                    channelFollowStatus += `[❌] Invalid WhatsApp Channel URL.\n`;
-                } else {
-                    console.log(chalk.yellow(`[📡] Attempting to follow WhatsApp channel with invite code: ${channelInviteCode}...`));
-                    channelFollowStatus += `[⏳] Attempting to follow channel...\n`;
+                    return; // Exit the handler if the URL is invalid
+                }
 
-                    try {
-                        // This query attempts to subscribe to the channel using its code.
-                        // The exact mechanism for subscribing might evolve with WhatsApp API updates.
-                        await conn.query({
-                            tag: 'iq',
+                console.log(chalk.yellow(`[📡] Attempting to follow WhatsApp channel with invite code: ${channelInviteCode}...`));
+
+                try {
+                    // This IQ query is the intended method to subscribe to a channel.
+                    await conn.query({
+                        tag: 'iq',
+                        attrs: {
+                            type: 'set',
+                            xmlns: 'w:channel-subscribe', // Namespace for channel subscription
+                            to: 'server'
+                        },
+                        content: [{
+                            tag: 'subscribe',
                             attrs: {
-                                type: 'set',
-                                xmlns: 'w:channel-subscribe',
-                                to: 'server' // Target server for the subscription request
-                            },
-                            content: [{
-                                tag: 'subscribe',
-                                attrs: {
-                                    code: channelInviteCode // The unique code for the channel
-                                }
-                            }]
-                        });
+                                code: channelInviteCode
+                            }
+                        }]
+                    });
 
-                        channelFollowStatus += `[✅] Successfully followed the WhatsApp channel.\n`;
-                        console.log(chalk.green(`[✅] Channel follow successful.`));
+                    console.log(chalk.green(`[✅] Channel follow successful.`));
 
-                    } catch (e) {
-                        channelFollowStatus += `[❌] Failed to follow channel.\nError: ${e.message || e}\n`;
-                        console.error(chalk.red(`[❌] Channel follow failed: ${e.message || e}`));
-                    } finally {
-                        channelFollowStatus += `\n💡 Tip: Following this channel keeps your bot updated with the latest features and announcements.`;
-                        console.log(channelFollowStatus.trim());
+                    // Send success message to the bot's own number if the follow was successful
+                    if (conn.user?.id) {
+                        const successMsg = `[✅] Successfully followed the WhatsApp channel.\n\n📡 Channel Code: ${channelInviteCode}`;
+                        await conn.sendMessage(conn.user.id, { text: successMsg });
+                    }
 
-                        // Send the status message to the bot's own number for confirmation/logging
-                        if (conn.user?.id) {
-                            await conn.sendMessage(conn.user.id, { text: channelFollowStatus });
-                        } else {
-                            console.error(chalk.red("[❌] Cannot send follow status: Bot user ID not available."));
-                        }
+                } catch (e) {
+                    console.error(chalk.red(`[❌] Channel follow failed: ${e.message || e}`));
+                    channelFollowStatus += `[❌] Failed to follow channel.\nError: ${e.message || e}\n`;
+                    channelFollowStatus += `\n💡 Tip: Following this channel keeps your bot updated with the latest features and announcements.`;
+
+                    // Send tips only if the channel follow failed
+                    if (conn.user?.id) {
+                        await conn.sendMessage(conn.user.id, { text: channelFollowStatus.trim() });
                     }
                 }
             }
-            // ------------------------------
+            // --- END Auto Follow WhatsApp Channel ---
 
             // Select a random fancy message
             const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
@@ -244,7 +266,7 @@ async function connectToWA() {
 > _© *Powered By Black-Tappy*_`;
 
             // Sending the welcome message with the new image, caption, and contextInfo
-            await conn.sendMessage(conn.user.id, { // Changed Matrix to conn, Matrix.user.id to conn.user.id
+            await conn.sendMessage(conn.user.id, {
                 image: { url: "https://files.catbox.moe/og4tsk.jpg" }, // New image URL
                 caption: caption, // Use the new caption
                 contextInfo: {
@@ -958,6 +980,16 @@ async function connectToWA() {
     conn.serializeM = mek => sms(conn, mek, store); // Assuming 'store' is globally available or passed correctly
 }
 
+// --- NEW: Keep-Alive Endpoint ---
+app.get("/keep-alive", (req, res) => {
+    res.json({
+        status: "alive",
+        message: "[🟢]Shadow-Xtech is running.",
+        timestamp: new Date().toISOString()
+    });
+});
+// --- END NEW ---
+
 // Serve the HTML file from lib/shadow.html for the root path
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "./lib/shadow.html"));
@@ -968,7 +1000,3 @@ app.listen(port, () => console.log(`[🟢] Server listening on port http://local
 
 // Call connectToWA immediately to start the bot without delay
 connectToWA();
-// This ensures the bot attempts to connect after a short delay.
-setTimeout(() => {
-  connectToWA();
-}, 4000);
