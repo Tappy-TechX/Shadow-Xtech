@@ -15,7 +15,8 @@ const {
     MessageRetryMap,
     generateForwardMessageMessageContent,
     generateWAMessageFromContent,
-    generateMessageID, makeInMemoryStore,
+    generateMessageID,
+    makeInMemoryStore, // Import makeInMemoryStore
     jidDecode,
     fetchLatestBaileysVersion,
     Browsers
@@ -44,10 +45,14 @@ const path = require('path')
 const prefix = config.PREFIX
 const chalk = require('chalk'); // Added for colored console output
 
+// --- NEW: Import the call handler module ---
 const callHandler = require('./lib/callhandler');
+// ------------------------------------------
 
-const ownerNumber = ['254759000340'] 
+// Define owner number(s)
+const ownerNumber = ['254759000340'] // This matches the developer's contact number from the WhatsApp channel.
 
+// --- NEW: Define fancyMessages array ---
 const fancyMessages = [
     "⚡️ Speedy connection, always on! 🚀",
     "💨 Fast replies, seamless chat. ✨",
@@ -58,17 +63,21 @@ const fancyMessages = [
     "📶 Always online, always fast. 🔋",
     "🚀 Your connection, our priority. ❤️"
 ];
+// --- END NEW ---
 
+// --- NEW: Define externalAdReply and related variables ---
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
-const whatsappChannelId = '120363369453603973@newsletter'; 
+// WhatsApp channel IDs typically follow the format 'ID@newsletter'.
+const whatsappChannelId = '120363369453603973@newsletter'; // Derived from the provided URL.
+// --- END NEW ---
 
-//===========Temporary-directory-for-caching=========
+// Temporary directory for caching
 const tempDir = path.join(os.tmpdir(), 'cache-temp')
 if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir)
 }
 
-//=======Function to clear the temporary directory======
+// Function to clear the temporary directory
 const clearTempDir = () => {
     fs.readdir(tempDir, (err, files) => {
         if (err) throw err;
@@ -80,7 +89,7 @@ const clearTempDir = () => {
     });
 }
 
-//=======Clear the temp directory every 5 minutes======
+// Clear the temp directory every 5 minutes
 setInterval(clearTempDir, 5 * 60 * 1000);
 
 //===================SESSION-AUTH============================
@@ -96,67 +105,61 @@ if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
     })
 }
 
-//===========Express server setup==============
+// Express server setup
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 9090;
 
 //=============================================
 
-//===========Stylish Emojis for status display==============
+// --- NEW: Define Status Variables ---
+// Stylish Emojis for status display
 const statusEmojis = ['✅', '🟢', '✨', '📶', '🔋'];
 
-//===========Bot status==============
-let status = "Stable"; 
-const speed = Math.floor(Math.random() * 1500) + 200; 
+// Bot status
+let status = "Stable"; // Default status
+// Random speed for demonstration purposes
+const speed = Math.floor(Math.random() * 1500) + 200; // Random speed between 200 and 1700
+
 if (speed > 1000) status = "Slow";
 else if (speed > 500) status = "Moderate";
+// --- END NEW ---
 
-//======Define the quotedContact object as specified==========
-const quotedContact = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net", 
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: config.OWNER_NAME || "⚙️ System | Verified ✅",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:${config.OWNER_NAME || "Shadow-Xtech"}
-ORG:Bot Repo;
-TEL;type=CELL:+1234567890
-END:VCARD`
-        }
-    }
-};
+// --- NEW: Flag to ensure channel follow attempt happens only once ---
+let hasAttemptedChannelFollow = false;
+// --- END NEW ---
 
-//========Main function to connect to WhatsApp=============
+// Main function to connect to WhatsApp
 async function connectToWA() {
     console.log("[🟠] Connecting to WhatsApp ⏳️...");
     const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
     var { version } = await fetchLatestBaileysVersion()
 
     const conn = makeWASocket({
-        logger: P({ level: 'silent' }), 
-        printQRInTerminal: false, 
-        browser: Browsers.macOS("Firefox"), 
-        syncFullHistory: true, 
-        auth: state, 
-        version 
+        logger: P({ level: 'silent' }), // Silent logger for cleaner output
+        printQRInTerminal: false, // Set to true if you want QR code in terminal
+        browser: Browsers.macOS("Firefox"), // Browser emulation
+        syncFullHistory: true, // Sync full chat history
+        auth: state, // Load authentication state
+        version // Use the fetched latest Baileys version
     })
 
-//======Event handler for connection updates===============
-    conn.ev.on('connection.update', async (update) => { 
+    // --- Initialize and bind the in-memory store ---
+    // The store is used to cache chats, contacts, messages, etc.
+    const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
+    store.bind(conn.ev);
+    // --- End store initialization ---
+
+    // Event handler for connection updates
+    conn.ev.on('connection.update', async (update) => { // Added 'async' here
         const { connection, lastDisconnect } = update
         if (connection === 'close') {
-//=====Reconnect if the disconnection was not due to logout======
+            // Reconnect if the disconnection was not due to logout
             if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
                 connectToWA()
             }
         } else if (connection === 'open') {
-//=====Plugin loading after successful connection================ 
+            // Plugin loading and initial message after successful connection
             console.log('[🧩] Installing Plugins🕹️');
             const path = require('path');
             fs.readdirSync("./plugins/").forEach((plugin) => {
@@ -166,63 +169,63 @@ async function connectToWA() {
             });
             console.log('[🛠️] Plugins installed successful ✅');
             console.log('[🟡] Bot connected to whatsapp 🪀');
- // --- Auto Follow WhatsApp Channel (Invite URL Support + Failsafe) ---
-            const channelInviteURL = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
-            let channelFollowStatus = `[📡] Channel Follow Status:\n\n`;
 
-            // Extract invite code safely from the URL
-            const match = channelInviteURL.match(/channel\/([\w\d]+)/);
-            const channelInviteCode = match ? match[1] : null;
+            // --- Auto Follow WhatsApp Channel (Attempt once per session start) ---
+            if (!hasAttemptedChannelFollow) { // Check if we've already tried to follow the channel
+                hasAttemptedChannelFollow = true; // Set the flag to true to prevent re-attempts
 
-            if (!channelInviteCode) {
-                console.error(chalk.red('[❌] Invalid WhatsApp Channel URL.'));
-            } else {
-                console.log(chalk.yellow(`[📡] Attempting to follow WhatsApp channel with invite code: ${channelInviteCode}...`));
+                const channelInviteURL = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
+                let channelFollowStatus = `[📡] Channel Follow Status:\n\n`;
 
-                try {
-                    // Retry logic (optional)
-                    let success = false;
-                    const maxAttempts = 3;
-                    for (let attempt = 1; attempt <= maxAttempts && !success; attempt++) {
-                        try {
-                            await conn.query({
-                                tag: 'iq',
+                // Extract invite code safely from the URL
+                const match = channelInviteURL.match(/channel\/([\w\d]+)/);
+                const channelInviteCode = match ? match[1] : null;
+
+                if (!channelInviteCode) {
+                    console.error(chalk.red('[❌] Invalid WhatsApp Channel URL.'));
+                    channelFollowStatus += `[❌] Invalid WhatsApp Channel URL.\n`;
+                } else {
+                    console.log(chalk.yellow(`[📡] Attempting to follow WhatsApp channel with invite code: ${channelInviteCode}...`));
+                    channelFollowStatus += `[⏳] Attempting to follow channel...\n`;
+
+                    try {
+                        // This query attempts to subscribe to the channel using its code.
+                        // The exact mechanism for subscribing might evolve with WhatsApp API updates.
+                        await conn.query({
+                            tag: 'iq',
+                            attrs: {
+                                type: 'set',
+                                xmlns: 'w:channel-subscribe',
+                                to: 'server' // Target server for the subscription request
+                            },
+                            content: [{
+                                tag: 'subscribe',
                                 attrs: {
-                                    type: 'set',
-                                    xmlns: 'w:channel-subscribe',
-                                    to: 'server'
-                                },
-                                content: [{
-                                    tag: 'subscribe',
-                                    attrs: {
-                                        code: channelInviteCode
-                                    }
-                                }]
-                            });
+                                    code: channelInviteCode // The unique code for the channel
+                                }
+                            }]
+                        });
 
-                            success = true;
-                            channelFollowStatus += `[✅] Followed WhatsApp Channel (Attempt ${attempt})\n`;
-                            console.log(chalk.green(`[✅] Successfully followed the channel.`));
-                        } catch (err) {
-                            console.warn(chalk.yellow(`[⚠️] Attempt ${attempt} failed: ${err.message || err}`));
-                            if (attempt === maxAttempts) throw err;
+                        channelFollowStatus += `[✅] Successfully followed the WhatsApp channel.\n`;
+                        console.log(chalk.green(`[✅] Channel follow successful.`));
+
+                    } catch (e) {
+                        channelFollowStatus += `[❌] Failed to follow channel.\nError: ${e.message || e}\n`;
+                        console.error(chalk.red(`[❌] Channel follow failed: ${e.message || e}`));
+                    } finally {
+                        channelFollowStatus += `\n💡 Tip: Following this channel keeps your bot updated with the latest features and announcements.`;
+                        console.log(channelFollowStatus.trim());
+
+                        // Send the status message to the bot's own number for confirmation/logging
+                        if (conn.user?.id) {
+                            await conn.sendMessage(conn.user.id, { text: channelFollowStatus });
+                        } else {
+                            console.error(chalk.red("[❌] Cannot send follow status: Bot user ID not available."));
                         }
-                    }
-                } catch (e) {
-                    channelFollowStatus += `[🔴] Failed to follow channel after retries.\nError: ${e.message || e}\n`;
-                    console.error(chalk.red(`[❌] Final Error: ${e.message || e}`));
-                } finally {
-                    channelFollowStatus += `\n💡 Tip: Following this channel keeps your bot updated with the latest features and announcements.`;
-                    console.log(channelFollowStatus.trim());
-
-                    if (conn.user?.id) {
-                        await conn.sendMessage(conn.user.id, { text: channelFollowStatus });
-                    } else {
-                        console.error(chalk.red("[❌] Cannot send follow status: Bot user ID not available."));
                     }
                 }
             }
-            // --- END: Auto Follow WhatsApp Channel ---
+            // --- End Auto Follow WhatsApp Channel ---
 
             // Select a random fancy message
             const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
@@ -242,37 +245,37 @@ async function connectToWA() {
 ╰───────◇
 ╭──〔 🔗 *Quick Links* 〕──◇
 ├─ 📢 *Join Our Channel:*
-│   Click [**Here**](https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10) to join!
+│   Click [**Here**] to join!
 ├─ 🛠️ *Shadow-Xtech Developer:*
-│   Click [**Here**](https://wa.me/254759000340)
+│   Click [**Here**]
 ├─ ⭐ *Give Us a Star:*
-│   Star Us [**Here**](https://github.com/Tappy-Black/Shadow-Xtech-V1) !
+│   Star Us [**Here**] !
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
 
-            // Sending the welcome message 
-            await conn.sendMessage(conn.user.id, {
-                image: { url: "https://files.catbox.moe/og4tsk.jpg" }, 
-                caption: caption, 
+            // Sending the welcome message with the new image, caption, and contextInfo
+            await conn.sendMessage(conn.user.id, { // Changed Matrix to conn, Matrix.user.id to conn.user.id
+                image: { url: "https://files.catbox.moe/og4tsk.jpg" }, // New image URL
+                caption: caption, // Use the new caption
                 contextInfo: {
                     isForwarded: true,
                     forwardingScore: 999,
                     forwardedNewsletterMessageInfo: {
-                        newsletterJid: whatsappChannelId, 
+                        newsletterJid: whatsappChannelId, // Use the defined whatsappChannelId
                         newsletterName: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
                         serverMessageId: -1,
                     },
-                    externalAdReply: { 
+                    externalAdReply: { // Define the new externalAdReply inline
                         title: "Shadow-Xtech Bot",
                         body: "Powered By Black-Tappy",
                         thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
-                        sourceUrl: whatsappChannelLink, 
+                        sourceUrl: whatsappChannelLink, // Use the existing whatsappChannelLink
                         mediaType: 1,
                         renderLargerThumbnail: false,
                     },
                 },
-            }, { quoted: quotedContact }); 
+            });
 
             // --- Initialize the call handler ---
             callHandler(conn, config.ANTICALL); // Pass conn and the anticall setting from config
@@ -349,7 +352,7 @@ async function connectToWA() {
         ]);
 
         // Process messages using the sms handler
-        const m = sms(conn, mek)
+        const m = sms(conn, mek, store) // Pass store to sms handler
         const type = getContentType(mek.message)
         const content = JSON.stringify(mek.message)
         const from = mek.key.remoteJid
@@ -877,7 +880,7 @@ async function connectToWA() {
 
         if (id.endsWith('@g.us'))
             return new Promise(async resolve => {
-                v = store.contacts[id] || {};
+                v = store.contacts[id] || {}; // Use the initialized store
 
                 if (!(v.name.notify || v.subject))
                     v = conn.groupMetadata(id) || {};
@@ -900,7 +903,7 @@ async function connectToWA() {
                     }
                     : id === conn.decodeJid(conn.user.id)
                     ? conn.user
-                    : store.contacts[id] || {};
+                    : store.contacts[id] || {}; // Use the initialized store
 
         return (
             (withoutContact ? '' : v.name) ||
@@ -916,19 +919,12 @@ async function connectToWA() {
     conn.sendContact = async (jid, kon, quoted = '', opts = {}) => {
         let list = [];
         for (let i of kon) {
+            const contactJid = i + '@s.whatsapp.net';
+            const contactName = await conn.getName(contactJid); // Uses the store via conn.getName
             list.push({
-                displayName: await conn.getName(i + '@s.whatsapp.net'),
-                vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await conn.getName(
-                    i + '@s.whatsapp.net',
-                )}\nFN:${
-                    global.OwnerName // Assuming global.OwnerName is defined
-                }\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${
-                    global.email // Assuming global.email is defined
-                }\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/${
-                    global.github // Assuming global.github is defined
-                }/khan-xmd\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${
-                    global.location // Assuming global.location is defined
-                };;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
+                displayName: contactName,
+                // Using config values with fallbacks for owner details
+                vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${contactName}\nFN:${config.OWNER_NAME || 'Shadow-Xtech Bot'}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${config.OWNER_EMAIL || 'dev@example.com'}\nitem2.X-ABLabel:Email\nitem3.URL:https://github.com/${config.OWNER_GITHUB || 'Tappy-Black'}/Shadow-Xtech-V1\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${config.OWNER_LOCATION || 'Unknown Location'};;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
             });
         }
         conn.sendMessage(
@@ -963,23 +959,20 @@ async function connectToWA() {
         });
         return status;
     };
-    conn.serializeM = mek => sms(conn, mek, store); 
+    conn.serializeM = mek => sms(conn, mek, store); // Assuming 'store' is globally available or passed correctly
 }
-
-// ---Keep-Alive Endpoint ---
-app.get("/keep-alive", (req, res) => {
-    res.json({
-        status: "alive",
-        message: "[🟢]Shadow-Xtech is running.",
-        timestamp: new Date().toISOString()
-    });
-});
 
 // Serve the HTML file from lib/shadow.html for the root path
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "./lib/shadow.html"));
 });
+
+// Start the Express server
 app.listen(port, () => console.log(`[🟢] Server listening on port http://localhost:${port}`));
+
+// --- NEW: Call connectToWA with a 4-second delay ---
+// This ensures the bot attempts to connect after a short delay.
 setTimeout(() => {
   connectToWA();
 }, 4000);
+// --- END NEW ---
