@@ -15,8 +15,7 @@ const {
     MessageRetryMap,
     generateForwardMessageMessageContent,
     generateWAMessageFromContent,
-    generateMessageID,
-    makeInMemoryStore, // Import makeInMemoryStore
+    generateMessageID, makeInMemoryStore,
     jidDecode,
     fetchLatestBaileysVersion,
     Browsers
@@ -125,10 +124,6 @@ if (speed > 1000) status = "Slow";
 else if (speed > 500) status = "Moderate";
 // --- END NEW ---
 
-// --- NEW: Flag to ensure channel follow attempt happens only once ---
-let hasAttemptedChannelFollow = false;
-// --- END NEW ---
-
 // Main function to connect to WhatsApp
 async function connectToWA() {
     console.log("[🟠] Connecting to WhatsApp ⏳️...");
@@ -143,12 +138,6 @@ async function connectToWA() {
         auth: state, // Load authentication state
         version // Use the fetched latest Baileys version
     })
-
-    // --- Initialize and bind the in-memory store ---
-    // The store is used to cache chats, contacts, messages, etc.
-    const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
-    store.bind(conn.ev);
-    // --- End store initialization ---
 
     // Event handler for connection updates
     conn.ev.on('connection.update', async (update) => { // Added 'async' here
@@ -225,7 +214,7 @@ async function connectToWA() {
                     }
                 }
             }
-            // --- End Auto Follow WhatsApp Channel ---
+            // ------------------------------
 
             // Select a random fancy message
             const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
@@ -352,7 +341,7 @@ async function connectToWA() {
         ]);
 
         // Process messages using the sms handler
-        const m = sms(conn, mek, store) // Pass store to sms handler
+        const m = sms(conn, mek)
         const type = getContentType(mek.message)
         const content = JSON.stringify(mek.message)
         const from = mek.key.remoteJid
@@ -880,7 +869,7 @@ async function connectToWA() {
 
         if (id.endsWith('@g.us'))
             return new Promise(async resolve => {
-                v = store.contacts[id] || {}; // Use the initialized store
+                v = store.contacts[id] || {};
 
                 if (!(v.name.notify || v.subject))
                     v = conn.groupMetadata(id) || {};
@@ -903,7 +892,7 @@ async function connectToWA() {
                     }
                     : id === conn.decodeJid(conn.user.id)
                     ? conn.user
-                    : store.contacts[id] || {}; // Use the initialized store
+                    : store.contacts[id] || {};
 
         return (
             (withoutContact ? '' : v.name) ||
@@ -919,12 +908,19 @@ async function connectToWA() {
     conn.sendContact = async (jid, kon, quoted = '', opts = {}) => {
         let list = [];
         for (let i of kon) {
-            const contactJid = i + '@s.whatsapp.net';
-            const contactName = await conn.getName(contactJid); // Uses the store via conn.getName
             list.push({
-                displayName: contactName,
-                // Using config values with fallbacks for owner details
-                vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${contactName}\nFN:${config.OWNER_NAME || 'Shadow-Xtech Bot'}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${config.OWNER_EMAIL || 'dev@example.com'}\nitem2.X-ABLabel:Email\nitem3.URL:https://github.com/${config.OWNER_GITHUB || 'Tappy-Black'}/Shadow-Xtech-V1\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${config.OWNER_LOCATION || 'Unknown Location'};;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
+                displayName: await conn.getName(i + '@s.whatsapp.net'),
+                vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await conn.getName(
+                    i + '@s.whatsapp.net',
+                )}\nFN:${
+                    global.OwnerName // Assuming global.OwnerName is defined
+                }\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click here to chat\nitem2.EMAIL;type=INTERNET:${
+                    global.email // Assuming global.email is defined
+                }\nitem2.X-ABLabel:GitHub\nitem3.URL:https://github.com/${
+                    global.github // Assuming global.github is defined
+                }/khan-xmd\nitem3.X-ABLabel:GitHub\nitem4.ADR:;;${
+                    global.location // Assuming global.location is defined
+                };;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
             });
         }
         conn.sendMessage(
@@ -970,9 +966,9 @@ app.get("/", (req, res) => {
 // Start the Express server
 app.listen(port, () => console.log(`[🟢] Server listening on port http://localhost:${port}`));
 
-// --- NEW: Call connectToWA with a 4-second delay ---
+// Call connectToWA immediately to start the bot without delay
+connectToWA();
 // This ensures the bot attempts to connect after a short delay.
 setTimeout(() => {
   connectToWA();
 }, 4000);
-// --- END NEW ---
