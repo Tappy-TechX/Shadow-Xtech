@@ -19,29 +19,29 @@ const {
     jidDecode,
     fetchLatestBaileysVersion,
     Browsers
-} = require('@whiskeysockets/baileys')
+} = require('@whiskeysockets/baileys');
 
-const l = console.log
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
-const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
-const fs = require('fs')
-const ff = require('fluent-ffmpeg')
-const P = require('pino')
-const config = require('./config') // Ensure config is loaded
+const l = console.log;
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions');
+const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data');
+const fs = require('fs');
+const ff = require('fluent-ffmpeg');
+const P = require('pino');
+const config = require('./config'); // Ensure config is loaded
 const GroupEvents = require('./lib/groupevents');
-const qrcode = require('qrcode-terminal')
-const StickersTypes = require('wa-sticker-formatter')
-const util = require('util')
-const { sms, downloadMediaMessage, AntiDelete } = require('./lib')
+const qrcode = require('qrcode-terminal');
+const StickersTypes = require('wa-sticker-formatter');
+const util = require('util');
+const { sms, downloadMediaMessage, AntiDelete } = require('./lib');
 const FileType = require('file-type');
-const axios = require('axios')
-const { File } = require('megajs')
+const axios = require('axios');
+const { File } = require('megajs');
 const { fromBuffer } = require('file-type');
-const bodyparser = require('body-parser')
-const os = require('os')
-const Crypto = require('crypto')
-const path = require('path')
-const prefix = config.PREFIX
+const bodyparser = require('body-parser');
+const os = require('os');
+const Crypto = require('crypto');
+const path = require('path');
+const prefix = config.PREFIX;
 const chalk = require('chalk'); // Added for colored console output
 
 // --- NEW: Import the call handler module ---
@@ -49,7 +49,7 @@ const callHandler = require('./lib/callhandler');
 // ------------------------------------------
 
 // Define owner number(s)
-const ownerNumber = ['254759000340'] // This matches the developer's contact number from the WhatsApp channel.
+const ownerNumber = ['254759000340']; // This matches the developer's contact number from the WhatsApp channel.
 
 // --- NEW: Define fancyMessages array ---
 const fancyMessages = [
@@ -70,9 +70,147 @@ const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 const whatsappChannelId = '120363369453603973@newsletter'; // Derived from the provided URL.
 // --- END NEW ---
 
-// --- NEW: Declare hasAttemptedChannelFollow ---
-// This flag ensures the channel follow attempt is made only once per session.
-let hasAttemptedChannelFollow = false;
+// --- NEW: Auto Follow Channel Logic ---
+// Configuration for the WhatsApp Channel auto-follow feature
+const channelInviteURL = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
+const dataDir = path.resolve('./data'); // Directory to store state
+const followStatusPath = path.join(dataDir, 'followStatus.json'); // Path to the state file
+
+// State variables for tracking follow status
+let hasAttemptedChannelFollow = false; // Flag to ensure we try to follow only once per session
+let hasFollowedChannel = false; // Flag to track if successfully followed
+let hasUserBeenNotified = false; // Flag to track if the owner has been notified about the channel
+
+// Ensure the data directory exists for state storage
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+}
+
+// Function to load the follow status from a JSON file
+const loadFollowStatus = () => {
+    try {
+        const data = fs.readFileSync(followStatusPath, 'utf-8');
+        const parsed = JSON.parse(data);
+        hasAttemptedChannelFollow = parsed.attempted || false;
+        hasFollowedChannel = parsed.followed || false;
+        hasUserBeenNotified = parsed.notified || false;
+    } catch (error) {
+        // If the file doesn't exist or is invalid, initialize state to default (false)
+        console.warn(chalk.yellow(`[⚠️] Could not load follow status from ${followStatusPath}: ${error.message}. Initializing to defaults.`));
+        hasAttemptedChannelFollow = false;
+        hasFollowedChannel = false;
+        hasUserBeenNotified = false;
+    }
+};
+
+// Function to save the current follow status to a JSON file
+const saveFollowStatus = () => {
+    const data = {
+        attempted: hasAttemptedChannelFollow,
+        followed: hasFollowedChannel,
+        notified: hasUserBeenNotified
+    };
+    try {
+        fs.writeFileSync(followStatusPath, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error(chalk.red(`[❌] Failed to save follow status to ${followStatusPath}: ${error.message}`));
+    }
+};
+
+/**
+ * Attempts to automatically subscribe the bot to the specified WhatsApp channel.
+ * It checks if already subscribed, tries to subscribe if not, and notifies the owner if it fails.
+ * @param {object} conn - The WhatsApp connection object.
+ */
+const autoFollowChannel = async (conn) => {
+    loadFollowStatus(); // Load the current state
+
+    // Extract the channel invite code from the URL
+    const match = channelInviteURL.match(/channel\/([\w\d]+)/);
+    const channelInviteCode = match ? match[1] : null;
+
+    if (!channelInviteCode) {
+        console.error(chalk.red('[❌] Invalid WhatsApp Channel URL provided. Cannot auto-follow.'));
+        return;
+    }
+
+    // If already followed, skip the process
+    if (hasFollowedChannel) {
+        console.log(chalk.green('[✅] Channel already followed. Skipping auto-follow.'));
+        return;
+    }
+
+    console.log(chalk.blue(`[🔍] Checking subscription status for channel code: ${channelInviteCode}...`));
+    try {
+        // Query WhatsApp to check subscription status
+        const checkSub = await conn.query({
+            tag: 'iq',
+            attrs: {
+                type: 'get',
+                xmlns: 'w:channel-subscribe',
+                to: 'server'
+            },
+            content: [{
+                tag: 'subscription',
+                attrs: { code: channelInviteCode }
+            }]
+        });
+
+        const json = JSON.stringify(checkSub);
+        const isSubscribed = json.includes('"subscribed":true') || json.includes('"status":"subscribed"');
+
+        if (isSubscribed) {
+            hasFollowedChannel = true; // Mark as followed
+            saveFollowStatus(); // Save the updated state
+            console.log(chalk.green('[✅] Already subscribed to the channel.'));
+            return;
+        }
+
+    } catch (err) {
+        console.warn(chalk.yellow(`[⚠️] Could not verify subscription status: ${err.message || err}. Proceeding to attempt follow.`));
+    }
+
+    // Attempt to auto-follow if not already attempted
+    if (!hasAttemptedChannelFollow) {
+        hasAttemptedChannelFollow = true; // Mark that we have attempted
+        console.log(chalk.yellow(`[📡] Attempting to auto-follow channel with code: ${channelInviteCode}...`));
+
+        try {
+            // Send the subscribe request to WhatsApp
+            await conn.query({
+                tag: 'iq',
+                attrs: {
+                    type: 'set',
+                    xmlns: 'w:channel-subscribe',
+                    to: 'server'
+                },
+                content: [{
+                    tag: 'subscribe',
+                    attrs: { code: channelInviteCode }
+                }]
+            });
+
+            hasFollowedChannel = true; // Mark as successfully followed
+            saveFollowStatus(); // Save the updated state
+            console.log(chalk.green('[✅] Successfully auto-followed the channel.'));
+            return;
+
+        } catch (e) {
+            console.error(chalk.red(`[❌] Auto-follow failed: ${e.message || e}`));
+            // If auto-follow fails, we still want to notify the user if they haven't been notified yet.
+        }
+    }
+
+    // Notify the owner once if the channel was not followed and hasn't been notified yet
+    if (!hasUserBeenNotified && conn.user?.id) {
+        const notifyText = `📡 *Stay Updated with Shadow-Xtech!*\n\n⚙️ Join our official WhatsApp Channel to receive:\n✅ Bot updates and Feature drops\n\n🔗 ${channelInviteURL}`;
+
+        await conn.sendMessage(conn.user.id, { text: notifyText }); // Send notification to the bot's own number (owner)
+        hasUserBeenNotified = true; // Mark as notified
+        saveFollowStatus(); // Save the updated state
+        console.log(chalk.cyan(`[📨] Follow reminder sent to owner.`));
+    }
+};
 // --- END NEW ---
 
 // Temporary directory for caching
@@ -153,6 +291,10 @@ async function connectToWA() {
                 connectToWA()
             }
         } else if (connection === 'open') {
+            // --- Auto Follow WhatsApp Channel ---
+            await autoFollowChannel(conn); // Call the integrated auto-follow logic
+            // --- END Auto Follow WhatsApp Channel ---
+
             // Plugin loading and initial message after successful connection
             console.log('[🧩] Installing Plugins🕹️');
             const path = require('path');
@@ -163,61 +305,6 @@ async function connectToWA() {
             });
             console.log('[🛠️] Plugins installed successful ✅');
             console.log('[🟡] Bot connected to whatsapp 🪀');
-
-            // --- Auto Follow WhatsApp Channel (Attempt once per session start) ---
-            if (!hasAttemptedChannelFollow) {
-                hasAttemptedChannelFollow = true;
-
-                const channelInviteURL = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
-                let channelFollowStatus = `[📡] Channel Follow Status:\n\n`;
-
-                const match = channelInviteURL.match(/channel\/([\w\d]+)/);
-                const channelInviteCode = match ? match[1] : null;
-
-                if (!channelInviteCode) {
-                    console.error(chalk.red('[❌] Invalid WhatsApp Channel URL.'));
-                    return; // Exit the handler if the URL is invalid
-                }
-
-                console.log(chalk.yellow(`[📡] Attempting to follow WhatsApp channel with invite code: ${channelInviteCode}...`));
-
-                try {
-                    // This IQ query is the intended method to subscribe to a channel.
-                    await conn.query({
-                        tag: 'iq',
-                        attrs: {
-                            type: 'set',
-                            xmlns: 'w:channel-subscribe', // Namespace for channel subscription
-                            to: 'server'
-                        },
-                        content: [{
-                            tag: 'subscribe',
-                            attrs: {
-                                code: channelInviteCode
-                            }
-                        }]
-                    });
-
-                    console.log(chalk.green(`[✅] Channel follow successful.`));
-
-                    // Send success message to the bot's own number if the follow was successful
-                    if (conn.user?.id) {
-                        const successMsg = `[✅] Successfully followed the WhatsApp channel.\n\n📡 Channel Code: ${channelInviteCode}`;
-                        await conn.sendMessage(conn.user.id, { text: successMsg });
-                    }
-
-                } catch (e) {
-                    console.error(chalk.red(`[❌] Channel follow failed: ${e.message || e}`));
-                    channelFollowStatus += `[❌] Failed to follow channel.\nError: ${e.message || e}\n`;
-                    channelFollowStatus += `\n💡 Tip: Following this channel keeps your bot updated with the latest features and announcements.`;
-
-                    // Send tips only if the channel follow failed
-                    if (conn.user?.id) {
-                        await conn.sendMessage(conn.user.id, { text: channelFollowStatus.trim() });
-                    }
-                }
-            }
-            // --- END Auto Follow WhatsApp Channel ---
 
             // Select a random fancy message
             const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
