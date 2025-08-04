@@ -184,7 +184,7 @@ Insight: _"${selectedQuote}"_
             },
             message: {
                 contactMessage: {
-                    displayName: config.OWNER_NAME || "System Repo | Verified ✅",
+                    displayName: config.OWNER_NAME || "⚙️ System | Repo Core 🔌",
                     vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:ShadowXTech\nORG:Bot Repo;\nTEL;type=CELL:+1234567890\nEND:VCARD"
                 }
             }
@@ -198,7 +198,7 @@ Insight: _"${selectedQuote}"_
                 forwardingScore: 999,
                 isForwarded: true,
                 externalAdReply: {
-                    title: "⚙️ SHADOW-XTECH | SYSTEM CORE",
+                    title: "⚙️ Shadow-Xtech | System Core",
                     body: "Bot is live and operational — stay connected!",
                     thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
                     sourceUrl: whatsappChannelLink,
