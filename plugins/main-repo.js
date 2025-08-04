@@ -184,7 +184,7 @@ Insight: _"${selectedQuote}"_
             },
             message: {
                 contactMessage: {
-                    displayName: config.OWNER_NAME || "⚙️ System | Repo Core 🔌",
+                    displayName: config.OWNER_NAME || "⚙️ System | Core 🔌",
                     vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:ShadowXTech\nORG:Bot Repo;\nTEL;type=CELL:+1234567890\nEND:VCARD"
                 }
             }
