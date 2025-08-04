@@ -153,34 +153,15 @@ async function connectToWA() {
                 connectToWA()
             }
         } else if (connection === 'open') {
-            // --- Plugin loading and initial message after successful connection ---
-            console.log(chalk.yellow('[🧩] Installing Plugins...'));
-            const pluginDir = './plugins/';
-            let loadedPluginsCount = 0;
-            let failedPlugins = [];
-
-            fs.readdirSync(pluginDir).forEach((pluginFile) => {
-                if (path.extname(pluginFile).toLowerCase() === ".js") {
-                    const pluginPath = path.join(pluginDir, pluginFile);
-                    try {
-                        require(pluginPath);
-                        console.log(chalk.green(`[✅] Loaded plugin: ${pluginFile}`));
-                        loadedPluginsCount++;
-                    } catch (error) {
-                        console.error(chalk.red(`[❌] Failed to load plugin ${pluginFile}:`), error);
-                        failedPlugins.push(pluginFile);
-                    }
+            // Plugin loading and initial message after successful connection
+            console.log('[🧩] Installing Plugins🕹️');
+            const path = require('path');
+            fs.readdirSync("./plugins/").forEach((plugin) => {
+                if (path.extname(plugin).toLowerCase() == ".js") {
+                    require("./plugins/" + plugin);
                 }
             });
-
-            if (loadedPluginsCount > 0) {
-                console.log(chalk.green(`[🛠️] ${loadedPluginsCount} plugins installed successfully.`));
-            }
-            if (failedPlugins.length > 0) {
-                console.warn(chalk.yellow(`[⚠️] ${failedPlugins.length} plugins failed to load. Check logs above for details.`));
-            }
-            // --- End Plugin loading ---
-
+            console.log('[🛠️] Plugins installed successful ✅');
             console.log('[🟡] Bot connected to whatsapp 🪀');
 
             // --- Auto Follow WhatsApp Channel (Attempt once per session start) ---
