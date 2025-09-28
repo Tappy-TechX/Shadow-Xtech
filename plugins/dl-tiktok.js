@@ -41,14 +41,6 @@ cmd({
         const videoUrl = meta.media.find(v => v.type === "video").org;
 
         const caption = `
-  *👤 USER_HANDLE: ${author.nickname} (@${author.username})*
-  *📁 VIDEO_TITLE: "${title}"*
-  *🌐 SOURCE_NODE: TikTok_NW://Stream.*
-  
- _⧉ *ENGAGEMENT_LOG*_
-  ♥️ *LIKES*       : *🌸 ${like}*
-  💬 *COMMENTS*  : *⏳ ${comment}*
-  🌐 *SHARES*     : *👤  ${share}*
   📸 *MEDIA_TYPE* : *VIDEO/NW/HD*
   🧬 *UPLINK_ID* | *shadow.xtech.grid://Ω1A2Z*`;
 
