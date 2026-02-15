@@ -1,47 +1,16 @@
-# =========================
-# ⚡ Base Image
-# =========================
-FROM node:lts-bullseye
+FROM node:lts-buster
 
-# =========================
-# 🛠️ Install Dependencies
-# =========================
-USER root
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ffmpeg \
-        webp \
-        git \
-        curl \
-        unzip && \
-    apt-get upgrade -y && \
-    rm -rf /var/lib/apt/lists/*
+# Set working directory
+WORKDIR /app
 
-# =========================
-# 👤 Switch to non-root user
-# =========================
-USER node
-WORKDIR /home/node
+# Copy all local files to container
+COPY . .
 
-# =========================
-# 🌐 Clone Repository
-# =========================
-RUN git clone https://github.com/Tappy-TechX/Xtech.git
-WORKDIR /home/node/Xtech
+# Install dependencies
+RUN npm install && npm install -g pm2
 
-# =========================
-# 🔧 Permissions & Install
-# =========================
-RUN chmod -R 777 /home/node/Xtech
-RUN yarn install --network-concurrency 1
+# Expose the port your app listens on
+EXPOSE 9090
 
-# =========================
-# 🔌 Expose Port & Env
-# =========================
-EXPOSE 7860
-ENV NODE_ENV=production
-
-# =========================
-# 🚀 Start Bot
-# =========================
+# Start the app
 CMD ["npm", "start"]

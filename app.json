@@ -4,237 +4,192 @@
   "logo": "https://files.catbox.moe/og4tsk.jpg",
   "keywords": ["SHADOW-XTECH"],
   "success_url": "/",
-  "stack": "heroku-24",
 
+    "stack": "container",
   "env": {
-
     "SESSION_ID": {
       "description": "Put the session-id here.",
       "required": true,
       "value": ""
-    },
-
-    "BOT_NAME": {
-      "description": "Type here the bot name.",
+    },  
+    
+    "STICKER_NAME": {
+      "description": "type your sticker pack name.",
       "required": false,
-      "value": "𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ"
+      "value": "SHADOW-XTECH"
+    }, 
+      
+    "PREFIX": {
+      "description": "paste your bot prefix note! Don't apply null prefix.",
+      "required": false,
+      "value": "."
     },
+    
+    "MODE": {
+      "description": "select your bot work type public-private-inbox-group.",
+      "required": false,
+      "value": "public"
+      
+    },
+    
+    
+    "ALWAYS_ONLINE": {
+      "description": "Make it true if want always online.",
+      "required": false,
+      "value": "false"  
+    },    
+  
+    "AUTO_VOICE": {
+      "description": "Make it true if want automatic voice reply .",
+      "required": false,
+      "value": "false"
+    }, 
 
+    "AUTO_REPLY": {
+      "description": "Make it true if you want automatic reply.",
+      "required": false,
+      "value": "false"
+    }, 
+
+    "AUTO_STICKER": {
+      "description": "Make it true if you want automatic sticker.",
+      "required": false,
+      "value": "false"
+    }, 
+
+
+    "AUTO_STATUS_SEEN": {
+      "description": "Make it true for automatic status seen.",
+      "required": true,
+      "value": "true"
+    }, 
+
+    "AUTO_STATUS_REACT": {
+      "description": "make it true for automatic status reaction or like.",
+      "required": true,
+      "value": "true"
+    }, 
+
+    "AUTO_STATUS_REPLY": {
+      "description": "Make it true for auto reply msg on status seen.",
+      "required": true,
+      "value": "false"
+    }, 
+
+    "AUTO_STATUS_MSG": {
+      "description": "Type custom message on status reply",
+      "required": true,
+      "value": "*SEEN YOUR STATUS BY SHADOW-XTECH 🩷*"
+   
+     }, 
+    
     "OWNER_NAME": {
       "description": "Type Bot Owner Name.",
       "required": false,
       "value": "Black-Tappy"
-    },
+}, 
 
     "OWNER_NUMBER": {
-      "description": "Put the owner number for bot.",
+      "description": "put the owner number for bot.",
       "required": false,
       "value": "254756360306"
-    },
 
-    "STICKER_NAME": {
-      "description": "Type your sticker pack name.",
-      "required": false,
-      "value": "SHADOW-XTECH"
-    },
+    }, 
 
-    "PREFIX": {
-      "description": "Paste your bot prefix. Don't apply null prefix.",
+    "BOT_NAME": {
+      "description": "Type here the bot name.",
       "required": false,
-      "value": "."
-    },
+      "value": "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ"
 
-    "MODE": {
-      "description": "Select your bot work type: public-private-inbox-group.",
-      "required": false,
-      "value": "public"
-    },
+      }, 
 
-    "PUBLIC_MODE": {
-      "description": "Make false if you want private mode.",
-      "required": false,
+    "ANTI_LINK": {
+      "description": "Make it true if you want bot auto remove group link.",
+      "required": true,
       "value": "true"
+      
     },
-
-    "DEV": {
-      "description": "Developer WhatsApp number.",
+    
+    "ANTI_BAD": {
+      "description": "Make it true if you want bot auto delete bad words.",
       "required": false,
-      "value": "254759000340"
-    },
+      "value": "false"
+    }, 
 
+    "MENTION_REPLY": {
+      "description": "make it true if want mention reply if someone menetion you.",
+      "required": false,
+      "value": "false"
+    },
+    
+    "MENU_IMAGE_URL": {
+      "description": "add url for mention reply and menu if want.",
+      "required": false,
+      "value": "https://files.catbox.moe/og4tsk.jpg"
+    },
+     
     "DESCRIPTION": {
-      "description": "Add caption for menu and other.",
+      "description": "add caption for menu and other",
       "required": false,
       "value": "> _© *Powered By Black-Tappy*_"
     },
 
-    "MENU_IMAGE_URL": {
-      "description": "Add URL for mention reply and menu image.",
-      "required": false,
-      "value": "https://files.catbox.moe/og4tsk.jpg"
-    },
-
-    "ALIVE_IMG": {
-      "description": "Add image for alive message.",
-      "required": false,
-      "value": "https://files.catbox.moe/og4tsk.jpg"
-    },
-
-    "LIVE_MSG": {
-      "description": "Alive message text.",
-      "required": false,
-      "value": "> AM ACTIVE *SHADOW-XTECH*⚡"
-    },
-
-    "WELCOME": {
-      "description": "Make true if want welcome and goodbye messages.",
+      "DELETE_LINKS": {
+      "description": "remove links from group automatically without removing member",
       "required": false,
       "value": "true"
     },
-
-    "ADMIN_EVENTS": {
-      "description": "Make true to detect promote/demote events.",
-      "required": false,
-      "value": "false"
-    },
-
-    "ANTI_LINK": {
-      "description": "Make true if you want bot auto remove group link.",
-      "required": true,
-      "value": "true"
-    },
-
-    "ANTI_LINK_KICK": {
-      "description": "Make true to kick members sending links.",
-      "required": false,
-      "value": "false"
-    },
-
-    "DELETE_LINKS": {
-      "description": "Remove links from group automatically without removing member.",
-      "required": false,
-      "value": "true"
-    },
-
-    "ANTI_BAD": {
-      "description": "Make true if you want bot auto delete bad words.",
-      "required": false,
-      "value": "false"
-    },
-
-    "ANTI_VV": {
-      "description": "Make true to disable view once messages.",
-      "required": false,
-      "value": "true"
-    },
-
-    "ANTICALL": {
-      "description": "Make true to block calls automatically.",
-      "required": false,
-      "value": "false"
-    },
-
-    "ANTI_DEL_PATH": {
-      "description": "Change it to 'same' if you want resend deleted message in same chat.",
-      "required": false,
-      "value": "log"
-    },
-
-    "AUTO_STATUS_SEEN": {
-      "description": "Make true for automatic status seen.",
-      "required": true,
-      "value": "true"
-    },
-
-    "AUTO_STATUS_REACT": {
-      "description": "Make true for automatic status reaction.",
-      "required": true,
-      "value": "true"
-    },
-
-    "AUTO_STATUS_REPLY": {
-      "description": "Make true for auto reply on status.",
-      "required": true,
-      "value": "false"
-    },
-
-    "AUTO_STATUS_MSG": {
-      "description": "Type custom message on status reply.",
-      "required": true,
-      "value": "*SEEN YOUR STATUS BY SHADOW-XTECH 🩷*"
-    },
-
-    "AUTO_REPLY": {
-      "description": "Make true if you want automatic reply.",
-      "required": false,
-      "value": "false"
-    },
-
-    "AUTO_VOICE": {
-      "description": "Make true if want automatic voice reply.",
-      "required": false,
-      "value": "false"
-    },
-
-    "AUTO_STICKER": {
-      "description": "Make true if you want automatic sticker.",
-      "required": false,
-      "value": "false"
-    },
-
-    "AUTO_REACT": {
-      "description": "Make true if you want react on every message.",
-      "required": false,
-      "value": "false"
-    },
-
-    "CUSTOM_REACT": {
-      "description": "Make true if you want custom reactions.",
-      "required": false,
-      "value": "false"
-    },
-
-    "CUSTOM_REACT_EMOJIS": {
-      "description": "Put here custom reaction emojis.",
-      "required": false,
-      "value": "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍"
-    },
-
+    
     "AUTO_RECORDING": {
-      "description": "Make true if you want auto recording presence.",
+      "description": "Make it true if you want auto recoding.",
       "required": false,
       "value": "false"
     },
 
     "AUTO_TYPING": {
-      "description": "Make true if you want auto typing presence.",
+      "description": "Make it true if you want auto typing.",
       "required": false,
       "value": "false"
     },
 
-    "ALWAYS_ONLINE": {
-      "description": "Make true if want always online.",
+    "AUTO_REACT": {
+      "description": "Make it true if you want react on every message.",
       "required": false,
       "value": "false"
     },
+    
+    "CUSTOM_REACT": {
+      "description": "Make it true if you want custom reactions.",
+      "required": false,
+      "value": "false"
+      
+    }, 
+    
+    "CUSTOM_REACT_EMOJIS": {
+      "description": "put here custom react react emojis.",
+      "required": false,
+      "value": "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍"
+    }, 
+    
+    "ANTI_DEL_PATH": {
+      "description": "change it to -same- if you want to resend deleted message in same chat",
+      "required": false,
+      "value": "log"
+    }, 
 
     "READ_MESSAGE": {
-      "description": "Make true if you want bot read all messages.",
-      "required": false,
-      "value": "false"
-    },
-
-    "READ_CMD": {
-      "description": "Make true if want mark commands as read.",
+      "description": "Make it true if you want bot read your all sms just now.",
       "required": false,
       "value": "false"
     }
 
-  },
+},
 
-  "buildpacks": [
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
-    }
-  ]
+     "buildpacks": [
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+        }
+     ],
+  "stack": "heroku-24"
 }
+  
