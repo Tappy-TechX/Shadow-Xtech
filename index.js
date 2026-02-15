@@ -23,6 +23,7 @@ const {
 
 
   const l = console.log
+  // NOTE: These modules are assumed to exist in './lib/' or './'
   const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
   const fs = require('fs')
@@ -125,7 +126,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
           version
           })
 
-  conn.ev.on('connection.update', async (update) => { // Added 'async' here
+  conn.ev.on('connection.update', async (update) => { 
   const { connection, lastDisconnect } = update
   if (connection === 'close') {
   if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
@@ -154,7 +155,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   // Select a random fancy message
   const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
 
-  // Construct the welcome message caption
+  // Construct the welcome message caption (Updated as requested)
   const caption = `
 ╭───────◇
 │ *✨ Hello, Shadow-Xtech User! ✨*
