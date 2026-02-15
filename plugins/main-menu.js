@@ -74,6 +74,7 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply }) => {
     try {
+        // 1. Acknowledge the command immediately to reduce perceived delay
         await reply("📜 Fetching commands... Please wait a moment!");
 
         // Select dynamic values
@@ -94,7 +95,7 @@ cmd({
 ┆ ◦ • 🚀 Version : *4.0.0 Mᴇᴛᴀ*
 ╰────────────────┈⊷
 > ${randomLoadingMessage}
-╭──·๏[📥 *ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴇɴᴜ*📥]
+╭──·๏[📥 *ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴇɴᴜ* 📥]
 ┆ ◦ 
 ┆ ◦  🟦 facebook
 ┆ ◦  📁 mediafire
@@ -482,7 +483,8 @@ cmd({
 ╰─┈⊷
 > ${config.DESCRIPTION}`;
 
-        // Send menu image
+        // 2. Send menu image and caption
+        // Sending media is the part that takes time. We ensure this is awaited before proceeding.
         await conn.sendMessage(from, {
             image: { url: selectedImageUrl },
             caption: menuCaption,
@@ -498,7 +500,7 @@ cmd({
             }
         }, { quoted: quotedContact });
 
-        // Send menu audio
+        // 3. Send menu audio (This happens sequentially after the image is sent)
         await conn.sendMessage(from, {
             audio: { url: selectedAudioUrl },
             mimetype: 'audio/mp4',
@@ -506,7 +508,9 @@ cmd({
         }, { quoted: quotedContact });
 
     } catch (e) {
+        // Refined error handling: Log the error internally and send a concise failure message to the user.
         console.error("Menu Command Error:", e);
-        reply(`❌ An error occurred while displaying the menu. Please try again later.`);
+        // If the initial reply succeeded, we might try to edit it, but a new reply is safer if the main send failed.
+        reply(`❌ An error occurred while displaying the menu. Please try again later. Error details logged.`);
     }
 });

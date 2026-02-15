@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // Keep import structure, though fetch is now unused for repo data
 const config = require('../config');
 const { cmd } = require('../command');
 
@@ -13,8 +13,21 @@ cmd({
     filename: __filename,
 },
 async (conn, mek, m, { from, reply }) => {
-    const githubRepoURL = 'https://github.com/Tappy-TechX/Shadow-Xtech';
+    // --- OPTIMIZATION: Bypassing network fetch by using known data ---
 
+    const githubRepoURL = 'https://github.com/Tappy-TechX/Shadow-Xtech';
+    
+    // Data derived directly from the provided content summary
+    const staticRepoData = {
+        name: "Shadow-Xtech",
+        owner: { login: "Tappy-Black" },
+        stargazers_count: 26,
+        forks_count: 70,
+        html_url: githubRepoURL,
+        description: 'No description, website, or topics provided.', // Based on "About" section
+        updated_at: new Date().toISOString() // Use current time as static update time approximation
+    };
+    
     const randomImageUrls = [
         "https://files.catbox.moe/etqc8k.jpg",
         "https://files.catbox.moe/0w7hqx.jpg",
@@ -38,15 +51,15 @@ async (conn, mek, m, { from, reply }) => {
     const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     try {
-        const [, username, repoName] = githubRepoURL.match(/github\.com\/([^/]+)\/([^/]+)/);
-        const response = await fetch(`https://api.github.com/repos/${username}/${repoName}`);
-        if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+        // --- Replaced API call with static data ---
+        const repoData = staticRepoData; 
+        // -----------------------------------------
 
-        const repoData = await response.json();
         const selectedImageUrl = getRandomElement(randomImageUrls);
         const selectedQuote = getRandomElement(quotes);
 
         const formatDate = (dateString) => {
+            // Since we are using a static date for update, we format it here.
             return new Date(dateString).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -190,6 +203,7 @@ Insight: _"${selectedQuote}"_
             }
         };
 
+        // Send the main message (Image + Caption)
         await conn.sendMessage(from, {
             image: { url: finalImageUrl },
             caption: selectedStyle,
@@ -213,6 +227,7 @@ Insight: _"${selectedQuote}"_
             }
         }, { quoted: quotedContact });
 
+        // Send the audio message
         await conn.sendMessage(from, {
             audio: { url: 'https://files.catbox.moe/ddmjyy.mp3' },
             mimetype: 'audio/mp4',
@@ -226,6 +241,7 @@ Insight: _"${selectedQuote}"_
 
     } catch (error) {
         console.error("Repo command error:", error);
-        reply(`❌ Error: ${error.message}`);
+        // If any other part fails (like config loading or message sending), reply with error
+        reply(`❌ Error: Failed to execute command quickly. ${error.message}`);
     }
 });

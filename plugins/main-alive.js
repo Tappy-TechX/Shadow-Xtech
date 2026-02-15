@@ -36,9 +36,6 @@ const quotedContact = {
     }
 };
 
-const getRandomWallpaper = () => FALLBACK_WALLPAPERS[Math.floor(Math.random() * FALLBACK_WALLPAPERS.length)];
-const getRandomQuote = () => FANCY_QUOTES[Math.floor(Math.random() * FANCY_QUOTES.length)];
-
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 
 cmd({
@@ -62,14 +59,14 @@ cmd({
 
         const caption = `
 🌟 *SHADOW-XTECH STATUS* 🌟
-Hey 👋🏻 ${pushname}
-🕒 *Time*: ${currentTime}
-📅 *Date*: ${currentDate}
-⏳ *Uptime*: ${runtime.hours}h ${runtime.minutes}m ${runtime.seconds}s
+*Hey 👋🏻 ${pushname}*
+🕒 *Time*: *${currentTime}*
+📅 *Date*: *${currentDate}*
+⏳ *Uptime*: *${runtime.hours}h ${runtime.minutes}m ${runtime.seconds}s*
 
 *🤖Status*: *Bot is alive and healthy🛠️*
 
-"${getRandomQuote()}"
+"*${getRandomQuote()}*"
 
 *🔹 Powered by Black-Tappy 🔹*
         `.trim();
