@@ -79,7 +79,7 @@
     "AUTO_STATUS_MSG": {
       "description": "Type custom message on status reply",
       "required": true,
-      "value": "*SEEN YOUR STATUS BY SHADOW-XTECH 🩷*"
+      "value": "*Seen Your Status By Shadow-Xtech 🩷*"
    
      }, 
     
