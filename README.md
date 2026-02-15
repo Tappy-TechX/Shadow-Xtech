@@ -43,7 +43,7 @@
 
 Click the button below to fork:
 
-  <a href="https://github.com/Tappy-Black/Xtreme-Tech_X/fork"><img title="XTREME-TECH_X" src="https://img.shields.io/badge/FORK-XTREME TECH X-h?color=green&style=for-the-badge&logo=stackshare"></a>
+  <a href="https://github.com/Tappy-TechX/Shadow-Xtech/fork"><img title="SHADOW XTECH" src="https://img.shields.io/badge/FORK-XTREME TECH X-h?color=green&style=for-the-badge&logo=stackshare"></a>
 
 ## ɢᴇᴛ ᴘᴀɪʀɪɴɢ ᴄᴏᴅᴇ
   <p align="left">  
@@ -65,10 +65,10 @@ Click the button below to fork:
 
 ## ᴄʀᴇᴅɪᴛs ᴀɴᴅ ᴅᴇᴠs
 > Shadow-Xtech Owner 
-- [Black-Tappy](https://github.com/Black-Tappy)
+- [Black-Tappy](https://github.com/Tappy-TechX)
 - Creater and Owner Of XEON-XMD 
 > Shadow-Xtech Helpers 
-- [POPKID](https://github.com/Popkiddevs)
+- [Tappy-Black](https://github.com/Tappy-Black)
 - For helping in bot plugin files.
   
 
