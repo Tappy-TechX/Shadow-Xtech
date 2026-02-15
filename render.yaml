@@ -1,0 +1,80 @@
+services:
+  - type: web
+    name: SHADOW-XTECH
+    env: node
+    plan: starter
+    envVars:
+      - key: SESSION_ID
+        value: ""
+      - key: BOT_NAME
+        value: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ"
+      - key: OWNER_NAME
+        value: "Black-Tappy"
+      - key: OWNER_NUMBER
+        value: "254756360306"
+      - key: STICKER_NAME
+        value: "SHADOW-XTECH"
+      - key: PREFIX
+        value: "."
+      - key: MODE
+        value: "public"
+      - key: PUBLIC_MODE
+        value: "true"
+      - key: DEV
+        value: "254759000340"
+      - key: DESCRIPTION
+        value: "> _© *Powered By Black-Tappy*_"
+      - key: MENU_IMAGE_URL
+        value: "https://files.catbox.moe/og4tsk.jpg"
+      - key: ALIVE_IMG
+        value: "https://files.catbox.moe/og4tsk.jpg"
+      - key: LIVE_MSG
+        value: "> AM ACTIVE *SHADOW-XTECH*⚡"
+      - key: WELCOME
+        value: "true"
+      - key: ADMIN_EVENTS
+        value: "false"
+      - key: ANTI_LINK
+        value: "true"
+      - key: ANTI_LINK_KICK
+        value: "false"
+      - key: DELETE_LINKS
+        value: "true"
+      - key: ANTI_BAD
+        value: "false"
+      - key: ANTI_VV
+        value: "true"
+      - key: ANTICALL
+        value: "false"
+      - key: ANTI_DEL_PATH
+        value: "log"
+      - key: AUTO_STATUS_SEEN
+        value: "true"
+      - key: AUTO_STATUS_REACT
+        value: "true"
+      - key: AUTO_STATUS_REPLY
+        value: "false"
+      - key: AUTO_STATUS_MSG
+        value: "*Seen Your Status By Shadow-Xtech 🩷*"
+      - key: AUTO_REPLY
+        value: "false"
+      - key: AUTO_VOICE
+        value: "false"
+      - key: AUTO_STICKER
+        value: "false"
+      - key: AUTO_REACT
+        value: "false"
+      - key: CUSTOM_REACT
+        value: "false"
+      - key: CUSTOM_REACT_EMOJIS
+        value: "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍"
+      - key: AUTO_RECORDING
+        value: "false"
+      - key: AUTO_TYPING
+        value: "false"
+      - key: ALWAYS_ONLINE
+        value: "false"
+      - key: READ_MESSAGE
+        value: "false"
+      - key: READ_CMD
+        value: "false"
