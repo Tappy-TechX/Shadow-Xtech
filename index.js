@@ -20,8 +20,10 @@ const {
     fetchLatestBaileysVersion,
     Browsers
   } = require('@whiskeysockets/baileys')
-  
+
+
   const l = console.log
+  // NOTE: These modules are assumed to exist in './lib/' or './'
   const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
   const fs = require('fs')
@@ -153,15 +155,15 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   // Select a random fancy message
   const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
 
-  // Construct the welcome message caption (Updated as requested)
+  // Construct the welcome message caption (Updated to clearly reflect connection success)
   const caption = `
 ╭───────◇
-│ *✨ Hello, Shadow-Xtech User! ✨*
+│ *✨ Connection Successful! Shadow-Xtech is Online ✨*
 ╰───────◇
-╭──〔 🤖 *Key Feature* 〕──◇
+╭──〔 🤖 *Bot Status* 〕──◇
 ├─ ⚙️ *Mode:* ${config.MODE}
-├─ ⚡ *Speed:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${speed}ms
-├─ 📶 *Status:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${status}
+├─ ⚡ *Latency:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${speed}ms
+├─ 📶 *Connection:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${status}
 ╰─🪀 *${randomFancyMessage}*
 ╭───────◇
 │ *🌐 24/7 Instant Response and Speed 🛜*
@@ -872,7 +874,7 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
           status: "alive",
           message: "[🟢]Shadow-Xtech is running.",
           timestamp: new Date().toISOString()
-      })
+      });
   });
   // --- END --- 
   
