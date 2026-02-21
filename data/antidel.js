@@ -20,8 +20,10 @@ const AntiDelDB = DATABASE.define('AntiDelete', {
     tableName: 'antidelete',
     timestamps: false,
     hooks: {
-        beforeCreate: record => { record.id = 1; },
-        beforeBulkCreate: records => { records.forEach(record => { record.id = 1; }); },
+        beforeCreate: record => { record.id = 1 },
+        beforeBulkCreate: records => {
+            records.forEach(record => record.id = 1)
+        },
     },
 });
 
@@ -29,11 +31,12 @@ let isInitialized = false;
 
 async function initializeAntiDeleteSettings() {
     if (isInitialized) return;
+
     try {
         await AntiDelDB.sync();
         await AntiDelDB.findOrCreate({
             where: { id: 1 },
-            defaults: { gc_status: false, dm_status: false },
+            defaults: { gc_status: false, dm_status: false }
         });
         isInitialized = true;
     } catch (error) {
@@ -45,8 +48,11 @@ async function setAnti(type, status) {
     try {
         await initializeAntiDeleteSettings();
         const record = await AntiDelDB.findByPk(1);
+        if (!record) return false;
+
         if (type === 'gc') record.gc_status = status;
-        else if (type === 'dm') record.dm_status = status;
+        if (type === 'dm') record.dm_status = status;
+
         await record.save();
         return true;
     } catch (error) {
@@ -59,6 +65,8 @@ async function getAnti(type) {
     try {
         await initializeAntiDeleteSettings();
         const record = await AntiDelDB.findByPk(1);
+        if (!record) return false;
+
         return type === 'gc' ? record.gc_status : record.dm_status;
     } catch (error) {
         console.error('Error getting anti-delete status:', error);
@@ -70,7 +78,12 @@ async function getAllAntiDeleteSettings() {
     try {
         await initializeAntiDeleteSettings();
         const record = await AntiDelDB.findByPk(1);
-        return [{ gc_status: record.gc_status, dm_status: record.dm_status }];
+        if (!record) return [];
+
+        return [{
+            gc_status: record.gc_status,
+            dm_status: record.dm_status
+        }];
     } catch (error) {
         console.error('Error retrieving all anti-delete settings:', error);
         return [];
@@ -84,5 +97,3 @@ module.exports = {
     getAnti,
     getAllAntiDeleteSettings,
 };
-
-// By Black-Tappy
