@@ -20,10 +20,8 @@ const {
     fetchLatestBaileysVersion,
     Browsers
   } = require('@whiskeysockets/baileys')
-
-
+  
   const l = console.log
-  // NOTE: These modules are assumed to exist in './lib/' or './'
   const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
   const fs = require('fs')
@@ -454,7 +452,16 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
           ...context,
           ...content[ctype].contextInfo
       }
-      const waMessage = await generateWAMessageFromContent(jid, content, options ? {
+      const waMessage = await generateWAMessageFromContent(jid, proto.Message.fromObject({
+          templateMessage: {
+              hydratedTemplate: {
+                  imageMessage: message.imageMessage,
+                  "hydratedContentText": text,
+                  "hydratedFooterText": footer,
+                  "hydratedButtons": but
+              }
+          }
+      }), options ? {
           ...content[ctype],
           ...options,
           ...(options.contextInfo ? {
@@ -865,7 +872,7 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
           status: "alive",
           message: "[🟢]Shadow-Xtech is running.",
           timestamp: new Date().toISOString()
-      });
+      })
   });
   // --- END --- 
   
