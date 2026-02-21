@@ -72,7 +72,19 @@ module.exports = {
   ANTI_BAD: process.env.ANTI_BAD || "false",
   ANTI_VV: process.env.ANTI_VV || "true",
   ANTICALL: process.env.ANTICALL || "false",
-  ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log",
+  
+  // ===============================
+  // ♻️ Antidelete Settings 
+  // ===============================
+  ANTI_DELETE_GC: process.env.ANTI_DELETE_GC || "true",     // Enable in Group Chats
+  ANTI_DELETE_DM: process.env.ANTI_DELETE_DM || "true",     // Enable in Private Chats
+  
+  /*
+  ANTI_DEL_PATH:
+  "log"  = send deleted messages to bot inbox
+  "same" = resend in same chat
+  */
+  ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log", 
 
   // ===============================
   // 🌍 Mode Settings 
