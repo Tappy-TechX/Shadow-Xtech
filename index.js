@@ -181,7 +181,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 
     // Sending the welcome message
     await conn.sendMessage(conn.user.id, {
-        image: { url: "https://files.catbox.moe/og4tsk.jpg" }, 
+        image: { url: "https://files.catbox.moe/6g5aq0.jpg" }, 
         caption: caption, 
         contextInfo: {
             isForwarded: true,
