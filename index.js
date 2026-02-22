@@ -155,7 +155,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   // Select a random fancy message
   const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
 
-  // Construct the welcome message caption (Updated to clearly reflect connection success)
+  // Construct the welcome message caption (Updated as requested)
   const caption = `
 ╭───────◇
 │ *✨ Connection Successful! Shadow-Xtech is Online ✨*
@@ -181,7 +181,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 
     // Sending the welcome message
     await conn.sendMessage(conn.user.id, {
-        image: { url: "https://files.catbox.moe/6g5aq0.jpg" }, 
+        image: { url: "https://files.catbox.moe/h8aep1.jpeg" }, 
         caption: caption, 
         contextInfo: {
             isForwarded: true,
@@ -194,7 +194,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
             externalAdReply: { 
                 title: "Shadow-Xtech Bot",
                 body: "Powered By Black-Tappy",
-                thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
+                thumbnailUrl: 'https://files.catbox.moe/vx5qb1.jpeg',
                 sourceUrl: whatsappChannelLink, 
                 mediaType: 1,
                 renderLargerThumbnail: false,
