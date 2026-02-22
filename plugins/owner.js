@@ -60,18 +60,16 @@ cmd({
     await conn.sendPresenceUpdate('composing', from);    
     await delay(1500);    
 
-    // Stylish caption text  
-    const stylishText = 
-`🛡️ *SYSTEM ACCESS: OWNER MODULE* 🛡️
- ⌬━━━━━━━━━━━━━━━━━━⌬
-  ◉ 👤 *Name:* ${ownerName}
-  ◉ 📞 *Number:* ${ownerNumber}
-  ◉ 🔰 *System ID:* Shadow-Xtech AI
-  ◉ ⚙️ *Core Version:* 8.0.0 Beta
-  ◉ 🧠 *Neural Core:* ACTIVE
-  ◉ 🌐 *Node State:* LINKED
- ⌬━━━━━━━━━━━━━━━━━━⌬
-📩 Use responsibly or emergencies only.`;    
+    // Updated stylish caption text  
+    const stylishText =
+`*🛡️ SYSTEM ACCESS: OWNER MODULE 🛡️*\n\n` +
+`*👤 Name:* ${ownerName}\n` +
+`*📞 Number:* ${ownerNumber}\n` +
+`*🔰 System ID:* Shadow-Xtech AI\n` +
+`*⚙️ Core Version:* 8.0.0 Beta\n` +
+`*🧠 Neural Core:* ACTIVE\n` +
+`*🌐 Node State:* LINKED\n\n` +
+`📩 Use responsibly or emergencies only.`;
 
     // Send forwarded newsletter without image  
     await conn.sendMessage(from, {  
@@ -86,7 +84,7 @@ cmd({
           serverMessageId: 143  
         },  
         externalAdReply: {  
-          title: "⚙️ Shadow-Xtech | System Pulse",  
+          title: "⚙️ Access | Module",  
           body: "Speed • Stability • Sync",  
           thumbnailUrl: thumbnailUrl,  
           sourceUrl: whatsappChannelLink,  
