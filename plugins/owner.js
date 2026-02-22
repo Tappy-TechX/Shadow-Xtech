@@ -14,6 +14,28 @@ const LOADING_MESSAGES = [
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Quoted Contact for GIF / Video
+const quotedContact = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "⚙️ Latency | Check 🚀",
+      vcard: [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        "FN:SCIFI",
+        "ORG:Shadow-Xtech BOT;",
+        "TEL;type=CELL;type=VOICE;waid=254700000001:+254700000001",
+        "END:VCARD"
+      ].join("\n")
+    }
+  }
+};
+
 cmd({
   pattern: "owner",
   react: "👨‍💻",
@@ -30,7 +52,7 @@ cmd({
       return reply("🚫 Missing owner details in the config file.");
     }
 
-    // 🔄 Typing Simulation
+    // Typing Simulation
     await conn.sendPresenceUpdate('composing', from);
     await delay(1200);
 
@@ -41,7 +63,7 @@ cmd({
     await conn.sendPresenceUpdate('composing', from);
     await delay(1500);
 
-    // 👤 Send Contact vCard
+    // Send Contact vCard normally
     const vcard = [
       'BEGIN:VCARD',
       'VERSION:3.0',
@@ -60,23 +82,31 @@ cmd({
     await conn.sendPresenceUpdate('composing', from);
     await delay(1200);
 
-    // 🎬 Autoplay Muted Video
-    await conn.sendMessage(from, {
+    // 🎬 GIF Video with dynamic buttons and forwarded newsletter (caption removed)
+    const buttons = [
+      {
+        buttonId: `wa.me/${ownerNumber.replace('+', '')}`,
+        buttonText: { displayText: '📞 Contact Owner' },
+        type: 1
+      },
+      {
+        buttonId: whatsappChannelLink,
+        buttonText: { displayText: '🌐 Visit Channel' },
+        type: 1
+      },
+      {
+        buttonId: 'help',
+        buttonText: { displayText: '⚙️ Help Menu' },
+        type: 1
+      }
+    ];
+
+    const buttonMessage = {
       video: { url: 'https://files.catbox.moe/eubadj.mp4' },
       gifPlayback: true,
-      caption: `
-⎾========================================⏌
- 🛡️ *SYSTEM ACCESS: OWNER MODULE* 🛡️
-  ⌬━━━━━━━━━━━━━━━━━⌬
-   ◉ 👤 *Name:* ${ownerName}
-   ◉ 📞 *Number:* ${ownerNumber}
-   ◉ 🔰 *System ID:* Shadow-Xtech AI
-   ◉ ⚙️ *Core Version:* 8.0.0 Beta
-   ◉ 🧠 *Neural Core:* ACTIVE
-   ◉ 🌐 *Node State:* LINKED
-  ⌬━━━━━━━━━━━━━━━━━⌬
- 📩 *Use responsibly or emergencies only.*
-⎿========================================⏋`,
+      footer: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
+      buttons: buttons,
+      headerType: 5,
       contextInfo: {
         mentionedJid: [`${ownerNumber.replace('+', '')}@s.whatsapp.net`],
         forwardingScore: 999,
@@ -94,18 +124,11 @@ cmd({
             renderLargerThumbnail: true
           }
         }
-      }
-    }, { quoted: mek });
+      },
+      quoted: quotedContact
+    };
 
-    await conn.sendPresenceUpdate('recording', from);
-    await delay(1000);
-
-    // 🔊 Owner Voice Tag
-    await conn.sendMessage(from, {
-      audio: { url: 'https://files.catbox.moe/4yqp5m.mp3' },
-      mimetype: 'audio/mp4',
-      ptt: true
-    }, { quoted: mek });
+    await conn.sendMessage(from, buttonMessage);
 
   } catch (error) {
     console.error(error);
