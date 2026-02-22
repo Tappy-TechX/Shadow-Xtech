@@ -14,7 +14,7 @@ const LOADING_MESSAGES = [
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Quoted Contact for GIF / Video
+// Quoted Contact for messages
 const quotedContact = {
   key: {
     fromMe: false,
@@ -82,7 +82,7 @@ cmd({
     await conn.sendPresenceUpdate('composing', from);
     await delay(1200);
 
-    // 🎬 GIF Video with dynamic buttons and forwarded newsletter (caption removed)
+    // Send buttons message only (without video)
     const buttons = [
       {
         buttonId: `wa.me/${ownerNumber.replace('+', '')}`,
@@ -102,11 +102,17 @@ cmd({
     ];
 
     const buttonMessage = {
-      video: { url: 'https://files.catbox.moe/eubadj.mp4' },
-      gifPlayback: true,
+      text: `🛡️ *SYSTEM ACCESS: OWNER MODULE* 🛡️
+◉ 👤 Name: ${ownerName}
+◉ 📞 Number: ${ownerNumber}
+◉ 🔰 System ID: Shadow-Xtech AI
+◉ ⚙️ Core Version: 8.0.0 Beta
+◉ 🧠 Neural Core: ACTIVE
+◉ 🌐 Node State: LINKED
+📩 Use responsibly or emergencies only.`,
       footer: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
       buttons: buttons,
-      headerType: 5,
+      headerType: 1, // simple text header
       contextInfo: {
         mentionedJid: [`${ownerNumber.replace('+', '')}@s.whatsapp.net`],
         forwardingScore: 999,
