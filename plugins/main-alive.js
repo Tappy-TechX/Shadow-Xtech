@@ -3,12 +3,7 @@ const moment = require("moment");
 
 let botStartTime = Date.now(); // Bot launch time
 
-const FALLBACK_WALLPAPERS = [
-    "https://files.catbox.moe/og4tsk.jpg",
-    "https://files.catbox.moe/odst1m.jpg",
-    "https://files.catbox.moe/95n1x6.jpg",
-    "https://files.catbox.moe/0w7hqx.jpg"
-];
+const ALIVE_VIDEO = "https://files.catbox.moe/eubadj.mp4";
 
 const FANCY_QUOTES = [
     "🧬 Neural grid stable — systems running within optimal range.",
@@ -21,7 +16,12 @@ const FANCY_QUOTES = [
     "🌐 Multi-thread ops: — No anomalies detected."
 ];
 
-// Quoted contact to show as reference
+// Function to get random quote
+function getRandomQuote() {
+    return FANCY_QUOTES[Math.floor(Math.random() * FANCY_QUOTES.length)];
+}
+
+// Quoted contact reference
 const quotedContact = {
     key: {
         fromMe: false,
@@ -30,13 +30,19 @@ const quotedContact = {
     },
     message: {
         contactMessage: {
-            displayName: "⚙️ Alive | Status 🟢 ",
-            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+            displayName: "⚙️ Alive | Status 🟢",
+            vcard:
+                "BEGIN:VCARD\n" +
+                "VERSION:3.0\n" +
+                "FN:SCIFI\n" +
+                "ORG:Shadow-Xtech BOT;\n" +
+                "TEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\n" +
+                "END:VCARD"
         }
     }
 };
 
-const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
+const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
 
 cmd({
     pattern: "alive",
@@ -51,58 +57,65 @@ cmd({
         const currentDate = moment().format("dddd, MMMM Do YYYY");
 
         const runtimeMs = Date.now() - botStartTime;
-        const runtime = {
-            hours: Math.floor(runtimeMs / (1000 * 60 * 60)),
-            minutes: Math.floor((runtimeMs / (1000 * 60)) % 60),
-            seconds: Math.floor((runtimeMs / 1000) % 60),
-        };
+        const hours = Math.floor(runtimeMs / (1000 * 60 * 60));
+        const minutes = Math.floor((runtimeMs / (1000 * 60)) % 60);
+        const seconds = Math.floor((runtimeMs / 1000) % 60);
 
         const caption = `
 🌟 *SHADOW-XTECH STATUS* 🌟
 *Hey 👋🏻 ${pushname}*
-🕒 *Time*: *${currentTime}*
-📅 *Date*: *${currentDate}*
-⏳ *Uptime*: *${runtime.hours}h ${runtime.minutes}m ${runtime.seconds}s*
 
-*🤖Status*: *Bot is alive and healthy🛠️*
+🕒 *Time:* ${currentTime}
+📅 *Date:* ${currentDate}
+⏳ *Uptime:* ${hours}h ${minutes}m ${seconds}s
 
-"*${getRandomQuote()}*"
+🤖 *Status:* Bot is alive and healthy 🛠️
 
-*🔹 Powered by Black-Tappy 🔹*
+"${getRandomQuote()}"
+
+🔹 *Powered by Black-Tappy* 🔹
         `.trim();
 
-        await conn.sendMessage(from, {
-            image: { url: getRandomWallpaper() },
-            caption,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: 'Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ',
-                    serverMessageId: 143
-                },
-                externalAdReply: {
-                    title: "⚙️ SHADOW-XTECH SYSTEM STATUS",
-                    body: "Bot is live and operational — stay connected!",
-                    thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
-                    sourceUrl: whatsappChannelLink,
-                    mediaType: 1,
-                    renderLargerThumbnail: false
+        await conn.sendMessage(
+            from,
+            {
+                video: { url: ALIVE_VIDEO },
+                gifPlayback: true, // Makes it behave like GIF
+                caption,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: "120363369453603973@newsletter",
+                        newsletterName: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
+                        serverMessageId: 143
+                    },
+                    externalAdReply: {
+                        title: "⚙️ SHADOW-XTECH SYSTEM STATUS",
+                        body: "Bot is live and operational — stay connected!",
+                        thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
+                        sourceUrl: whatsappChannelLink,
+                        mediaType: 1,
+                        renderLargerThumbnail: false
+                    }
                 }
-            }
-        }, { quoted: quotedContact });
+            },
+            { quoted: quotedContact }
+        );
 
     } catch (error) {
-        console.error("Error in alive command: ", error);
+        console.error("Error in alive command:", error);
+
         const errorMessage = `
 ❌ An error occurred while processing the *alive* command.
-🛠 *Error Details*:
+
+🛠 Error:
 ${error.message}
 
-Please report this issue or try again later.
+Please try again later.
         `.trim();
+
         return reply(errorMessage);
     }
 });

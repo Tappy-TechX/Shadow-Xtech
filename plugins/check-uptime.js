@@ -2,41 +2,61 @@ const { cmd } = require('../command');
 const { runtime } = require('../lib/functions');
 const config = require('../config');
 
+const UPTIME_VIDEO = "https://files.catbox.moe/eubadj.mp4";
+const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
+
+// Quoted contact reference
+const quotedContact = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "⚙️ Uptime | Status 🟢",
+            vcard:
+                "BEGIN:VCARD\n" +
+                "VERSION:3.0\n" +
+                "FN:SCIFI\n" +
+                "ORG:Shadow-Xtech BOT;\n" +
+                "TEL;type=CELL;type=VOICE;waid=254700000001:+254700000001\n" +
+                "END:VCARD"
+        }
+    }
+};
+
 cmd({
     pattern: "uptime",
     alias: ["runtime", "up"],
-    desc: "Show bot uptime with stylish formats, current date/time, random images, and quotes.",
+    desc: "Show bot uptime with stylish formats, current date/time, and uptime quotes.",
     category: "main",
     react: "⏱️",
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
     try {
+
         const uptime = runtime(process.uptime());
         const startTime = new Date(Date.now() - process.uptime() * 1000);
         const currentTime = new Date();
 
-        const imageUrls = [
-            "https://files.catbox.moe/etqc8k.jpg",
-            "https://files.catbox.moe/odst1m.jpg", // Replace with actual image URLs
-            "https://files.catbox.moe/95n1x6.jpg", // Replace with actual image URLs
-            "https://files.catbox.moe/0w7hqx.jpg", // Replace with actual image URLs
-            "https://files.catbox.moe/og4tsk.jpg"  // Replace with actual image URLs
-        ];
-
         const quotes = [
-            "🪀The best way to predict the future is to create it🎀.",
-            "🎁Stay hungry, stay foolish🍁.",
-            "🌅Innovation distinguishes between a leader and a follower🌐.",
-            "⚜️The only way to do great work is to love what you do📶.",
-            "✨Life is what happens when you're busy making other plans.✨"
+            "System check complete — bot uptime stable. 🟢",
+            "Uptime verified — running without interruptions. ⚡",
+            "Monitoring systems — all services operational. 🛰",
+            "Power core steady — no downtime detected. 🔋",
+            "Runtime confirmed — bot performing optimally. 🚀",
+            "AI engine active — uptime within safe limits. 🧠",
+            "Signal strong — uptime holding firm. 📡",
+            "Diagnostic result — system fully online. ⚙️",
+            "Connectivity intact — bot responding smoothly. 🌐",
+            "Maintenance log — zero crashes recorded. 🛠"
         ];
 
-        const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
-        const randomImageUrl = getRandomElement(imageUrls);
-        const randomQuote = getRandomElement(quotes);
+        const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const randomQuote = getRandom(quotes);
 
-        // Function to format date and time nicely
         const formatDateTime = (date) => {
             return date.toLocaleString('en-US', {
                 weekday: 'long',
@@ -53,39 +73,30 @@ async (conn, mek, m, { from, reply }) => {
         const formattedCurrentTime = formatDateTime(currentTime);
         const formattedStartTime = formatDateTime(startTime);
 
-        // Style 1: Classic Box
+        // ===== ALL STYLES =====
+
         const style1 = `╭───『 UPTIME 』───⳹
-│
 │ ⏱️ ${uptime}
 │ 🕰️ Current: ${formattedCurrentTime}
 │ 🚀 Started: ${formattedStartTime}
-│
 │ 💬 "${randomQuote}"
 ╰────────────────⳹
 ${config.DESCRIPTION}`;
 
-        // Style 2: Minimalist
         const style2 = `•——[ UPTIME ]——•
-  │
-  ├─ ⏳ ${uptime}
-  ├─ 🕒 Current: ${formattedCurrentTime}
-  ├─ 🗓️ Since: ${formattedStartTime}
-  │
-  ├─ 💬 "${randomQuote}"
-  •——[ ${config.BOT_NAME} ]——•`;
+├─ ⏳ ${uptime}
+├─ 🕒 Current: ${formattedCurrentTime}
+├─ 🗓️ Since: ${formattedStartTime}
+├─ 💬 "${randomQuote}"
+•——[ ${config.BOT_NAME} ]——•`;
 
-        // Style 3: Fancy Borders
         const style3 = `▄▀▄▀▄ BOT UPTIME ▄▀▄▀▄
+♢ Running: ${uptime}
+♢ Live: ${formattedCurrentTime}
+♢ Since: ${formattedStartTime}
+💬 "${randomQuote}"
+${config.DESCRIPTION}`;
 
-  ♢ Running: ${uptime}
-  ♢ Live: ${formattedCurrentTime}
-  ♢ Since: ${formattedStartTime}
-  
-  💬 "${randomQuote}"
-  
-  ${config.DESCRIPTION}`;
-
-        // Style 4: Code Style
         const style4 = `┌──────────────────────┐
 │  ⚡ UPTIME STATUS ⚡  │
 ├──────────────────────┤
@@ -96,20 +107,15 @@ ${config.DESCRIPTION}`;
 │ • Quote: "${randomQuote}"
 └──────────────────────┘`;
 
-        // Style 5: Modern Blocks
         const style5 = `▰▰▰▰▰ UPTIME ▰▰▰▰▰
+⏳ ${uptime}
+🗓️ ${formattedCurrentTime}
+🕰️ ${formattedStartTime}
+💬 "${randomQuote}"
+${config.DESCRIPTION}`;
 
-  ⏳ ${uptime}
-  🗓️ ${formattedCurrentTime}
-  🕰️ ${formattedStartTime}
-  
-  💬 "${randomQuote}"
-  
-  ${config.DESCRIPTION}`;
-
-        // Style 6: Retro Terminal
         const style6 = `╔══════════════════════╗
-║   ${config.BOT_NAME} UPTIME    ║
+║ ${config.BOT_NAME} UPTIME ║
 ╠══════════════════════╣
 ║ > RUNTIME: ${uptime}
 ║ > CURRENT: ${formattedCurrentTime}
@@ -117,76 +123,74 @@ ${config.DESCRIPTION}`;
 ║ > QUOTE: "${randomQuote}"
 ╚══════════════════════╝`;
 
-        // Style 7: Elegant
         const style7 = `┌───────────────┐
-│  ⏱️  UPTIME  │
+│ ⏱️ UPTIME │
 └───────────────┘
-│
-│ ${uptime}
-│
-│ Current: ${formattedCurrentTime}
-│ Since ${formattedStartTime}
-│
-│ 💬 "${randomQuote}"
-│
-┌───────────────┐
-│  ${config.BOT_NAME}  │
-└───────────────┘`;
+${uptime}
+Current: ${formattedCurrentTime}
+Since: ${formattedStartTime}
+💬 "${randomQuote}"
+${config.BOT_NAME}`;
 
-        // Style 8: Social Media Style
-        const style8 = `⏱️ *Uptime Report* ⏱️
-
+        const style8 = `⏱️ *Uptime Report*
 🟢 Online for: ${uptime}
-📅 Current Time: ${formattedCurrentTime}
+📅 Current: ${formattedCurrentTime}
 📅 Since: ${formattedStartTime}
-
 💬 _"${randomQuote}"_
-
 ${config.DESCRIPTION}`;
 
-        // Style 9: Fancy List
         const style9 = `╔♫═⏱️═♫══════════╗
-   ${config.BOT_NAME} UPTIME
+${config.BOT_NAME} UPTIME
 ╚♫═⏱️═♫══════════╝
+✧ ${uptime}
+✧ Live: ${formattedCurrentTime}
+✧ Since: ${formattedStartTime}
+✧ "${randomQuote}"`;
 
-•・゜゜・* ✧  *・゜゜・•
- ✧ ${uptime}
- ✧ Live: ${formattedCurrentTime}
- ✧ Since ${formattedStartTime}
- ✧ "${randomQuote}"
-•・゜゜・* ✧  *・゜゜・•`;
-
-        // Style 10: Professional
         const style10 = `┏━━━━━━━━━━━━━━━━━━┓
-┃  UPTIME ANALYSIS  ┃
+┃ UPTIME ANALYSIS ┃
 ┗━━━━━━━━━━━━━━━━━━┛
-
 ◈ Duration: ${uptime}
-◈ Current Time: ${formattedCurrentTime}
-◈ Start Time: ${formattedStartTime}
+◈ Current: ${formattedCurrentTime}
+◈ Started: ${formattedStartTime}
 ◈ Stability: 100%
-◈ Version:  4.0.0
 ◈ Insight: "${randomQuote}"
-
 ${config.DESCRIPTION}`;
 
-        const styles = [style1, style2, style3, style4, style5, style6, style7, style8, style9, style10];
-        const selectedStyle = getRandomElement(styles);
+        const styles = [
+            style1, style2, style3, style4, style5,
+            style6, style7, style8, style9, style10
+        ];
 
-        await conn.sendMessage(from, { 
-            image: { url: randomImageUrl },
-            caption: selectedStyle,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: config.OWNER_NAME || 'Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ',
-                    serverMessageId: 143
+        const caption = getRandom(styles);
+
+        await conn.sendMessage(
+            from,
+            {
+                video: { url: UPTIME_VIDEO },
+                gifPlayback: true,
+                caption,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: "120363369453603973@newsletter",
+                        newsletterName: config.OWNER_NAME || "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
+                        serverMessageId: 143
+                    },
+                    externalAdReply: {
+                        title: "⚙️ SHADOW-XTECH UPTIME STATUS",
+                        body: "Bot is live and operational — stay connected!",
+                        thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
+                        sourceUrl: whatsappChannelLink,
+                        mediaType: 1,
+                        renderLargerThumbnail: false
+                    }
                 }
-            }
-        }, { quoted: mek });
+            },
+            { quoted: quotedContact }
+        );
 
     } catch (e) {
         console.error("Uptime Error:", e);

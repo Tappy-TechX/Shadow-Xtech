@@ -1,88 +1,72 @@
-const config = require('../config');
-const { cmd, commands } = require('../command');
-const os = require("os");
-const { runtime } = require('../lib/functions');
+const config = require('../config'); 
+const { cmd, commands } = require('../command'); 
+const os = require("os"); 
+const { runtime } = require('../lib/functions');  
 
 // --- CONFIGURATION ---
 
-// Array of random image URLs for the menu
-const MENU_IMAGES = [
-    'https://files.catbox.moe/og4tsk.jpg',
-    'https://files.catbox.moe/95n1x6.jpg',
-    'https://files.catbox.moe/0w7hqx.jpg',
-    'https://files.catbox.moe/3hrxbh.jpg',
-    'https://files.catbox.moe/etqc8k.jpg'
-];
+// Video URL for the menu 
+const MENU_VIDEO_URL = 'https://files.catbox.moe/eubadj.mp4';
 
 // Quoted Contact Object
-const quotedContact = {
-  key: {
-    fromMe: false,
-    participant: "0@s.whatsapp.net",
-    remoteJid: "status@broadcast"
-  },
-  message: {
-    contactMessage: {
-      displayName: "⚙️ System | Menu 📜",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
-    }
-  }
+const quotedContact = { 
+    key: { 
+        fromMe: false, 
+        participant: "0@s.whatsapp.net", 
+        remoteJid: "status@broadcast" 
+    }, 
+    message: { 
+        contactMessage: { 
+            displayName: "⚙️ System | Menu 📜", 
+            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD" 
+        } 
+    } 
 };
 
 // Fancy loading messages
-const LOADING_MESSAGES = [
-    "Initializing connection...🌐",
-    "Establishing Bot commands...📂",
-    "Verifying credentials...😂",
-    "Connecting to WhatsApp API...🗝️",
-    "Preparing menu...🆔",
-    "Redirecting to commands...📜",
-    "Connecting to servers...🛰️",
-    "Fetching command list...📝",
-    "Authenticating user...👤",
-    "Compiling menu...⚙️",
-    "Displaying menu now...✅",
-    "Waking up the bot...😴",
-    "Brewing some coffee...☕",
-    "Checking for updates...🔄",
-    "Loading all modules...📦",
-    "Unleashing the menu...💥",
-    "Accessing mainframe...💻",
-    "Decrypting command protocols...🛡️",
-    "Calibrating response time...⚡",
-    "Generating menu interface...🎨",
-    "Welcome, user...👋"
-];
-
-// Random audio URLs for the menu
-const MENU_AUDIO_URLS = [
-    'https://files.catbox.moe/ddmjyy.mp3',
-    'https://files.catbox.moe/mexjrq.mp3',
-    'https://files.catbox.moe/4yqp5m.mp3',
-    'https://files.catbox.moe/k41qij.mp3'
+const LOADING_MESSAGES = [ 
+    "Initializing connection...🌐", 
+    "Establishing Bot commands...📂", 
+    "Verifying credentials...😂", 
+    "Connecting to WhatsApp API...🗝️", 
+    "Preparing menu...🆔", 
+    "Redirecting to commands...📜", 
+    "Connecting to servers...🛰️", 
+    "Fetching command list...📝", 
+    "Authenticating user...👤", 
+    "Compiling menu...⚙️", 
+    "Displaying menu now...✅", 
+    "Waking up the bot...😴", 
+    "Brewing some coffee...☕", 
+    "Checking for updates...🔄", 
+    "Loading all modules...📦", 
+    "Unleashing the menu...💥", 
+    "Accessing mainframe...💻", 
+    "Decrypting command protocols...🛡️", 
+    "Calibrating response time...⚡", 
+    "Generating menu interface...🎨", 
+    "Welcome, user...👋" 
 ];
 
 // --- END OF CONFIGURATION ---
 
-cmd({
-    pattern: "menu",
-    alias: ["allmenu", "fullmenu"],
-    use: '.menu',
-    desc: "Show all bot commands",
-    category: "menu",
-    react: "📜",
-    filename: __filename
-}, async (conn, mek, m, { from, reply }) => {
-    try {
-        // 1. Acknowledge the command immediately to reduce perceived delay
-        await reply("📜 Fetching commands... Please wait a moment!");
+cmd({ 
+    pattern: "menu", 
+    alias: ["allmenu", "fullmenu"], 
+    use: '.menu', 
+    desc: "Show all bot commands", 
+    category: "menu", 
+    react: "📜", 
+    filename: __filename 
+}, async (conn, mek, m, { from, reply }) => { 
+    try { 
+        // 1. Acknowledge the command immediately
+        await reply("📜 Fetching commands... Please wait a moment!");  
 
         // Select dynamic values
-        const selectedImageUrl = MENU_IMAGES[Math.floor(Math.random() * MENU_IMAGES.length)];
-        const randomLoadingMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
-        const selectedAudioUrl = MENU_AUDIO_URLS[Math.floor(Math.random() * MENU_AUDIO_URLS.length)];
+        const randomLoadingMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];  
 
-        // Compose menu caption (truncated for brevity in this snippet, but you can include full menu)
+        // Compose menu caption 
         const menuCaption = `╭──⭘💈 *${config.BOT_NAME}* 💈─·⭘
 ┆ ◦ 
 ┆ ◦ • 👑 Owner : *${config.OWNER_NAME}*
@@ -481,36 +465,29 @@ cmd({
 ┆ ◦  📮 otpbox
 ┆ ◦ 
 ╰─┈⊷
-> ${config.DESCRIPTION}`;
+> ${config.DESCRIPTION}`;  
 
-        // 2. Send menu image and caption
-        // Sending media is the part that takes time. We ensure this is awaited before proceeding.
-        await conn.sendMessage(from, {
-            image: { url: selectedImageUrl },
-            caption: menuCaption,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: config.BOT_NAME,
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: quotedContact });
+        // 2. Send menu video and caption
+        await conn.sendMessage(from, { 
+            video: { url: MENU_VIDEO_URL }, 
+            caption: menuCaption, 
+            gifPlayback: true, 
+            mimetype: 'video/mp4', 
+            contextInfo: { 
+                mentionedJid: [m.sender], 
+                forwardingScore: 999, 
+                isForwarded: true, 
+                forwardedNewsletterMessageInfo: { 
+                    newsletterJid: '120363369453603973@newsletter', 
+                    newsletterName: config.BOT_NAME, 
+                    serverMessageId: 143 
+                } 
+            } 
+        }, { quoted: quotedContact });  
 
-        // 3. Send menu audio (This happens sequentially after the image is sent)
-        await conn.sendMessage(from, {
-            audio: { url: selectedAudioUrl },
-            mimetype: 'audio/mp4',
-            ptt: true
-        }, { quoted: quotedContact });
-
-    } catch (e) {
-        // Refined error handling: Log the error internally and send a concise failure message to the user.
-        console.error("Menu Command Error:", e);
-        // If the initial reply succeeded, we might try to edit it, but a new reply is safer if the main send failed.
-        reply(`❌ An error occurred while displaying the menu. Please try again later. Error details logged.`);
-    }
+    } catch (e) { 
+        // Refined error handling
+        console.error("Menu Command Error:", e); 
+        reply(`❌ An error occurred while displaying the menu. Please try again later. Error details logged.`); 
+    }   
 });

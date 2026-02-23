@@ -71,7 +71,7 @@ cmd({
 `*🌐 Node State:* LINKED\n\n` +
 `📩 Use responsibly or emergencies only.`;
 
-    // Send forwarded newsletter without image  
+    // Send forwarded newsletter  
     await conn.sendMessage(from, {  
       text: stylishText,  
       contextInfo: {  

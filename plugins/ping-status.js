@@ -42,15 +42,15 @@ cmd({
     ];
 
     const speedLatencyQuotes = [
-      "“🔋 *Speed defines intelligence.*”",
-      "“🛰️ *Latency is the language of performance.*”",
-      "“👾 *Bots that blink are bots that win.*”",
-      "“💡 *Digital flow never waits.*”",
-      "“⏱️ *Milliseconds matter in the matrix.*”",
-      "“⚡ *Optimized to outrun time.*”",
-      "“🔧 *You ping, I race.*”",
-      "“🛠️ *Diagnostics complete — all systems nominal.*”",
-      "“🎯 *Real-time. Right now.*”"
+      "“⚡ Checking ping across all nodes...”",
+      "“⏱️ Measuring milliseconds for precision...”",
+      "“📶 Network pulse detected — calculating...”",
+      "“🚀 Testing bot reflex time...”",
+      "“🔧 Ping diagnostics in progress...”",
+      "“🛰️ Latency signals are being analyzed...”",
+      "“💡 Response time calibration underway...”",
+      "“🎯 Real-time ping measurement active...”",
+      "“🛠️ Bot heartbeat — ping confirmed stable...”"
     ];
 
     const statusEmojis = ['✅', '🟢', '✨', '📶', '🔋'];
@@ -83,30 +83,23 @@ cmd({
     const memoryUsage = process.memoryUsage();
     const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024;
 
-    let profilePicUrl;
-    try {
-      profilePicUrl = await conn.profilePictureUrl(sender, 'image');
-    } catch {
-      profilePicUrl = 'https://i.ibb.co/gdpjw5w/pp-wa-3.jpg';
-    }
-
     const stylishText = `
-*⎾===========================================⏌*
+ *⌬━━━━━━━━━━━━━━━━━━━━⌬*
  *📡 SYSTEM DIAGNOSTICS — PULSE REPORT*
- ⌬━━━━━━━━━━━━━━━━━━━⌬
+*⌬━━━━━━━━━━━━━━━━━━━━⌬*
   ◉ Bot ID       » *${config.botname || "SHADOW-XTECH"}*
   ◉ Response     » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
   ◉ Load Memory  » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB* 📦
   ◉ Stability    » ${stabilityEmoji} *${stabilityText}*
   ◉ Time Sync    » *${new Date().toLocaleTimeString()}*
- ⌬━━━━━━━━━━━━━━━━━━━⌬
+ *⌬━━━━━━━━━━━━━━━━━━━━⌬*
  ➤ *${randomQuote}*
-*⎿===========================================⏋*
+ *⌬━━━━━━━━━━━━━━━━━━━━⌬*
     `.trim();
 
+    // Send message
     await conn.sendMessage(from, {
-      image: { url: profilePicUrl },
-      caption: stylishText,
+      text: stylishText,
       contextInfo: {
         mentionedJid: [sender],
         forwardingScore: 999,
