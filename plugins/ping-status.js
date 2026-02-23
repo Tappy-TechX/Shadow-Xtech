@@ -13,7 +13,12 @@ const quotedContact = {
   message: {
     contactMessage: {
       displayName: "⚙️ Latency | Check 🚀",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
+      vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:SCIFI
+ORG:Shadow-Xtech BOT;
+TEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001
+END:VCARD`
     }
   }
 };
@@ -30,6 +35,7 @@ cmd({
   try {
     const start = Date.now();
 
+    // 8 loading messages
     const loadingMessages = [
       "*⎾⟪ ⚡ Initializing diagnostic scan... ⟫⏌*",
       "*⎾⟪ 🚀 Engaging latency protocol... ⟫⏌*",
@@ -41,6 +47,7 @@ cmd({
       "*⎾⟪ ✨ Running chrono-lag check... ⟫⏌*"
     ];
 
+    // 9 speed quotes
     const speedLatencyQuotes = [
       "“⚡ Checking ping across all nodes...”",
       "“⏱️ Measuring milliseconds for precision...”",
@@ -61,6 +68,7 @@ cmd({
     const randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
     const randomQuote = speedLatencyQuotes[Math.floor(Math.random() * speedLatencyQuotes.length)];
 
+    // Send first loading message
     await conn.sendMessage(from, { text: randomLoadingMessage });
 
     const end = Date.now();
@@ -83,21 +91,38 @@ cmd({
     const memoryUsage = process.memoryUsage();
     const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024;
 
-    const stylishText = `
- *⌬━━━━━━━━━━━━━━━━━━━━⌬*
- *📡 SYSTEM DIAGNOSTICS — PULSE REPORT*
-*⌬━━━━━━━━━━━━━━━━━━━━⌬*
-  ◉ Bot ID       » *${config.botname || "SHADOW-XTECH"}*
-  ◉ Response     » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
-  ◉ Load Memory  » ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB* 📦
-  ◉ Stability    » ${stabilityEmoji} *${stabilityText}*
-  ◉ Time Sync    » *${new Date().toLocaleTimeString()}*
- *⌬━━━━━━━━━━━━━━━━━━━━⌬*
- ➤ *${randomQuote}*
- *⌬━━━━━━━━━━━━━━━━━━━━⌬*
-    `.trim();
+    // Date, time, runtime
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString();
+    const currentDate = now.toLocaleDateString();
 
-    // Send message
+    // Calculate runtime
+    const uptime = process.uptime(); // seconds
+    const runtime = {
+      hours: Math.floor(uptime / 3600),
+      minutes: Math.floor((uptime % 3600) / 60),
+      seconds: Math.floor(uptime % 60)
+    };
+
+    // Final stylish report
+    const stylishText = `
+*📡 SYSTEM DIAGNOSTICS REPORT*
+▰▰▰▰▰▰▰▰▰▰▰▰▰
+💻 Bot ID  ◉» *${config.botname || "SHADOW-XTECH"}*
+⏱ Clock    : ${currentTime} 
+📆 Log      : ${currentDate}
+🔄 Runtime  : ${runtime.hours}h/${runtime.minutes}m/${runtime.seconds}s
+▰▰▰▰▰▰▰▰▰▰▰▰▰
+📶 Latency        : ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
+🧬 Memory Load    : ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB*
+📊 Stability      » ${stabilityEmoji} *${stabilityText}*
+⌛ Time Sync      » *${currentTime}*
+━━━━━━━━━━━━━━━━━━━
+*${randomQuote}*
+━━━━━━━━━━━━━━━━━━━
+`.trim();
+
+    // Send final report
     await conn.sendMessage(from, {
       text: stylishText,
       contextInfo: {
