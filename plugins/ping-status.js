@@ -23,6 +23,7 @@ END:VCARD`
   }
 };
 
+// Ping command
 cmd({
   pattern: "ping",
   alias: ["speed", "pong"],
@@ -35,29 +36,29 @@ cmd({
   try {
     const start = Date.now();
 
-    // 8 loading messages
+    // 8 loading messages (unchanged)
     const loadingMessages = [
       "*⎾⟪ ⚡ Initializing diagnostic scan... ⟫⏌*",
       "*⎾⟪ 🚀 Engaging latency protocol... ⟫⏌*",
       "*⎾⟪ 📊 Probing system integrity... ⟫⏌*",
-      "*⎾⟪ ⚙️ Optimizing digital threads... ⟫⏌*",
+      "*⎾⎪ ⚙️ Optimizing digital threads... ⏌*",
       "*⎾⟪ 🧠 Booting quantum core... ⟫⏌*",
       "*⎾⟪ 💡 Gathering neural response... ⟫⏌*",
       "*⎾⟪ 📡 Syncing data flux... ⟫⏌*",
       "*⎾⟪ ✨ Running chrono-lag check... ⟫⏌*"
     ];
 
-    // 9 speed quotes
+    // Updated 9 speed/latency quotes
     const speedLatencyQuotes = [
-      "“⚡ Checking ping across all nodes...”",
-      "“⏱️ Measuring milliseconds for precision...”",
-      "“📶 Network pulse detected — calculating...”",
-      "“🚀 Testing bot reflex time...”",
-      "“🔧 Ping diagnostics in progress...”",
-      "“🛰️ Latency signals are being analyzed...”",
-      "“💡 Response time calibration underway...”",
-      "“🎯 Real-time ping measurement active...”",
-      "“🛠️ Bot heartbeat — ping confirmed stable...”"
+      "⚡ Checking ping nodes",
+      "⏱️ Measuring milliseconds",
+      "📶 Network pulse detected",
+      "🚀 Testing bot reflex",
+      "🔧 Ping diagnostics progress",
+      "🛰️ Analyzing latency signals",
+      "💡 Calibrating response time",
+      "🎯 Real-time ping check",
+      "🛠️ Bot heartbeat stable"
     ];
 
     const statusEmojis = ['✅', '🟢', '✨', '📶', '🔋'];
@@ -91,10 +92,14 @@ cmd({
     const memoryUsage = process.memoryUsage();
     const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024;
 
-    // Date, time, runtime
+    // African time (EAT, UTC+3)
     const now = new Date();
-    const currentTime = now.toLocaleTimeString();
-    const currentDate = now.toLocaleDateString();
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const eatOffset = 3 * 60 * 60 * 1000; // +3 hours
+    const eatTime = new Date(utcTime + eatOffset);
+
+    const currentTime = eatTime.toLocaleTimeString('en-GB', { hour12: false });
+    const currentDate = eatTime.toLocaleDateString('en-GB');
 
     // Calculate runtime
     const uptime = process.uptime(); // seconds
@@ -106,20 +111,19 @@ cmd({
 
     // Final stylish report
     const stylishText = `
-*📡 SYSTEM DIAGNOSTICS REPORT*
+📡 SYSTEM DIAGNOSTICS REPORT
 ▰▰▰▰▰▰▰▰▰▰▰▰▰
-💻 Bot ID  ◉» *${config.botname || "SHADOW-XTECH"}*
-⏱ Clock    : ${currentTime} 
-📆 Log      : ${currentDate}
-🔄 Runtime  : ${runtime.hours}h/${runtime.minutes}m/${runtime.seconds}s
+💻 Bot ID       ◉ ${config.botname || "SHADOW-XTECH"}
+⏱ Clock        ◉ ${currentTime}
+📆 Log          ◉ ${currentDate}
+🔄 Runtime      ◉ ${runtime.hours}h/${runtime.minutes}m/${runtime.seconds}s
+📶 Latency      ◉ ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
+🧬 Memory Load  ◉ ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${memoryUsageMB.toFixed(2)} MB
+📊 Stability    ◉ ${stabilityEmoji} ${stabilityText}
+⌛ Time Sync    ◉ ${currentTime}
 ▰▰▰▰▰▰▰▰▰▰▰▰▰
-📶 Latency        : ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${latencyMs} ms ⚡
-🧬 Memory Load    : ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} *${memoryUsageMB.toFixed(2)} MB*
-📊 Stability      » ${stabilityEmoji} *${stabilityText}*
-⌛ Time Sync      » *${currentTime}*
-━━━━━━━━━━━━━━━━━━━
-*${randomQuote}*
-━━━━━━━━━━━━━━━━━━━
+> ${randomQuote}
+▰▰▰▰▰▰▰▰▰▰▰▰▰
 `.trim();
 
     // Send final report
@@ -140,7 +144,7 @@ cmd({
           thumbnailUrl: 'https://files.catbox.moe/3l3qgq.jpg',
           sourceUrl: whatsappChannelLink,
           mediaType: 1,
-          renderLargerThumbnail: false,
+          renderLargerThumbnail: false
         }
       }
     }, { quoted: quotedContact });
