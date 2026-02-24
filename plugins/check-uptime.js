@@ -1,6 +1,7 @@
 const { cmd } = require('../command');
 const { runtime } = require('../lib/functions');
 const config = require('../config');
+const moment = require('moment-timezone'); // Make sure moment-timezone is installed
 
 // Quoted contact for replies
 const quotedContact = {
@@ -17,21 +18,25 @@ const quotedContact = {
     }
 };
 
-// WhatsApp channel link for external ad
-const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
-
 cmd({
     pattern: "uptime",
     alias: ["runtime", "up"],
-    desc: "Show bot uptime with stylish formats, current date/time, random video, and quotes.",
+    desc: "Show bot uptime with stylish formats, current date/time, random video/gif, and quotes.",
     category: "main",
     react: "⏱️",
     filename: __filename
-}, async (conn, mek, m, { from, reply }) => {
+},
+async (conn, mek, m, { from, reply }) => {
     try {
         const uptime = runtime(process.uptime());
         const startTime = new Date(Date.now() - process.uptime() * 1000);
-        const currentTime = new Date();
+
+        // Nairobi Time
+        const currentTime = moment().tz("Africa/Nairobi").toDate();
+        const formatDateTime = (date) => moment(date).tz("Africa/Nairobi").format("dddd, MMMM Do YYYY, h:mm:ss A");
+
+        const formattedCurrentTime = formatDateTime(currentTime);
+        const formattedStartTime = formatDateTime(startTime);
 
         // Bot status quotes
         const quotes = [
@@ -45,33 +50,14 @@ cmd({
             "📡 Bot heartbeat steady, operational 🎯"
         ];
 
-        // Uptime emojis for randomization
-        const uptimeEmojis = ["⏱️", "🕰️", "⏳", "⚡", "🚀"];
-
         const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
-        const randomEmoji = getRandomElement(uptimeEmojis);
         const randomQuote = getRandomElement(quotes);
 
-        // Format date/time nicely
-        const formatDateTime = (date) => date.toLocaleString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            hour12: true
-        });
-
-        const formattedCurrentTime = formatDateTime(currentTime);
-        const formattedStartTime = formatDateTime(startTime);
-
-        // --- 10 styles ---
+        // 10 Styles
         const style1 = `╭───『 *UPTIME* 』───⳹
 │
-│ *🟢 Active Time: ${uptime}*
-│ *🕰️ Current: ${formattedCurrentTime}*
+│ *⏱️ Running: ${uptime}*
+│ *📆 Current: ${formattedCurrentTime}*
 │ *🚀 Started: ${formattedStartTime}*
 │
 │ *${randomQuote}*
@@ -79,43 +65,43 @@ cmd({
 ${config.DESCRIPTION}`;
 
         const style2 = `•——[ *UPTIME* ]——•
-│
-├─ *${randomEmoji} System Duration: ${uptime}*
-├─ *🕒 Current: ${formattedCurrentTime}*
-├─ *🗓️ Since: ${formattedStartTime}*
-│
-├─ *${randomQuote}*
-•——[ *${config.BOT_NAME}* ]——•`;
+  │
+  ├─ *⌛ Running: ${uptime}"
+  ├─ *🕒 Current: ${formattedCurrentTime}*
+  ├─ *🗓️ Since: ${formattedStartTime}*
+  │
+  ├─ *${randomQuote}*
+  •——[ *${config.BOT_NAME}* ]——•`;
 
         const style3 = `▄▀▄▀▄ *BOT UPTIME* ▄▀▄▀▄
 
-♢ *Running: ${uptime}*
-♢ *Live: ${formattedCurrentTime}*
-♢ Since: *${formattedStartTime}*
-
-♢ *${randomQuote}*
-
-> *${config.DESCRIPTION}*`;
+  *♢ Running: ${uptime}*
+  *♢ Live: ${formattedCurrentTime}*
+  *♢ Since: ${formattedStartTime}*
+  
+  *${randomQuote}*
+  
+  > *${config.DESCRIPTION}*`;
 
         const style4 = `┌──────────────────────┐
-│  ⚡ *UPTIME STATUS* ⚡  │
+│  *⚡ UPTIME STATUS ⚡*  │
 ├──────────────────────┤
-│ • *${randomEmoji} Time: ${uptime}*
-│ • *🌐 Current: ${formattedCurrentTime}*
-│ • *🟢 Started: ${formattedStartTime}*
-│ • *🔴 Version: 4.0.0*
-│ • *${randomQuote}*
+│ • *Time: ${uptime}*
+│ • *Current: ${formattedCurrentTime}*
+│ • *Started: ${formattedStartTime}*
+│ • *Version: 4.0.0*
+│ • *Status: ${randomQuote}*
 └──────────────────────┘`;
 
         const style5 = `▰▰▰▰▰ *UPTIME* ▰▰▰▰▰
 
-*${randomEmoji} ${uptime}*
-*🗓️ ${formattedCurrentTime}*
-*🧭 ${formattedStartTime}*
-
-*${randomQuote}*
-
-> *${config.DESCRIPTION}*`;
+  *🟢 ${uptime}*
+  *🗓️ ${formattedCurrentTime}*
+  *⌛ ${formattedStartTime}*
+    
+  *${randomQuote}*
+    
+  > *${config.DESCRIPTION}*`;
 
         const style6 = `╔══════════════════════╗
 ║   *${config.BOT_NAME} UPTIME*    ║
@@ -123,17 +109,17 @@ ${config.DESCRIPTION}`;
 ║ > *RUNTIME: ${uptime}*
 ║ > *CURRENT: ${formattedCurrentTime}*
 ║ > *SINCE: ${formattedStartTime}*
-║ > *QUOTE: ${randomQuote}*
+║ > *STATUS: ${randomQuote}*
 ╚══════════════════════╝`;
 
         const style7 = `┌───────────────┐
-│  *${randomEmoji}  UPTIME*  │
+│  *⏱️  UPTIME*  │
 └───────────────┘
 │
-│ *🛰️ Runtime ${uptime}*
+│ *🟢 Runtime: ${uptime}*
 │
-│ *▶️ Current: ${formattedCurrentTime}*
-│ *📅 Since ${formattedStartTime}*
+│ *📅 Current: ${formattedCurrentTime}*
+│ *⌛ Since ${formattedStartTime}*
 │
 │ *${randomQuote}*
 │
@@ -141,44 +127,46 @@ ${config.DESCRIPTION}`;
 │  *${config.BOT_NAME}*  │
 └───────────────┘`;
 
-        const style8 = `${randomEmoji} *Uptime Report* ${randomEmoji}
+        const style8 = `⏱️ *Uptime Report* ⏱️
 
 *🟢 Online for: ${uptime}*
 *📅 Current Time: ${formattedCurrentTime}*
-*⏳ Since: ${formattedStartTime}*
+*📅 Since: ${formattedStartTime}*
 
-*${randomQuote}*
+_*${randomQuote}*_
 
 > *${config.DESCRIPTION}*`;
 
-        const style9 = `╔♫═${randomEmoji}═♫══════════╗
-*${config.BOT_NAME} UPTIME*
-╚♫═${randomEmoji}═♫══════════╝
+        const style9 = `╔♫═⏱️═♫══════════╗
+   *${config.BOT_NAME} UPTIME*
+╚♫═⏱️═♫══════════╝
 
 •・゜゜・* ✧  *・゜゜・•
-✧ Running: ${uptime}
-✧ Live: ${formattedCurrentTime}
-✧ Since ${formattedStartTime}
-✧ *${randomQuote}*
+ ✧ *Runtime: ${uptime}*
+ ✧ *Live: ${formattedCurrentTime}*
+ ✧ *Since: ${formattedStartTime}*
+ ✧ *Status: ${randomQuote}*
 •・゜゜・* ✧  *・゜゜・•`;
 
         const style10 = `┏━━━━━━━━━━━━━━━━━━┓
-┃  *${randomEmoji} UPTIME ANALYSIS*  ┃
+┃  *UPTIME ANALYSIS*  ┃
 ┗━━━━━━━━━━━━━━━━━━┛
 
-◈ *Duration: ${uptime}*
-◈ *Current Time: ${formattedCurrentTime}*
-◈ *Start Time: ${formattedStartTime}*
-◈ *Stability: 100%*
-◈ *Version:  4.0.0*
-◈ *${randomQuote}*
+*◈ Duration: ${uptime}*
+*◈ Current Time: ${formattedCurrentTime}*
+*◈ Start Time: ${formattedStartTime}*
+*◈ Stability: 100%*
+*◈ Version:  4.0.0*
+*◈ Insight: ${randomQuote}*
 
 > *${config.DESCRIPTION}*`;
 
         const styles = [style1, style2, style3, style4, style5, style6, style7, style8, style9, style10];
         const caption = getRandomElement(styles);
 
-        // Send video as muted loop with external ad reply
+        // Replace with your WhatsApp channel link
+        const whatsappChannelLink = "https://chat.whatsapp.com/YourChannelLinkHere";
+
         await conn.sendMessage(from, {
             video: { url: "https://files.catbox.moe/tmynfd.mp4" },
             gifPlayback: true,
@@ -194,7 +182,7 @@ ${config.DESCRIPTION}`;
                     serverMessageId: 143
                 },
                 externalAdReply: {
-                    title: "⚙️ Shadow-Xtech | Uptime Status",
+                    title: "🟢 Shadow-Xtech | Uptime Status",
                     body: "Stable • Running • Healthy",
                     thumbnailUrl: "https://files.catbox.moe/kttohz.jpeg",
                     sourceUrl: whatsappChannelLink,

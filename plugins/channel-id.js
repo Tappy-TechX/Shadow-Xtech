@@ -1,7 +1,7 @@
 const { cmd } = require("../command");
-const config = require("../config"); // Assuming your WhatsApp link is in config
+const config = require("../config"); // Your WhatsApp channel link
 
-// Contact used for quoting the reply
+// Quoted contact card for replies
 const quotedContact = {
     key: {
         fromMe: false,
@@ -21,6 +21,25 @@ END:VCARD`
     }
 };
 
+// Helper function to fetch real-time channel metadata
+async function fetchChannelData(conn, inviteId) {
+    try {
+        const metadata = await conn.newsletterMetadata("invite", inviteId);
+        if (!metadata || !metadata.id) throw new Error("Channel not found");
+
+        return {
+            id: metadata.id,
+            name: metadata.name || "Unknown",
+            followers: metadata.subscribers ?? 0,
+            createdAt: metadata.creation_time
+                ? new Date(metadata.creation_time * 1000)
+                : null
+        };
+    } catch (err) {
+        throw new Error("Failed to fetch channel metadata");
+    }
+}
+
 cmd({
     pattern: "cid",
     alias: ["newsletter", "id"],
@@ -30,30 +49,41 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, args, q, reply, sender }) => {
     try {
-        if (!q) return reply("❎ Please provide a WhatsApp Channel link.\n\n*Example:* .cid https://whatsapp.com/channel/123456789");
+        if (!q)
+            return reply(
+                "❎ Please provide a WhatsApp Channel link.\n\n*Example:* .cid https://whatsapp.com/channel/123456789"
+            );
 
         const match = q.match(/whatsapp\.com\/channel\/([\w-]+)/);
-        if (!match) return reply("⚠️ *Invalid channel link format.*\n\nMake sure it looks like:\nhttps://whatsapp.com/channel/xxxxxxxxx");
+        if (!match)
+            return reply(
+                "⚠️ Invalid channel link format.\n\nMake sure it looks like:\nhttps://whatsapp.com/channel/xxxxxxxxx"
+            );
 
         const inviteId = match[1];
 
-        let metadata;
+        // Fetch channel data
+        let channelData;
         try {
-            metadata = await conn.newsletterMetadata("invite", inviteId);
-        } catch (e) {
+            channelData = await fetchChannelData(conn, inviteId);
+        } catch (err) {
             return reply("❌ Failed to fetch channel metadata. Make sure the link is correct.");
         }
 
-        if (!metadata || !metadata.id) return reply("❌ Channel not found or inaccessible.");
+        const formattedText = `*— 乂 Channel Info —*\n\n` +
+            `🆔 *ID:* ${channelData.id}\n` +
+            `📌 *Name:* ${channelData.name}\n` +
+            `👥 *Followers:* ${channelData.followers.toLocaleString()}\n` +
+            `📅 *Created on:* ${channelData.createdAt ? channelData.createdAt.toLocaleString("id-ID") : "Unknown"}`;
 
-        const stylishText = `*— 乂 Channel Info —*\n\n` +
-            `🆔 *ID:* ${metadata.id}\n` +
-            `📌 *Name:* ${metadata.name}\n` +
-            `👥 *Followers:* ${metadata.subscribers?.toLocaleString() || "N/A"}\n` +
-            `📅 *Created on:* ${metadata.creation_time ? new Date(metadata.creation_time * 1000).toLocaleString("id-ID") : "Unknown"}`;
-
+        // Send message with copy button
         await conn.sendMessage(from, {
-            text: stylishText,
+            text: formattedText,
+            footer: "Shadow-Xtech | Channel Tracker",
+            buttons: [
+                { buttonId: `.copyid ${channelData.id}`, buttonText: { displayText: "Copy Channel ID 🆔" }, type: 1 }
+            ],
+            headerType: 1,
             contextInfo: {
                 mentionedJid: [sender],
                 forwardingScore: 999,
