@@ -70,7 +70,7 @@ cmd({
         // --- 10 styles ---
         const style1 = `╭───『 *UPTIME* 』───⳹
 │
-│ *${randomEmoji} ${uptime}*
+│ *🟢 Active Time: ${uptime}*
 │ *🕰️ Current: ${formattedCurrentTime}*
 │ *🚀 Started: ${formattedStartTime}*
 │
@@ -80,7 +80,7 @@ ${config.DESCRIPTION}`;
 
         const style2 = `•——[ *UPTIME* ]——•
 │
-├─ *${randomEmoji} ${uptime}*
+├─ *${randomEmoji} System Duration: ${uptime}*
 ├─ *🕒 Current: ${formattedCurrentTime}*
 ├─ *🗓️ Since: ${formattedStartTime}*
 │
@@ -89,7 +89,7 @@ ${config.DESCRIPTION}`;
 
         const style3 = `▄▀▄▀▄ *BOT UPTIME* ▄▀▄▀▄
 
-♢ *Running: ${randomEmoji} ${uptime}*
+♢ *Running: ${uptime}*
 ♢ *Live: ${formattedCurrentTime}*
 ♢ Since: *${formattedStartTime}*
 
@@ -101,9 +101,9 @@ ${config.DESCRIPTION}`;
 │  ⚡ *UPTIME STATUS* ⚡  │
 ├──────────────────────┤
 │ • *${randomEmoji} Time: ${uptime}*
-│ • *${randomEmoji} Current: ${formattedCurrentTime}*
-│ • *${randomEmoji} Started: ${formattedStartTime}*
-│ • *${randomEmoji} Version: 4.0.0*
+│ • *🌐 Current: ${formattedCurrentTime}*
+│ • *🟢 Started: ${formattedStartTime}*
+│ • *🔴 Version: 4.0.0*
 │ • *${randomQuote}*
 └──────────────────────┘`;
 
@@ -111,7 +111,7 @@ ${config.DESCRIPTION}`;
 
 *${randomEmoji} ${uptime}*
 *🗓️ ${formattedCurrentTime}*
-*🕰️ ${formattedStartTime}*
+*🧭 ${formattedStartTime}*
 
 *${randomQuote}*
 
@@ -130,10 +130,10 @@ ${config.DESCRIPTION}`;
 │  *${randomEmoji}  UPTIME*  │
 └───────────────┘
 │
-│ *${randomEmoji} ${uptime}*
+│ *🛰️ Runtime ${uptime}*
 │
-│ *${randomEmoji} Current: ${formattedCurrentTime}*
-│ *${randomEmoji} Since ${formattedStartTime}*
+│ *▶️ Current: ${formattedCurrentTime}*
+│ *📅 Since ${formattedStartTime}*
 │
 │ *${randomQuote}*
 │
@@ -143,7 +143,7 @@ ${config.DESCRIPTION}`;
 
         const style8 = `${randomEmoji} *Uptime Report* ${randomEmoji}
 
-*🟢 Online for: ${randomEmoji} ${uptime}*
+*🟢 Online for: ${uptime}*
 *📅 Current Time: ${formattedCurrentTime}*
 *⏳ Since: ${formattedStartTime}*
 
@@ -156,7 +156,7 @@ ${config.DESCRIPTION}`;
 ╚♫═${randomEmoji}═♫══════════╝
 
 •・゜゜・* ✧  *・゜゜・•
-✧ ${uptime}
+✧ Running: ${uptime}
 ✧ Live: ${formattedCurrentTime}
 ✧ Since ${formattedStartTime}
 ✧ *${randomQuote}*
@@ -166,7 +166,7 @@ ${config.DESCRIPTION}`;
 ┃  *${randomEmoji} UPTIME ANALYSIS*  ┃
 ┗━━━━━━━━━━━━━━━━━━┛
 
-◈ *Duration: ${randomEmoji} ${uptime}*
+◈ *Duration: ${uptime}*
 ◈ *Current Time: ${formattedCurrentTime}*
 ◈ *Start Time: ${formattedStartTime}*
 ◈ *Stability: 100%*
@@ -180,7 +180,7 @@ ${config.DESCRIPTION}`;
 
         // Send video as muted loop with external ad reply
         await conn.sendMessage(from, {
-            video: { url: "https://files.catbox.moe/eubadj.mp4" },
+            video: { url: "https://files.catbox.moe/tmynfd.mp4" },
             gifPlayback: true,
             ptv: false,
             caption,
@@ -196,7 +196,7 @@ ${config.DESCRIPTION}`;
                 externalAdReply: {
                     title: "⚙️ Shadow-Xtech | Uptime Status",
                     body: "Stable • Running • Healthy",
-                    thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
+                    thumbnailUrl: "https://files.catbox.moe/kttohz.jpeg",
                     sourceUrl: whatsappChannelLink,
                     mediaType: 1,
                     renderLargerThumbnail: false
