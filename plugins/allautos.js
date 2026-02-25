@@ -1,8 +1,4 @@
-//---------------------------------------------------------------------------
-//          BLACK-TAPPY
-//---------------------------------------------------------------------------
-//  ⚠️ DO NOT MODIFY THIS FILE ⚠️  
-//---------------------------------------------------------------------------
+//-----------------------------------------------------
 const { cmd, commands } = require('../command');
 const config = require('../config');
 const prefix = config.PREFIX;
@@ -55,22 +51,6 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
     }
 });
 
-//--------------------setprefix-----------------------
-// Quoted contact card
-const quotedContact = {
-  key: {
-    fromMe: false,
-    participant: "0@s.whatsapp.net",
-    remoteJid: "status@broadcast"
-  },
-  message: {
-    contactMessage: {
-      displayName: "🧩 Bot | Configuration ⚡",
-      vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
-    }
-  }
-};
-
 cmd({
     pattern: "setprefix",
     alias: ["prefix"],
@@ -78,69 +58,18 @@ cmd({
     desc: "Change the bot's command prefix.",
     category: "settings",
     filename: __filename,
-},
-async (conn, mek, m, { from, args, isCreator }) => {
+}, async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*📛 Only the owner can use this command!*");
 
-    const sender = mek.key.participant || mek.key.remoteJid;
+    const newPrefix = args[0]; // Get the new prefix from the command arguments
+    if (!newPrefix) return reply("❌ Please provide a new prefix. Example: `.setprefix !`");
 
-    const sendReply = async (text) => {
-        await conn.sendMessage(from, {
-            text: text,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: "𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ",
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: quotedContact });
-    };
-
-    if (!isCreator) {
-        return sendReply("*📛 Only the owner can use this command!*");
-    }
-
-    if (!args[0]) {
-        return sendReply(
-            "❌ Please provide a prefix.\n\n" +
-            "Examples:\n" +
-            "• `.setprefix !`\n" +
-            "• `.setprefix 123`\n" +
-            "• `.setprefix abc`\n" +
-            "• `.setprefix none`"
-        );
-    }
-
-    let newPrefix = args[0];
-
-    // Remove prefix completely
-    if (newPrefix.toLowerCase() === "none") {
-        config.PREFIX = "";
-        return sendReply(
-            "✅ *Prefix Removed Successfully!*\n\n" +
-            "⚙️ The bot will now respond without a prefix."
-        );
-    }
-
-    // Allow any symbol, number, or text (limit length for safety)
-    if (newPrefix.length > 5) {
-        return sendReply("❌ Prefix is too long. Maximum 5 characters allowed.");
-    }
-
+    // Update the prefix in memory
     config.PREFIX = newPrefix;
 
-    return sendReply(
-        `✅ *Prefix Successfully Updated!*\n\n` +
-        `🔧 New Prefix: *${newPrefix}*\n\n` +
-        `> All commands will now use the new prefix.`
-    );
+    return reply(`✅ Prefix successfully changed to *${newPrefix}*`);
+});
 
-});
-//--------------------setprefix-----------------------
-});
 cmd({
     pattern: "mode",
     alias: ["setmode"],
