@@ -5,9 +5,7 @@ const path = require('path');
 const { cmd, commands } = require('../command');
 const { runtime } = require('../lib/functions');
 
-const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
-
-// 🔖 Contact used for quoting the reply
+// Quoted contact for replying
 const quotedContact = {
   key: {
     fromMe: false,
@@ -27,23 +25,21 @@ END:VCARD`
   }
 };
 
+const whatsappChannelLink = "https://chat.whatsapp.com/yourchannel"; // <-- replace with your channel link
+
 cmd({
   pattern: 'version',
   alias: ["changelog", "cupdate", "checkupdate"],
   react: '🚀',
-  desc: "Check bot version, system stats & update info.",
+  desc: "Check bot's version, system stats, and update info.",
   category: 'info',
   filename: __filename
-}, async (conn, mek, m, {
-  from, sender, pushname, reply
-}) => {
-
+}, async (conn, mek, m, { from, sender, pushname, reply }) => {
   try {
 
-    // 🕒 Dynamic Greeting System (Constant Greeting + Random Quote)
+    // 🕒 Dynamic Greeting System
     const hour = new Date().getHours();
-    let greetingTitle;
-    let greetingMessage;
+    let greetingTitle, greetingMessage;
 
     const morningQuotes = [
       "Rise and shine! Let’s make today productive 🚀",
@@ -52,7 +48,6 @@ cmd({
       "Success starts now 🔥",
       "Let’s build something powerful today"
     ];
-
     const afternoonQuotes = [
       "Keep pushing, greatness is loading ⚡",
       "Stay sharp, stay focused 💼",
@@ -60,7 +55,6 @@ cmd({
       "Productivity mode activated 🔥",
       "Success doesn’t sleep 💪"
     ];
-
     const eveningQuotes = [
       "Stay sharp, stay winning 💼",
       "Reflect, recharge, refocus 🔥",
@@ -68,7 +62,6 @@ cmd({
       "Calm mind, strong vision ⚡",
       "Strategy time 🌙"
     ];
-
     const nightQuotes = [
       "System calm, but still watching 🌌",
       "Quiet hours, powerful ideas 💻",
@@ -99,7 +92,6 @@ cmd({
     const localVersionPath = path.join(__dirname, '../data/version.json');
     let localVersion = 'Unknown';
     let changelog = 'No changelog available.';
-
     if (fs.existsSync(localVersionPath)) {
       const localData = JSON.parse(fs.readFileSync(localVersionPath));
       localVersion = localData.version;
@@ -110,20 +102,17 @@ cmd({
     const rawVersionUrl = 'https://raw.githubusercontent.com/Tappy-Black/Shadow-Xtech-V1/main/data/version.json';
     let latestVersion = 'Unknown';
     let latestChangelog = 'No changelog available.';
-
     try {
       const { data } = await axios.get(rawVersionUrl);
       latestVersion = data.version;
       latestChangelog = data.changelog;
-    } catch (err) {
-      console.log('GitHub fetch failed:', err.message);
+    } catch (error) {
+      console.error('Failed to fetch latest version:', error);
     }
 
     // 📂 Plugin count
     const pluginPath = path.join(__dirname, '../plugins');
-    const pluginCount = fs.existsSync(pluginPath)
-      ? fs.readdirSync(pluginPath).filter(file => file.endsWith('.js')).length
-      : 0;
+    const pluginCount = fs.readdirSync(pluginPath).filter(file => file.endsWith('.js')).length;
 
     // 🔢 Command count
     const totalCommands = commands.length;
@@ -133,23 +122,20 @@ cmd({
     const ramUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const totalRam = (os.totalmem() / 1024 / 1024).toFixed(2);
     const hostName = os.hostname();
-    const lastUpdate = fs.existsSync(localVersionPath)
-      ? fs.statSync(localVersionPath).mtime.toLocaleString()
-      : "Unknown";
+    const lastUpdate = fs.statSync(localVersionPath).mtime.toLocaleString();
 
     // 🔄 Update Check
     let updateMessage = `✅ Your *Shadow-Xtech* bot is up-to-date!`;
-
     if (localVersion !== latestVersion) {
-      updateMessage = `🚀 *Update Available!*
-🔹 Current Version: ${localVersion}
-🔹 Latest Version: ${latestVersion}
+      updateMessage = `🚀 Your *Shadow-Xtech* bot is outdated!
+🔹 *Current Version:* ${localVersion}
+🔹 *Latest Version:* ${latestVersion}
 
-Use *.update* to upgrade now.`;
+Use *.update* to update.`;
     }
 
-    const stylishText = 
-`${greetingTitle} — ${greetingMessage}
+    // 💫 Stylish Dynamic Status Message
+    const stylishText = `${greetingTitle} — ${greetingMessage}
 👤 *User:* ${pushname}
 
 📌 *Bot Name:* 𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ
@@ -172,16 +158,17 @@ ${updateMessage}
 ⭐ Repo: https://github.com/Tappy-Black/Shadow-Xtech-V1
 🚀 Fork • Star • Support`;
 
+    // Send the status message
     await conn.sendMessage(from, {
       text: stylishText,
       contextInfo: {
-        mentionedJid: [sender],
+        mentionedJid: [m.sender],
         forwardingScore: 999,
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363369453603973@newsletter',
-          newsletterName: "𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ | Update Hub",
-          serverMessageId: 201
+          newsletterName: '𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ',
+          serverMessageId: 143
         },
         externalAdReply: {
           title: "⚙️ Shadow-Xtech | Version Center",
@@ -189,14 +176,13 @@ ${updateMessage}
           thumbnailUrl: 'https://files.catbox.moe/3l3qgq.jpg',
           sourceUrl: whatsappChannelLink,
           mediaType: 1,
-          renderLargerThumbnail: true
+          renderLargerThumbnail: false
         }
       }
     }, { quoted: quotedContact });
 
   } catch (error) {
-    console.error('Version command error:', error);
-    reply('❌ Error while checking version.');
+    console.error('Error fetching version info:', error);
+    reply('❌ An error occurred while checking the bot version.');
   }
-
 });
