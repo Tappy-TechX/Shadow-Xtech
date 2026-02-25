@@ -1,10 +1,8 @@
 const { cmd } = require("../command");
 const moment = require("moment");
 
-// Bot start time
-let botStartTime = Date.now(); 
+let botStartTime = Date.now(); // Bot launch time
 
-// Fancy quotes array
 const FANCY_QUOTES = [
     "⚙️ Systems fully operational 🚀",
     "🧩 Core modules running smooth 🌟",
@@ -16,19 +14,7 @@ const FANCY_QUOTES = [
     "🟢 Operations stable and normal ✔️"
 ];
 
-// Status messages array
-const BOT_STATUS_MESSAGES = [
-    "🛰️ All circuits green ✅",
-    "⚡ Processing cmds smoothly 🔄",
-    "🤖 AI heartbeat detected 💓",
-    "🌐 Network links stable 🔗",
-    "🚀 Modules synced and ready 🛠️",
-    "🔋 Power levels optimal ⚡",
-    "🧠 Kernel routines active 🌀",
-    "📡 Signals received clearly 🎯"
-];
-
-// Quoted contact for replies
+// Quoted contact
 const quotedContact = {
     key: {
         fromMe: false,
@@ -43,14 +29,11 @@ const quotedContact = {
     }
 };
 
-// Random selection helpers
-const getRandomQuote = () => FANCY_QUOTES[Math.floor(Math.random() * FANCY_QUOTES.length)];
-const getRandomStatus = () => BOT_STATUS_MESSAGES[Math.floor(Math.random() * BOT_STATUS_MESSAGES.length)];
+const getRandomQuote = () => 
+    FANCY_QUOTES[Math.floor(Math.random() * FANCY_QUOTES.length)];
 
-// WhatsApp channel link
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 
-// Alive command
 cmd({
     pattern: "alive",
     desc: "Check if the bot is active.",
@@ -71,21 +54,22 @@ cmd({
         };
 
         const caption = `
-🌟 *SHADOW-XTECH STATUS* 🌟
+> 🌟 *SHADOW-XTECH STATUS* 🌟
 ▰▰▰▰▰▰▰▰▰▰▰▰▰
-> *Hey 👋🏻* *${pushname}*
-> 🕒 *Time*: *${currentTime}*
-> 📅 *Date*: *${currentDate}*
-> ⏳ *Uptime*: *${runtime.hours}h ${runtime.minutes}m ${runtime.seconds}s*
-> *🤖 Status*: *${getRandomStatus()}*
-> *${getRandomQuote()}*
+> Hey 👋🏻 ${pushname}
+> 🕒 *Time*: ${currentTime}
+> 📅 *Date*: ${currentDate}
+> ⏳ *Uptime*: ${runtime.hours}h ${runtime.minutes}m ${runtime.seconds}s
+> *🤖 Status*: *🌐 Network links stable 🔗*
+▰▰▰▰▰▰▰▰▰▰▰▰▰
+> _*${getRandomQuote()}*_
 ▰▰▰▰▰▰▰▰▰▰▰▰▰
         `.trim();
 
         await conn.sendMessage(from, {
-            video: { url: "https://files.catbox.moe/tmynfd.mp4" },
-            gifPlayback: true,
-            ptv: false,
+            video: { url: "https://files.catbox.moe/eubadj.mp4" },
+            gifPlayback: true,      // Makes video behave like GIF
+            ptv: false,             // Prevents sending as video note
             caption,
             contextInfo: {
                 mentionedJid: [m.sender],
@@ -99,7 +83,7 @@ cmd({
                 externalAdReply: {
                     title: "⚙️ Shadow-Xtech | Alive Status",
                     body: "Active • Healthy • Responsive",
-                    thumbnailUrl: "https://files.catbox.moe/vn9ksi.jpg",
+                    thumbnailUrl: "https://files.catbox.moe/3l3qgq.jpg",
                     sourceUrl: whatsappChannelLink,
                     mediaType: 1,
                     renderLargerThumbnail: false

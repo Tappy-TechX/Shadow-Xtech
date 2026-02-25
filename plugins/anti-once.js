@@ -4,21 +4,15 @@ cmd({
   pattern: "vv",
   alias: ["viewonce", "retrive"],
   react: "👾",
-  desc: "Owner Only - retrieve quoted message back to user",
-  category: "owner",
+  desc: "Retrieve quoted view-once message",
+  category: "fun", // Changed from owner to a public category
   filename: __filename
-}, async (conn, message, match, { from, isOwner, sender }) => {
+}, async (conn, message, match, { from, sender }) => {
   try {
-
-    if (!isOwner) {
-      return await conn.sendMessage(from, {
-        text: "*📛 This is an owner command.*"
-      }, { quoted: message });
-    }
 
     if (!match.quoted) {
       return await conn.sendMessage(from, {
-        text: "*🍁 Please reply to a view once message!*"
+        text: "*🍁 Please reply to a view-once message!*"
       }, { quoted: message });
     }
 
@@ -51,7 +45,7 @@ END:VCARD`
     switch (mtype) {
       case "imageMessage":
         messageContent = {
-          image: buffer, // 🔥 Retrieved view once image
+          image: buffer,
           caption: quotedMsg.text || "🖼️ Retrieved View Once Image",
           mimetype: quotedMsg.mimetype || "image/jpeg"
         };

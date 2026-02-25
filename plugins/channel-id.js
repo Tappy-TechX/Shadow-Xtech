@@ -1,7 +1,7 @@
 const { cmd } = require("../command");
-const config = require("../config"); // Assuming your WhatsApp link is in config
+const config = require("../config");
 
-// Contact used for quoting the reply
+// Quoted contact
 const quotedContact = {
     key: {
         fromMe: false,
@@ -28,49 +28,80 @@ cmd({
     desc: "Get WhatsApp Channel info from link",
     category: "whatsapp",
     filename: __filename
-}, async (conn, mek, m, { from, args, q, reply, sender }) => {
+},
+async (conn, mek, m, { from, q, reply, sender }) => {
     try {
-        if (!q) return reply("❎ Please provide a WhatsApp Channel link.\n\n*Example:* .cid https://whatsapp.com/channel/123456789");
 
-        const match = q.match(/whatsapp\.com\/channel\/([\w-]+)/);
-        if (!match) return reply("⚠️ *Invalid channel link format.*\n\nMake sure it looks like:\nhttps://whatsapp.com/channel/xxxxxxxxx");
-
-        const channelId = match[1];
-
-        let metadata;
-        try {
-            // Fetch channel metadata using WhatsApp API
-            metadata = await conn.newsletterMetadata("invite", channelId);
-        } catch (e) {
-            return reply("❌ Failed to fetch channel metadata. Make sure the link is correct.");
+        if (!q) {
+            return reply("❎ Please provide a WhatsApp Channel link.\n\n*Example:* .cid https://whatsapp.com/channel/xxxxxxxxx");
         }
 
-        if (!metadata || !metadata.id) return reply("❌ Channel not found or inaccessible.");
+        // Extract Channel ID
+        const match = q.match(/whatsapp\.com\/channel\/([\w-]+)/);
+        if (!match) {
+            return reply("⚠️ *Invalid channel link format.*\n\nCorrect format:\nhttps://whatsapp.com/channel/xxxxxxxxx");
+        }
 
-        // Current date and time
-        const currentDateTime = new Date().toLocaleString("id-ID", {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
+        const inviteCode = match[1];
+
+        // Fetch metadata from WhatsApp
+        let metadata;
+        try {
+            metadata = await conn.newsletterMetadata("invite", inviteCode);
+        } catch (err) {
+            console.error("Metadata fetch error:", err);
+            return reply("❌ Failed to fetch channel data. The link may be invalid or private.");
+        }
+
+        if (!metadata) {
+            return reply("❌ Channel not found.");
+        }
+
+        // Safely fetch values
+        const channelId = metadata.id || "N/A";
+        const channelName = metadata.name || metadata.subject || "Unknown Channel";
+        const subscribers = metadata.subscribers || metadata.followerCount || metadata.participantsCount || 0;
+
+        // Format followers nicely
+        const formattedSubscribers = Number(subscribers).toLocaleString("en-US");
+
+        // Current Date & Time (English)
+        const now = new Date();
+
+        const formattedDate = now.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }).replace(",", " •");
+
+        const formattedTime = now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
         });
 
-        // Stylish text for the message
-        const stylishText = `*— 乂 Channel Info —*\n\n` +
-            `🆔 *ID:* ${metadata.id}\n` +
-            `📌 *Name:* ${metadata.name}\n` +
-            `👥 *Subscribers:* ${metadata.subscribers?.toLocaleString() || "N/A"}\n` +
-            `📅 *Fetched on:* ${currentDateTime}`;
+        // Stylish Output
+        const stylishText =
+`*— 乂 Channel Information —*
 
-        // Send message with a button to copy the channel ID
+🆔 *Channel ID:* ${channelId}
+📌 *Channel Name:* ${channelName}
+👥 *Followers:* ${formattedSubscribers}
+
+📅 ${formattedDate}
+⏰ ${formattedTime}`;
+
         await conn.sendMessage(from, {
             text: stylishText,
-            footer: "Shadow-Xtech | Channel Info",
+            footer: "Shadow-Xtech | Channel Scanner",
             buttons: [
-                { buttonId: `copyid_${metadata.id}`, buttonText: { displayText: "📋 Copy Channel ID" }, type: 1 }
+                {
+                    buttonId: `copyid_${channelId}`,
+                    buttonText: { displayText: "📋 Copy Channel ID" },
+                    type: 1
+                }
             ],
             headerType: 1,
             contextInfo: {
@@ -95,6 +126,6 @@ cmd({
 
     } catch (error) {
         console.error("❌ Error in .cid plugin:", error);
-        reply("⚠️ An unexpected error occurred.");
+        reply("⚠️ Unexpected error occurred while fetching channel info.");
     }
 });

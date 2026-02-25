@@ -1,7 +1,6 @@
-const settingsManager = require('../lib/settingsmanager'); // Path to your settings manager
-const { cmd } = require('../command'); // Command registration
+const settingsManager = require('../lib/settingsmanager');
+const { cmd } = require('../command');
 
-// Quoted contact card to be used in replies
 const quotedContact = {
   key: {
     fromMe: false,
@@ -19,70 +18,89 @@ const quotedContact = {
 cmd({
     pattern: "anticall",
     alias: ["callblock", "togglecall"],
-    desc: "Manages the anti-call feature. Use: .anticall [on/off]",
+    desc: "Manage anti-call system",
     category: "owner",
     react: "📞",
     filename: __filename,
-    fromMe: true // Only accessible by bot itself
+    fromMe: true
 },
-async (conn, mek, m, { isOwner, reply, from, sender, args, prefix }) => {
+async (conn, mek, m, { isOwner, reply, from, sender, args }) => {
     try {
-        if (!isOwner) {
-            return reply("🚫 This command is for the bot owner only.");
-        }
 
-        const currentStatus = settingsManager.getSetting('ANTICALL');
-        const arg = (args?.[0] || '').toLowerCase();
+        if (!isOwner) return reply("🚫 Owner only command.");
 
-        let replyText;
-        let finalReactionEmoji = '📞';
+        const arg = (args[0] || "").toLowerCase();
+        const subArg = args.slice(1).join(" ");
 
-        if (arg === 'on') {
-            if (currentStatus) {
-                replyText = `📞 Anti-call feature is already *enabled*.`;
-                finalReactionEmoji = 'ℹ️';
-            } else {
-                settingsManager.setSetting('ANTICALL', true);
-                replyText = `📞 Anti-call feature has been *enabled*!`;
-                finalReactionEmoji = '✅';
+        const status = settingsManager.getSetting("ANTICALL") || false;
+        const action = settingsManager.getSetting("ANTICALL_ACTION") || "reject";
+        const message = settingsManager.getSetting("ANTICALL_MESSAGE") || 
+        "🚫 *Auto Call Rejection!*\n\nPlease do not call this bot.";
+
+        let text = "";
+        let reactEmoji = "📞";
+
+        // ===== TOGGLE =====
+        if (arg === "on") {
+            settingsManager.setSetting("ANTICALL", true);
+            text = "✅ Anti-call has been *enabled*.";
+            reactEmoji = "✅";
+
+        } else if (arg === "off") {
+            settingsManager.setSetting("ANTICALL", false);
+            text = "❌ Anti-call has been *disabled*.";
+            reactEmoji = "❌";
+
+        // ===== SET MESSAGE =====
+        } else if (arg === "message") {
+            if (!subArg) {
+                return reply("⚠️ Provide a message.\nExample:\n.anticall message Please don't call me.");
             }
-        } else if (arg === 'off') {
-            if (!currentStatus) {
-                replyText = `📞 Anti-call feature is already *disabled*.`;
-                finalReactionEmoji = 'ℹ️';
-            } else {
-                settingsManager.setSetting('ANTICALL', false);
-                replyText = `📞 Anti-call feature has been *disabled*!`;
-                finalReactionEmoji = '❌';
+
+            settingsManager.setSetting("ANTICALL_MESSAGE", subArg);
+            text = `✅ Anti-call rejection message updated to:\n\n"${subArg}"`;
+            reactEmoji = "✏️";
+
+        // ===== SET ACTION =====
+        } else if (arg === "action") {
+            if (!["reject", "block"].includes(subArg)) {
+                return reply("⚠️ Use:\n.anticall action reject\nor\n.anticall action block");
             }
-        } else if (arg === '') {
-            const statusEmoji = currentStatus ? '✅ ON' : '❌ OFF';
-            replyText = `
-*📞 Anti-Call Feature Manager*
 
-Current Status: *${statusEmoji}*
+            settingsManager.setSetting("ANTICALL_ACTION", subArg);
+            text = `✅ Anti-call action set to *${subArg.toUpperCase()}*`;
+            reactEmoji = "⚙️";
 
-To turn On:
-◉ \`${prefix}anticall on\`
-To turn Off:
-◉ \`${prefix}anticall off\`
+        // ===== STATUS PANEL =====
+        } else if (arg === "status" || !arg) {
+
+            const statusEmoji = status ? "✅ ON" : "❌ OFF";
+
+            text = `
+📞 *Anti-Call Settings*
+
+🔹 Status: ${statusEmoji}
+🔹 Action: ${action.toUpperCase()}
+🔹 Message: ${message}
+
+🛠 *Usage:*
+• .anticall on/off
+• .anticall message <text>
+• .anticall action reject/block
             `.trim();
-            finalReactionEmoji = '❓';
+
+            reactEmoji = "ℹ️";
+
         } else {
-            replyText = `❌ Invalid argument. Please use \`${prefix}anticall on\`, \`${prefix}anticall off\`, or just \`${prefix}anticall\` for help.`;
-            finalReactionEmoji = '❓';
+            return reply("❌ Invalid option.");
         }
 
-        // React to the command message
-        if (conn?.sendMessage) {
-            await conn.sendMessage(from, {
-                react: { text: finalReactionEmoji, key: mek.key }
-            });
-        }
-
-        // Send the status/help reply with quoted contact
         await conn.sendMessage(from, {
-            text: replyText,
+            react: { text: reactEmoji, key: mek.key }
+        });
+
+        await conn.sendMessage(from, {
+            text,
             contextInfo: {
                 mentionedJid: [sender],
                 forwardingScore: 999,
@@ -96,7 +114,7 @@ To turn Off:
         }, { quoted: quotedContact });
 
     } catch (e) {
-        console.error("Error in anticall command:", e);
-        reply(`An error occurred while managing anti-call: ${e.message}`);
+        console.error("Anticall error:", e);
+        reply(`Error: ${e.message}`);
     }
 });
