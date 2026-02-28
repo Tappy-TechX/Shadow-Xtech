@@ -13,7 +13,7 @@ const memoryPath = path.join(__dirname, "../lib/chatbotMemory.json");
 if (!fs.existsSync(settingsPath)) {
   fs.writeFileSync(
     settingsPath,
-    JSON.stringify({ enabled: true, scope: "both" }, null, 2)
+    JSON.stringify({ enabled: true }, null, 2)
   );
 }
 
@@ -44,80 +44,67 @@ function saveSettings(data) {
 // ⏱️ COOLDOWN SYSTEM
 // ===============================
 const cooldown = new Map();
-const COOLDOWN_TIME = 4000; // 4s anti-spam
+const COOLDOWN_TIME = 4000; // 4 seconds
 
 // ===============================
-// 🤖 AUTO CHATBOT HANDLER
+// 🤖 CHATBOT TOGGLE COMMAND
+// ===============================
+cmd(
+  {
+    pattern: "chatbot",
+    desc: "Enable or Disable Chatbot",
+    category: "owner",
+    filename: __filename
+  },
+  async (conn, mek, m, { args, isOwner }) => {
+    try {
+      if (!isOwner)
+        return m.reply("🚫 Only bot owner can use this command.");
+
+      if (!args[0])
+        return m.reply(
+          "🤖 Usage:\n\n• chatbot on\n• chatbot off"
+        );
+
+      const settings = loadSettings();
+
+      if (args[0].toLowerCase() === "on") {
+        settings.enabled = true;
+        saveSettings(settings);
+        return m.reply("🤖 Chatbot has been Enabled ✅");
+      }
+
+      if (args[0].toLowerCase() === "off") {
+        settings.enabled = false;
+        saveSettings(settings);
+        return m.reply("🤖 Chatbot has been Disabled ❌");
+      }
+
+      return m.reply("❌ Invalid option. Use `chatbot on` or `chatbot off`.");
+    } catch (err) {
+      console.error("CHATBOT TOGGLE ERROR:", err);
+    }
+  }
+);
+
+// ===============================
+// 🤖 AUTO CHATBOT LISTENER
 // ===============================
 cmd(
   {
     on: "body",
   },
-  async (conn, mek, m, { body, from, isOwner, isGroup }) => {
+  async (conn, mek, m, { body, from }) => {
     try {
       if (!body) return;
 
       const settings = loadSettings();
-      const memory = loadMemory();
-      const text = body.trim().toLowerCase();
+      if (!settings.enabled) return;
+      if (mek.key.fromMe) return;
 
-      // ===============================
-      // 🔐 OWNER-ONLY CHATBOT CONTROL
-      // ===============================
-      if (text.startsWith("chatbot")) {
-        if (!isOwner)
-          return m.reply("🚫 Only bot owner can control chatbot.");
+      const text = body.trim();
 
-        const args = text.split(" ").slice(1);
-        const action = args[0];
-        const scope = args[1] || "both"; // group, private, or both
-
-        // Show usage help
-        if (!action || action === "help") {
-          return m.reply(
-            `🤖 Chatbot Command Usage:\n\n` +
-              `• chatbot on [group/private/both] - Enable chatbot\n` +
-              `• chatbot off [group/private/both] - Disable chatbot\n` +
-              `• chatbot help - Show this help message\n\n` +
-              `Scope options:\n` +
-              `- group : Enable/disable in group chats only\n` +
-              `- private : Enable/disable in private chats only\n` +
-              `- both : Enable/disable in both group & private chats`
-          );
-        }
-
-        if (["on", "off"].includes(action)) {
-          settings.enabled = action === "on";
-          settings.scope = ["group", "private", "both"].includes(scope)
-            ? scope
-            : "both";
-          saveSettings(settings);
-          return m.reply(
-            `🤖 Chatbot ${action === "on" ? "Enabled" : "Disabled"} for ${settings.scope}`
-          );
-        }
-
-        return m.reply(
-          "❌ Invalid command. Type `chatbot help` for instructions."
-        );
-      }
-
-      // ===============================
-      // ❌ STOP CONDITIONS
-      // ===============================
-      if (!settings.enabled) return; // chatbot off
-      if (mek.key.fromMe) return; // ignore bot's own messages
-
-      // Respect scope
-      if (
-        (settings.scope === "group" && !isGroup) ||
-        (settings.scope === "private" && isGroup)
-      )
-        return;
-
-      // ===============================
-      // ⏱️ COOLDOWN
-      // ===============================
+      // ⏱️ Cooldown per chat
       const now = Date.now();
       if (cooldown.has(from)) {
         const expire = cooldown.get(from) + COOLDOWN_TIME;
@@ -125,21 +112,16 @@ cmd(
       }
       cooldown.set(from, now);
 
-      // ===============================
-      // 🧠 MEMORY HANDLING
-      // ===============================
-      if (!memory[from]) memory[from] = [];
-      memory[from].push({ role: "user", content: body });
-      memory[from] = memory[from].slice(-15); // keep last 15 messages
+      const memory = loadMemory();
 
-      // ===============================
-      // 🤖 AI REQUEST
-      // ===============================
+      if (!memory[from]) memory[from] = [];
+
+      memory[from].push({ role: "user", content: text });
+      memory[from] = memory[from].slice(-15);
+
       await conn.sendPresenceUpdate("composing", from);
 
-      const apiUrl = `https://api.yupra.my.id/api/ai/copilot?text=${encodeURIComponent(
-        body
-      )}`;
+      const apiUrl = `https://api.yupra.my.id/api/ai/copilot?text=${encodeURIComponent(text)}`;
       const response = await axios.get(apiUrl);
       const res = response.data;
 
@@ -155,6 +137,7 @@ cmd(
         { text: `🤖 ${replyText}` },
         { quoted: mek }
       );
+
     } catch (err) {
       console.error("CHATBOT ERROR:", err);
     }
