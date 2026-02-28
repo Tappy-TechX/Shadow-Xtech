@@ -1,0 +1,22 @@
+{
+  "1202555012345@s.whatsapp.net": [
+    {
+      "role": "user",
+      "content": "Hi chatbot!"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! How can I help you today?"
+    }
+  ],
+  "1202555067890@g.us": [
+    {
+      "role": "user",
+      "content": "Hello group!"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi everyone! I'm here to help."
+    }
+  ]
+}
