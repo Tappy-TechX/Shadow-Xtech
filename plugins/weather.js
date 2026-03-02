@@ -85,7 +85,7 @@ async (conn, mek, m, { from, q, reply, sender }) => {
                         thumbnailUrl: 'https://files.catbox.moe/3l3qgq.jpg',
                         sourceUrl: whatsappChannelLink,
                         mediaType: 1,
-                        renderLargerThumbnail: true
+                        renderLargerThumbnail: false
                     }
                 }
             },
