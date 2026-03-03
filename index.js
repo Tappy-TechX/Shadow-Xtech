@@ -20,13 +20,30 @@ const {
     fetchLatestBaileysVersion,
     Browsers
   } = require('@whiskeysockets/baileys')
+  
+  // ES Module path resolution imports (needed for the requested upgrade)
+  const { fileURLToPath } = require('url');
+  const { dirname } = require('path');
+  const path = require('path');
+  const fs = require('fs');
+  const zlib = require('zlib');
+  const { promisify } = require('util');
 
-
+  // Correctly define __filename and __dirname using ES Module context if available, 
+  // or fall back to CommonJS if running directly, though the requested logic implies ESM context.
+  let __filename;
+  try {
+      __filename = fileURLToPath(import.meta.url);
+  } catch (e) {
+      // Fallback for pure CommonJS execution if import.meta is unavailable
+      __filename = new URL(import.meta.url).pathname;
+  }
+  const __dirname = dirname(__filename);
+  
   const l = console.log
   // NOTE: These modules are assumed to exist in './lib/' or './'
   const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
-  const fs = require('fs')
   const ff = require('fluent-ffmpeg')
   const P = require('pino')
   const config = require('./config') 
@@ -42,7 +59,6 @@ const {
   const bodyparser = require('body-parser')
   const os = require('os')
   const Crypto = require('crypto')
-  const path = require('path')
   const prefix = config.PREFIX
 
   // --- Import the call handler module ---
@@ -92,34 +108,89 @@ const {
   setInterval(clearTempDir, 5 * 60 * 1000);
 
   //===================SESSION-AUTH============================
-if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
-if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
-const sessdata = config.SESSION_ID.replace("GURU~", '');
-const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
-filer.download((err, data) => {
-if(err) throw err
-fs.writeFile(__dirname + '/sessions/creds.json', data, () => {
-console.log("Session downloaded ✅")
-})})}
+  const sessionDir = path.join(__dirname, 'sessions');
+  const credsPath = path.join(sessionDir, 'creds.json');
 
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 9090;
+  if (!fs.existsSync(sessionDir)) {
+      fs.mkdirSync(sessionDir, { recursive: true });
+  }
 
-// Define WhatsApp Channel details
-const whatsappChannelId = "120363369453603973@newsletter";
-const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
+  const gunzip = promisify(zlib.gunzip);
+
+  async function loadGiftedSession() {
+      if (!config.SESSION_ID) return false;
+      
+      // Check for the new POPKID~ format (assuming this is the compressed format)
+      if (config.SESSION_ID.startsWith("GURU~")) {
+          const compressedBase64 = config.SESSION_ID.substring("POPKID~".length);
+          try {
+              const compressedBuffer = Buffer.from(compressedBase64, 'base64');
+              // Check for gzip magic bytes (0x1f, 0x8b)
+              if (compressedBuffer[0] === 0x1f && compressedBuffer[1] === 0x8b) {
+                  const decompressedBuffer = await gunzip(compressedBuffer);
+                  await fs.promises.writeFile(credsPath, decompressedBuffer.toString('utf-8'));
+                  console.log("Session decompressed and loaded from POPKID~ ✅");
+                  return true;
+              }
+          } catch (error) { 
+              console.error("Error decompressing session:", error);
+              return false; 
+          }
+      }
+      
+      // Original logic for MEGA link session loading (kept for compatibility if POPKID~ fails or isn't used)
+      if (!fs.existsSync(credsPath) && config.SESSION_ID && !config.SESSION_ID.startsWith("POPKID~")) {
+          console.log("Attempting to download session from MEGA link...");
+          const sessdata = config.SESSION_ID.replace("trend-x~", '');
+          try {
+              const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
+              await new Promise((resolve, reject) => {
+                  filer.download((err, data) => {
+                      if (err) {
+                          console.error("Error downloading session from MEGA:", err);
+                          reject(err);
+                      } else {
+                          fs.writeFile(credsPath, data, () => {
+                              console.log("Session downloaded from MEGA ✅");
+                              resolve();
+                          });
+                      }
+                  });
+              });
+              return true;
+          } catch (e) {
+              console.error("MEGA Session download failed:", e);
+              return false;
+          }
+      }
+      
+      return fs.existsSync(credsPath);
+  }
+
+  const express = require("express");
+  const app = express();
+  const port = process.env.PORT || 9090;
+
+  // Define WhatsApp Channel details
+  const whatsappChannelId = "120363369453603973@newsletter";
+  const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
 
   //=============================================
 
   async function connectToWA() {
   console.log("Connecting to WhatsApp ⏳️...");
-  const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
+  
+  const sessionLoaded = await loadGiftedSession();
+  if (!sessionLoaded) {
+      console.log("Session file not found or failed to load. Waiting for QR code or session data...");
+  }
+  
+  const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
   var { version } = await fetchLatestBaileysVersion()
 
   const conn = makeWASocket({
           logger: P({ level: 'silent' }),
-          printQRInTerminal: false,
+          printQRInTerminal: true, // Set to true to show QR if session fails/is new
           browser: Browsers.macOS("Firefox"),
           syncFullHistory: true,
           auth: state,
@@ -134,7 +205,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   }
   } else if (connection === 'open') {
   console.log('🕹️ Installing Plugins')
-  const path = require('path');
+  // Note: path is already required above
   fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
   require("./plugins/" + plugin);
@@ -148,7 +219,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
     await conn.newsletterFollow(whatsappChannelId); 
     console.log("📬 Followed Shadow-Xtech newsletter.");
   } catch (e) {
-    console.error("❌ Failed to follow newsletter:", e);
+    console.error("❌ Failed to follow newsletter:", e.message);
   }
   // ------------------------------
 
@@ -226,7 +297,8 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   //=============readstatus=======
 
   conn.ev.on('messages.upsert', async(mek) => {
-    mek = mek.messages[0]
+    if (!mek || mek.messages.length === 0) return;
+    mek = mek.messages[0];
     if (!mek.message) return
     mek.message = (getContentType(mek.message) === 'ephemeralMessage')
     ? mek.message.ephemeralMessage.message
@@ -883,6 +955,8 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
   });
 
   app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
+  
+  // Start connection after server initialization
   setTimeout(() => {
   connectToWA()
   }, 4000);
