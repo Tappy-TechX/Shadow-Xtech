@@ -20,30 +20,13 @@ const {
     fetchLatestBaileysVersion,
     Browsers
   } = require('@whiskeysockets/baileys')
-  
-  // ES Module path resolution imports (needed for the requested upgrade)
-  const { fileURLToPath } = require('url');
-  const { dirname } = require('path');
-  const path = require('path');
-  const fs = require('fs');
-  const zlib = require('zlib');
-  const { promisify } = require('util');
 
-  // Correctly define __filename and __dirname using ES Module context if available, 
-  // or fall back to CommonJS if running directly, though the requested logic implies ESM context.
-  let __filename;
-  try {
-      __filename = fileURLToPath(import.meta.url);
-  } catch (e) {
-      // Fallback for pure CommonJS execution if import.meta is unavailable
-      __filename = new URL(import.meta.url).pathname;
-  }
-  const __dirname = dirname(__filename);
-  
+
   const l = console.log
   // NOTE: These modules are assumed to exist in './lib/' or './'
   const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
+  const fs = require('fs')
   const ff = require('fluent-ffmpeg')
   const P = require('pino')
   const config = require('./config') 
@@ -59,6 +42,7 @@ const {
   const bodyparser = require('body-parser')
   const os = require('os')
   const Crypto = require('crypto')
+  const path = require('path')
   const prefix = config.PREFIX
 
   // --- Import the call handler module ---
@@ -108,89 +92,58 @@ const {
   setInterval(clearTempDir, 5 * 60 * 1000);
 
   //===================SESSION-AUTH============================
-  const sessionDir = path.join(__dirname, 'sessions');
-  const credsPath = path.join(sessionDir, 'creds.json');
+//===================SESSION-AUTH============================
+const fs = require('fs');
+const zlib = require('zlib');
+const { promisify } = require('util');
 
-  if (!fs.existsSync(sessionDir)) {
-      fs.mkdirSync(sessionDir, { recursive: true });
-  }
+// Create sessions folder if it doesn't exist
+if (!fs.existsSync(__dirname + '/sessions')) {
+    fs.mkdirSync(__dirname + '/sessions', { recursive: true });
+}
 
-  const gunzip = promisify(zlib.gunzip);
+// Keep the original if-format but use zlib decompression
+if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
+    if (!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!');
 
-  async function loadGiftedSession() {
-      if (!config.SESSION_ID) return false;
-      
-      // Check for the new POPKID~ format (assuming this is the compressed format)
-      if (config.SESSION_ID.startsWith("GURU~")) {
-          const compressedBase64 = config.SESSION_ID.substring("POPKID~".length);
-          try {
-              const compressedBuffer = Buffer.from(compressedBase64, 'base64');
-              // Check for gzip magic bytes (0x1f, 0x8b)
-              if (compressedBuffer[0] === 0x1f && compressedBuffer[1] === 0x8b) {
-                  const decompressedBuffer = await gunzip(compressedBuffer);
-                  await fs.promises.writeFile(credsPath, decompressedBuffer.toString('utf-8'));
-                  console.log("Session decompressed and loaded from POPKID~ ✅");
-                  return true;
-              }
-          } catch (error) { 
-              console.error("Error decompressing session:", error);
-              return false; 
-          }
-      }
-      
-      // Original logic for MEGA link session loading (kept for compatibility if POPKID~ fails or isn't used)
-      if (!fs.existsSync(credsPath) && config.SESSION_ID && !config.SESSION_ID.startsWith("POPKID~")) {
-          console.log("Attempting to download session from MEGA link...");
-          const sessdata = config.SESSION_ID.replace("trend-x~", '');
-          try {
-              const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
-              await new Promise((resolve, reject) => {
-                  filer.download((err, data) => {
-                      if (err) {
-                          console.error("Error downloading session from MEGA:", err);
-                          reject(err);
-                      } else {
-                          fs.writeFile(credsPath, data, () => {
-                              console.log("Session downloaded from MEGA ✅");
-                              resolve();
-                          });
-                      }
-                  });
-              });
-              return true;
-          } catch (e) {
-              console.error("MEGA Session download failed:", e);
-              return false;
-          }
-      }
-      
-      return fs.existsSync(credsPath);
-  }
+    const sessdata = config.SESSION_ID.replace("POPKID~;;;", ""); // or GURU~ if using that
+    (async () => {
+        try {
+            const compressedBuffer = Buffer.from(sessdata, 'base64');
+            if (compressedBuffer[0] === 0x1f && compressedBuffer[1] === 0x8b) { // gzip check
+                const gunzip = promisify(zlib.gunzip);
+                const decompressedBuffer = await gunzip(compressedBuffer);
 
-  const express = require("express");
-  const app = express();
-  const port = process.env.PORT || 9090;
+                fs.writeFile(__dirname + '/sessions/creds.json', decompressedBuffer.toString('utf-8'), () => {
+                    console.log("Session downloaded ✅");
+                });
+            } else {
+                console.log("SESSION_ID is not a valid compressed buffer.");
+            }
+        } catch (err) {
+            console.error("Failed to load session:", err);
+        }
+    })();
+}
 
-  // Define WhatsApp Channel details
-  const whatsappChannelId = "120363369453603973@newsletter";
-  const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 9090;
+
+// Define WhatsApp Channel details
+const whatsappChannelId = "120363369453603973@newsletter";
+const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
 
   //=============================================
 
   async function connectToWA() {
   console.log("Connecting to WhatsApp ⏳️...");
-  
-  const sessionLoaded = await loadGiftedSession();
-  if (!sessionLoaded) {
-      console.log("Session file not found or failed to load. Waiting for QR code or session data...");
-  }
-  
-  const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
+  const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
 
   const conn = makeWASocket({
           logger: P({ level: 'silent' }),
-          printQRInTerminal: true, // Set to true to show QR if session fails/is new
+          printQRInTerminal: false,
           browser: Browsers.macOS("Firefox"),
           syncFullHistory: true,
           auth: state,
@@ -205,7 +158,7 @@ const {
   }
   } else if (connection === 'open') {
   console.log('🕹️ Installing Plugins')
-  // Note: path is already required above
+  const path = require('path');
   fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
   require("./plugins/" + plugin);
@@ -219,7 +172,7 @@ const {
     await conn.newsletterFollow(whatsappChannelId); 
     console.log("📬 Followed Shadow-Xtech newsletter.");
   } catch (e) {
-    console.error("❌ Failed to follow newsletter:", e.message);
+    console.error("❌ Failed to follow newsletter:", e);
   }
   // ------------------------------
 
@@ -229,7 +182,7 @@ const {
   // Construct the welcome message caption (Updated as requested)
   const caption = `
 ╭───────◇
-│ *✨ Connection Successful! Shadow-Xtech is Online ✨*
+│ *📡 Shadow-Xtech Connected 🌐*
 ╰───────◇
 ╭──〔 🤖 *Bot Status* 〕──◇
 ├─ ⚙️ *Mode:* ${config.MODE}
@@ -297,8 +250,7 @@ const {
   //=============readstatus=======
 
   conn.ev.on('messages.upsert', async(mek) => {
-    if (!mek || mek.messages.length === 0) return;
-    mek = mek.messages[0];
+    mek = mek.messages[0]
     if (!mek.message) return
     mek.message = (getContentType(mek.message) === 'ephemeralMessage')
     ? mek.message.ephemeralMessage.message
@@ -315,7 +267,7 @@ const {
     }
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
     const jawadlike = await conn.decodeJid(conn.user.id);
-    const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇵🇰', '💜', '💙', '🌝', '🖤', '💚'];
+    const emojis = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤', '🤍', '🩷', '🩵', '🩶', '🌸', '🔥', '⚡', '🚩', '🪄', '🚀', '😎', '📡', '✅', '📶', '🛜', '😁', '🌐', '🌸', '🌙', '🎀', '⛅', '🌟', '✨', '🫧', '🌼', '💙', '🌝', '🖤', '💚'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     await conn.sendMessage(mek.key.remoteJid, {
       react: {
@@ -955,8 +907,6 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
   });
 
   app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
-  
-  // Start connection after server initialization
   setTimeout(() => {
   connectToWA()
   }, 4000);
