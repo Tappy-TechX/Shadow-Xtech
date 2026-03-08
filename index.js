@@ -103,8 +103,9 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   //=============================================
 
   async function connectToWA() {
+  await loadSession();
   console.log("Connecting to WhatsApp ⏳️...");
-  const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
+  const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/')
   var { version } = await fetchLatestBaileysVersion()
 
   const conn = makeWASocket({
@@ -134,12 +135,20 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   console.log('Bot connected to whatsapp 🪆')
 
   // --- Newsletter Follow ---
+  if (!newsletterFollowed) {
+  newsletterFollowed = true;
   try {
-    await conn.newsletterFollow(whatsappChannelId); 
-    console.log("📬 Followed Shadow-Xtech newsletter.");
+    const subs = await conn.newsletterFetchAllSubscriptions().catch(() => []);
+    if (subs.some(s => s.id === whatsappChannelId)) {
+      console.log(`[🟢] Already following newsletter: ${whatsappChannelId}`);
+    } else {
+      await conn.newsletterFollow(whatsappChannelId);
+      console.log(`[📬] Followed newsletter: ${whatsappChannelId} at ${new Date().toLocaleString()}`);
+    }
   } catch (e) {
-    console.error("❌ Failed to follow newsletter:", e);
+    console.error(`[🔴] Failed to follow newsletter ${whatsappChannelId}:`, e);
   }
+}
   // ------------------------------
 
   // Select a random fancy message
