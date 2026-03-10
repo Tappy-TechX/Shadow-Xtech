@@ -110,7 +110,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 
   const Gifted = GiftedConnect({
           logger: P({ level: 'silent' }),
-          printQRInTerminal: false,
+          printQRInTerminal: !config.SESSION_ID,
           browser: Browsers.macOS("Firefox"),
           syncFullHistory: true,
           auth: state,
