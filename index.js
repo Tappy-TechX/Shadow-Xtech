@@ -1,5 +1,5 @@
 const {
-  default: makeWASocket,
+  default: giftedConnect,
     useMultiFileAuthState,
     DisconnectReason,
     jidNormalizedUser,
@@ -102,13 +102,13 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 
   //=============================================
 
-  async function connectToWA() {
+  async function ConnectGiftedToWA() {
   await loadSession();
   console.log("Connecting to WhatsApp ⏳️...");
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
 
-  const conn = makeWASocket({
+  const Gifted = GiftedConnect({
           logger: P({ level: 'silent' }),
           printQRInTerminal: false,
           browser: Browsers.macOS("Firefox"),
