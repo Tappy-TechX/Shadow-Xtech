@@ -121,7 +121,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   const { connection, lastDisconnect } = update
   if (connection === 'close') {
   if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
-  connectToWA()
+  ConnectGiftedToWA()
   }
   } else if (connection === 'open') {
   console.log('🕹️ Installing Plugins')
@@ -869,5 +869,5 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
 
   app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
   setTimeout(() => {
-  connectToWA()
+  ConnectGiftedToWA()
   }, 4000);
