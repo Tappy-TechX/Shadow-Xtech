@@ -66,6 +66,7 @@
     "ws": "^8.17.1",
     "yargs": "^17.6.0",
     "yargs-parser": "^21.1.1",
+    "zlib": "latest",
     "body-parser": "^1.20.2"
   }
 }
