@@ -103,7 +103,6 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   //=============================================
 
   async function connectToWA() {
-  await loadSession();
   console.log("Connecting to WhatsApp ⏳️...");
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
@@ -140,13 +139,13 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   try {
     const subs = await conn.newsletterFetchAllSubscriptions().catch(() => []);
     if (subs.some(s => s.id === whatsappChannelId)) {
-      console.log(`[🟢] Already following newsletter: ${whatsappChannelId}`);
+      console.log(`🟢 Already following newsletter: ${whatsappChannelId}`);
     } else {
       await conn.newsletterFollow(whatsappChannelId);
-      console.log(`[📬] Followed newsletter: ${whatsappChannelId} at ${new Date().toLocaleString()}`);
+      console.log(`📬 Followed newsletter: ${whatsappChannelId} at ${new Date().toLocaleString()}`);
     }
   } catch (e) {
-    console.error(`[🔴] Failed to follow newsletter ${whatsappChannelId}:`, e);
+    console.error(`🔴 Failed to follow newsletter ${whatsappChannelId}:`, e);
   }
 }
   // ------------------------------
@@ -857,7 +856,7 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
   app.get("/keep-alive", (req, res) => {
       res.json({
           status: "alive",
-          message: "[🟢]Shadow-Xtech is running.",
+          message: "🟢 Shadow-Xtech is running.",
           timestamp: new Date().toISOString()
       });
   });
@@ -867,7 +866,7 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
       res.sendFile(path.join(__dirname, "./lib/shadow.html"));
   });
 
-  app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
+  app.listen(port, () => console.log(`🌐 Server listening on port http://localhost:${port}`));
   setTimeout(() => {
   connectToWA()
   }, 4000);
