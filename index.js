@@ -103,9 +103,8 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   //=============================================
 
   async function connectToWA() {
-    try {
-        await loadSession();
-        console.log("Connecting to WhatsApp ⏳️...");
+  await loadSession();
+  console.log("♻️ Connecting to WhatsApp ⏳️...");
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
 
@@ -132,8 +131,8 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   require("./plugins/" + plugin);
   }
   });
-  console.log('Plugins installed successful ✅')
-  console.log('Bot connected to whatsapp 🪆')
+  console.log('📂 Plugins installed successful ✅')
+  console.log('🟢 Bot connected to whatsapp 🚀')
 
   // --- Newsletter Follow ---
   if (!newsletterFollowed) {
