@@ -10,6 +10,7 @@ module.exports = {
     // =============================== 
     // 🔐 Session 
     // =============================== 
+    // This will first check Katabump Variables, then fallback to the string below
     SESSION_ID: process.env.SESSION_ID || "Shadow-Xtech~TIZS1bRB#tdEuL2kc47iAhItPKKQ_XaqkKLXp8zcqfR9_BoFxsQ8",        
 
     // =============================== 
@@ -76,10 +77,8 @@ module.exports = {
     // =============================== 
     // ♻️ Antidelete Settings 
     // =============================== 
-    ANTI_DELETE_GC: process.env.ANTI_DELETE_GC || "true",     // Enable in Group Chats 
-    ANTI_DELETE_DM: process.env.ANTI_DELETE_DM || "true",     // Enable in Private Chats        
-
-    /* ANTI_DEL_PATH: "log"  = send deleted messages to bot inbox "same" = resend in same chat */ 
+    ANTI_DELETE_GC: process.env.ANTI_DELETE_GC || "true", 
+    ANTI_DELETE_DM: process.env.ANTI_DELETE_DM || "true", 
     ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log",        
 
     // =============================== 
@@ -104,6 +103,6 @@ module.exports = {
     // =============================== 
     // 🧠 OpenAI Settings 
     // =============================== 
-    OPENAI_API_KEY: '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'        
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY || "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"        
     
 };
