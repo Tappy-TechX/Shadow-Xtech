@@ -103,7 +103,9 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   //=============================================
 
   async function connectToWA() {
-  console.log("Connecting to WhatsApp ⏳️...");
+    try {
+        await loadSession();
+        console.log("Connecting to WhatsApp ⏳️...");
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
 
