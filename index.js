@@ -146,9 +146,9 @@ async function connectToWA() {
         }
 
         const startMess = {
-            image: { url: 'https://files.catbox.moe/yz5yle.jpg' },
+            image: { url: 'https://files.catbox.moe/og4tsk.jpg' },
             caption: `*ð—¡ð—¢ð—©ð—” ð—«ð— ð—— ð—œð—¦ ð—”ð—Ÿð—œð—©ð—˜*\n\nPrefix: ${config.PREFIX}\nOwner: ${config.OWNER_NAME}\nMode: ${config.MODE}`,
-            contextInfo: { forwardedNewsletterMessageInfo: { newsletterJid: '120363382023564830@newsletter', newsletterName: "POKID-XMD" } }
+            contextInfo: { forwardedNewsletterMessageInfo: { newsletterJid: '120363369453603973@newsletter', newsletterName: "POKID-XMD" } }
         }
         await conn.sendMessage(conn.user.id, startMess)
       }
