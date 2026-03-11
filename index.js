@@ -27,8 +27,10 @@ const {
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
   const fs = require('fs')
   const ff = require('fluent-ffmpeg')
+  const zlib = require('zlib')
   const P = require('pino')
   const config = require('./config') 
+  const { promisify } = require('util')
   const GroupEvents = require('./lib/groupevents');
   const qrcode = require('qrcode-terminal')
   const StickersTypes = require('wa-sticker-formatter')
@@ -91,10 +93,37 @@ const {
   setInterval(clearTempDir, 5 * 60 * 1000);
 
   //===================SESSION-AUTH============================
-const { loadSession } = require("./lib/session");
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 9090;
+
+const sessionDir = path.join(__dirname, 'sessions');
+const credsPath = path.join(sessionDir, 'creds.json');
+
+async function loadGiftedSession() {
+    if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
+    if (fs.existsSync(credsPath)) return true;
+    if (config.SESSION_ID && config.SESSION_ID.startsWith("Gifted~")) {
+        const compressedBase64 = config.SESSION_ID.substring("Gifted~".length);
+        try {
+            const compressedBuffer = Buffer.from(compressedBase64, 'base64');
+            if (compressedBuffer[0] === 0x1f && compressedBuffer[1] === 0x8b) {
+                const gunzip = promisify(zlib.gunzip);
+                const decompressedBuffer = await gunzip(compressedBuffer);
+                await fs.promises.writeFile(credsPath, decompressedBuffer.toString('utf-8'));
+                cmdLogger.success("Session restored successfully ✅");
+                return true;
+            }
+        } catch (error) {
+            cmdLogger.error("Failed to decompress session ID");
+            return false;
+        }
+    } else {
+        cmdLogger.warning('Please add your SESSION_ID to the env!');
+    }
+    return false;
+}
+
+const app = express()
+const port = process.env.PORT || 9090
+let conn
 
 // Define WhatsApp Channel details
 const whatsappChannelId = "120363369453603973@newsletter";
