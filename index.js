@@ -108,7 +108,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
 
-  const Gifted = GiftedConnect({
+  const conn = GiftedConnect({
           logger: P({ level: 'silent' }),
           printQRInTerminal: !config.SESSION_ID,
           browser: Browsers.macOS("Firefox"),
