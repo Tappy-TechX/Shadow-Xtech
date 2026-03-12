@@ -90,9 +90,8 @@ const {
   // Clear the temp directory every 5 minutes
   setInterval(clearTempDir, 5 * 60 * 1000);
 
-  //===================SESSION-AUTH============================
-// index.js
-const { loadSession } = require('./lib/session');
+//===================SESSION-AUTH============================
+const { loadSession } = require("./lib/session");
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 9090;
@@ -101,22 +100,25 @@ const port = process.env.PORT || 9090;
 const whatsappChannelId = "120363369453603973@newsletter";
 const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
 
-  //=============================================
+//=============================================
 
-  async function connectToWA() {
-  await loadSession(process.env.SESSION_ID);
+async function connectToWA() {
+
+  await loadSession(config.SESSION_ID);
+
   console.log("Connecting to WhatsApp ⏳️...");
+
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/')
   var { version } = await fetchLatestBaileysVersion()
 
   const conn = makeWASocket({
-          logger: P({ level: 'silent' }),
-          printQRInTerminal: false,
-          browser: Browsers.macOS("Firefox"),
-          syncFullHistory: true,
-          auth: state,
-          version
-          })
+      logger: P({ level: 'silent' }),
+      printQRInTerminal: false,
+      browser: Browsers.macOS("Firefox"),
+      syncFullHistory: true,
+      auth: state,
+      version
+  })
 
   conn.ev.on('connection.update', async (update) => { 
   const { connection, lastDisconnect } = update
