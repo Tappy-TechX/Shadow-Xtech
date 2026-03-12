@@ -8,9 +8,9 @@ function convertToBool(text, fault = 'true') {
 module.exports = {        
 
     // =============================== 
-    // 🔐 Session 
+    //  🔐 Session 
     // =============================== 
-    SESSION_ID: process.env.SESSION_ID || "",        
+    SESSION_ID: process.env.SESSION_ID || "Shadow-Xtech~TIZS1bRB#tdEuL2kc47iAhItPKKQ_XaqkKLXp8zcqfR9_BoFxsQ8",        
 
     // =============================== 
     // 📊 Status Settings 
@@ -91,7 +91,9 @@ module.exports = {
     // =============================== 
     // 👨🏾‍💻 Developer Settings 
     // =============================== 
-    DEV: process.env.DEV || "254759000340",        
+    DEV: process.env.DEV || "254759000340",  
+    DATABASE_URL: process.env.DATABASE_URL || "postgresql://neondb_owner:npg_AeNhu3a2VFOM@ep-bitter-bird-an8g7zvq-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=verify-full&channel_binding=require",
+          
 
     // =============================== 
     // 🖥️ Channel React Settings 
