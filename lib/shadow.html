@@ -1,77 +1,392 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHADOW-XTECH | WHATSAPP BOT</title>
-
-    <!-- Metadata for SEO -->
-    <meta name="description" content="SHADOW-XTECH | WHATSAPP BOT">
-    <meta property="og:title" content="SHADOW-XTECH | WHATSAPP BOT">
-    <meta property="og:description" content="[🟠] Hey | There, Shadow-Xtech is Active and Running [🟢]">
-    <meta property="og:image" content="https://files.catbox.moe/og4tsk.jpg">
-    <link rel="icon" href="https://files.catbox.moe/og4tsk.jpg">
-
+    <title>Dynamic Display</title>
     <style>
+        :root {
+            --background-image: url('https://files.catbox.moe/kk7xdb.jpg');
+            --primary-color: #00bfff; /* Deep Sky Blue */
+            --secondary-color: #ffffff; /* White */
+            --text-shadow-color: rgba(0, 191, 255, 0.7);
+        }
+
         body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--secondary-color);
+            background-color: #0a0a0a; /* Dark background */
+            overflow: hidden; /* Prevent scrollbars */
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #121212;
-            color: white;
-            font-family: Arial, sans-serif;
-            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            background-image: var(--background-image);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
-        .glow {
-            font-size: 2em;
-            color: #fff;
+        .background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 0;
+        }
+
+        .shapes-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* Allows clicks to pass through to elements below */
+        }
+
+        .shape {
+            position: absolute;
+            background-color: rgba(0, 191, 255, 0.3); /* Semi-transparent blue */
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.6), 0 0 5px rgba(0, 191, 255, 0.4);
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+            border-radius: 50%; /* Default for circle */
+        }
+
+        /* Specific shape styles */
+        .shape.circle {
+            border-radius: 50%;
+        }
+
+        .shape.triangle {
+            width: 0;
+            height: 0;
+            background-color: transparent;
+            border-left: 30px solid transparent; /* Smaller base for responsiveness */
+            border-right: 30px solid transparent;
+            border-bottom: 60px solid rgba(0, 191, 255, 0.3); /* Base color for triangle */
+        }
+
+        .shape.square {
+            border-radius: 10px; /* Slightly rounded corners */
+        }
+
+        .shape.hexagon {
+            width: 80px; /* Responsive width */
+            height: 40px; /* Responsive height */
+            background-color: rgba(0, 191, 255, 0.3);
+            position: absolute;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        /* General animation for shapes */
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-200px) scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes float-rotate {
+            0% {
+                transform: translateY(0) scale(1) rotate(0deg);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-200px) scale(1.5) rotate(360deg);
+                opacity: 0.8;
+            }
+        }
+
+        .overlay {
+            position: relative;
+            z-index: 2;
             text-align: center;
-            animation: glowing 10s infinite;
+            padding: 20px;
+            backdrop-filter: blur(5px); /* Slight blur effect on content */
+            background: rgba(0, 0, 0, 0.3); /* Semi-transparent dark background for text */
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.4);
         }
 
-        @keyframes glowing {
-            0% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000; }
-            20% { text-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900, 0 0 30px #ff9900, 0 0 40px #ff9900, 0 0 50px #ff9900; }
-            40% { text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff00, 0 0 40px #ffff00, 0 0 50px #ffff00; }
-            60% { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00, 0 0 50px #00ff00; }
-            80% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff, 0 0 50px #00ffff; }
-            100% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000; }
+        .info-display {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
         }
 
-        .developer {
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 1.2em;
-            margin-top: 20px;
-            color: #aaa;
+            text-shadow: 0 0 8px var(--text-shadow-color);
+        }
+
+        .info-item span {
+            display: inline-block;
+        }
+
+        #current-time, #current-date, #battery-level, #current-year, #day-name {
+            font-weight: 500;
+        }
+
+        #bot-runtime {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 5px var(--text-shadow-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .info-item {
+                font-size: 1em;
+            }
+            .shape.triangle {
+                border-left-width: 20px;
+                border-right-width: 20px;
+                border-bottom-width: 40px;
+            }
+            .shape.hexagon {
+                width: 50px;
+                height: 25px;
+            }
+        }
+        @media (max-width: 480px) {
+            .info-item {
+                font-size: 0.9em;
+            }
+            .shape.triangle {
+                border-left-width: 15px;
+                border-right-width: 15px;
+                border-bottom-width: 30px;
+            }
+            .shape.hexagon {
+                width: 40px;
+                height: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="glow"> ֆཏ𝖺𝖽𝗈𝗐-𝗑𝗍𝖾𝖼𝗁 𝖢𝗈𝗇𝗇𝖾𝖼𝗍𝖾𝖽 ֆ𝗎𝖼𝖼𝖾ֆֆ𝖿𝗎𝗅 ! ✅️</div> </br>
-    <div class="current-info" id="Info">Loading...</div>
-    <div class="developer">Developed by Tappy-Black</div>
+    <div class="background-container">
+        <div class="shapes-container">
+            <!-- Shapes will be generated by JS -->
+        </div>
+        <div class="overlay">
+            <div class="info-display">
+                <div class="info-item">
+                    <span id="day-emoji"></span> <span id="day-name"></span>
+                </div>
+                <div class="info-item">
+                    <span id="time-emoji"></span> <span id="current-time"></span>
+                </div>
+                <div class="info-item">
+                    <span id="date-emoji"></span> <span id="current-date"></span>
+                </div>
+                <div class="info-item">
+                    <span id="battery-emoji"></span> <span id="battery-level"></span>
+                </div>
+                <div class="info-item">
+                    <span id="year-emoji"></span> <span id="current-year"></span>
+                </div>
+                <div class="info-item">
+                    <span id="bot-runtime"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const botStartTime = new Date(); // Record the start time of the bot's runtime
+
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // --- Emoji Functions ---
+        function getDayEmoji(dayIndex) {
+            const emojis = ["☀️", "💼", "💡", "🌳", "🚀", "🎉", "🏖️"];
+            return emojis[dayIndex] || "📅";
+        }
+
+        function getTimeEmoji(hours) {
+            if (hours >= 5 && hours < 12) return "🌅"; // Morning
+            if (hours >= 12 && hours < 18) return "☀️"; // Afternoon
+            if (hours >= 18 && hours < 22) return "🌇"; // Evening
+            return "🌙"; // Night
+        }
+
+        function getBatteryEmoji(level, charging) {
+            if (charging) return "⚡";
+            if (level >= 0.8) return "🔋";
+            if (level >= 0.5) return "💡";
+            if (level >= 0.2) return "⚠️";
+            return "💀"; // Critically low
+        }
+
+        function getYearEmoji(year) {
+            // Simple emoji for the year, can be customized
+            if (year === 2025) return "🌟";
+            return "🕰️";
+        }
+
+        // --- Update Functions ---
+        function updateDateTime() {
+            const now = new Date();
+
+            // Day and Date
+            const dayIndex = now.getDay();
+            const dayName = dayNames[dayIndex];
+            const dateNum = now.getDate();
+            const monthIndex = now.getMonth();
+            const monthName = monthNames[monthIndex];
+            const year = now.getFullYear(); 
+
+            document.getElementById('day-emoji').textContent = getDayEmoji(dayIndex);
+            document.getElementById('day-name').textContent = dayName;
+            document.getElementById('date-emoji').textContent = "📅"; // Static emoji for date
+            document.getElementById('current-date').textContent = `${dateNum} ${monthName}`;
+            document.getElementById('year-emoji').textContent = getYearEmoji(year);
+            document.getElementById('current-year').textContent = year;
+
+            // Time
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+
+            document.getElementById('time-emoji').textContent = getTimeEmoji(hours);
+            document.getElementById('current-time').textContent = `${displayHours}:${minutes}:${seconds} ${ampm}`;
+        }
+
+        function updateBatteryStatus() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    const level = battery.level;
+                    const charging = battery.charging;
+                    const batteryLevelPercentage = Math.round(level * 100);  
+
+                    document.getElementById('battery-emoji').textContent = getBatteryEmoji(level, charging);
+                    document.getElementById('battery-level').textContent = `${batteryLevelPercentage}% ${charging ? '(Charging)' : ''}`;
+                }).catch(error => {
+                    console.error("Battery Status API not available or failed:", error);
+                    document.getElementById('battery-emoji').textContent = "❓";
+                    document.getElementById('battery-level').textContent = "N/A";
+                });
+            } else {
+                document.getElementById('battery-emoji').textContent = "❓";
+                document.getElementById('battery-level').textContent = "Browser not supported";
+            }
+        }
+
+        function updateBotRuntime() {
+            const now = new Date();
+            const diffMs = now - botStartTime; // Difference in milliseconds
+
+            const seconds = Math.floor(diffMs / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            const displaySeconds = seconds % 60;
+            const displayMinutes = minutes % 60;
+            const displayHours = hours % 24;
+
+            let runtimeString = "";
+            if (days > 0) runtimeString += `${days}d `;
+            if (displayHours > 0 || days > 0) runtimeString += `${displayHours}h `;
+            if (displayMinutes > 0 || hours > 0 || days > 0) runtimeString += `${displayMinutes}m `;
+            runtimeString += `${displaySeconds}s`;
+
+            document.getElementById('bot-runtime').textContent = `Bot Runtime: ${runtimeString}`;
+        }
+
+        // --- Shape Generation ---
+        const shapesContainer = document.querySelector('.shapes-container');
+        const shapeTypes = ['circle', 'triangle', 'square', 'hexagon'];
+        const numberOfShapes = 30; // Number of shapes to display
+
+        function createShape() {
+            const shapeElement = document.createElement('div');
+            shapeElement.classList.add('shape');
+
+            // Randomly select shape type
+            const randomType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+            shapeElement.classList.add(randomType);
+
+            // Random position
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const size = Math.random() * 50 + 20; // Random size between 20px and 70px
+
+            shapeElement.style.width = `${size}px`;
+            shapeElement.style.height = `${size}px`;
+            shapeElement.style.left = `${Math.random() * (viewportWidth - size)}px`;
+            shapeElement.style.top = `${Math.random() * (viewportHeight - size)}px`;
+
+            // Random animation properties
+            const animationDuration = Math.random() * 10 + 5; // 5s to 15s
+            const animationDelay = Math.random() * 5; // 0s to 5s
+            const animationDirection = Math.random() < 0.5 ? 'alternate' : 'normal';
+            const animationTiming = ['ease-in-out', 'ease-linear', 'ease-out'][Math.floor(Math.random() * 3)];
+
+            shapeElement.style.animationDuration = `${animationDuration}s`;
+            shapeElement.style.animationDelay = `${animationDelay}s`;
+            shapeElement.style.animationDirection = animationDirection;
+            shapeElement.style.animationTimingFunction = animationTiming;
+
+            // Apply float animation for circles/squares, float-rotate for triangles/hexagons
+            if (randomType === 'triangle' || randomType === 'hexagon') {
+                shapeElement.style.animationName = 'float-rotate';
+            } else {
+                shapeElement.style.animationName = 'float';
+            }
+
+            shapesContainer.appendChild(shapeElement);
+        }
+
+        // Generate shapes on load
+        for (let i = 0; i < numberOfShapes; i++) {
+            createShape();
+        }
+
+        // --- Initial Calls and Intervals ---
+        updateDateTime();
+        updateBatteryStatus();
+        updateBotRuntime();
+
+        // Update every second
+        setInterval(() => {
+            updateDateTime();
+            updateBotRuntime();
+        }, 1000);
+
+        // Update battery status periodically (e.g., every minute)
+        setInterval(updateBatteryStatus, 60000);
+
+        // Handle window resizing to re-position shapes if needed (optional, but good practice)
+        window.addEventListener('resize', () => {
+            // Clear existing shapes and re-create them to fit new dimensions
+            shapesContainer.innerHTML = '';
+            for (let i = 0; i < numberOfShapes; i++) {
+                createShape();
+            }
+        });
+
+    </script>
 </body>
-<script>
-    function updateInfo() {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-      const dayName = dayNames[now.getDay()];
-      const date = now.toLocaleDateString(); // Format date as MM/DD/YYYY
-
-      const timeString = `${hours}:${minutes}:${seconds}`;
-      const infoString = `Time: ${timeString} | Date: ${date} | Day: ${dayName}`;
-      document.getElementById('Info').textContent = infoString;
-    }
-
-    // Update info every second
-    setInterval(updateInfo, 1000);
-
-    // Initial call to set info immediately
-    updateInfo();
-</script>
 </html>
