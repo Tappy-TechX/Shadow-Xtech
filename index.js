@@ -93,7 +93,6 @@ const {
   //===================SESSION-AUTH============================
 // index.js
 const { loadSession } = require('./lib/session');
-const { useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 9090;
