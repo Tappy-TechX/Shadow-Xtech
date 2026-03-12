@@ -167,13 +167,13 @@ console.log("Newsletter follow error:", err)
 }
 
 /* ===============================
-   WELCOME MESSAGE
+   BUILD STATUS MESSAGE
 ================================ */
 
 const randomFancyMessage =
 fancyMessages[Math.floor(Math.random() * fancyMessages.length)]
 
-const caption = `
+let up = `
 ╭───────◇
 │ 📡 *Shadow-Xtech Connected*
 ╰───────◇
@@ -198,10 +198,18 @@ const caption = `
 © Powered By Black-Tappy
 `
 
+/* ===============================
+   SEND MESSAGE AFTER CONNECT
+================================ */
+
+setTimeout(async () => {
+
 await conn.sendMessage(conn.user.id,{
 image:{ url:"https://files.catbox.moe/h8aep1.jpeg" },
-caption: caption
+caption: up
 })
+
+},2000)
 
 /* ===============================
    CALL HANDLER
