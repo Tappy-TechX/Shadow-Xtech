@@ -43,7 +43,8 @@ const {
   const Crypto = require('crypto')
   const path = require('path')
   const prefix = config.PREFIX
-  const { loadSession } = require("./lib/session")
+
+  // --- NEW: Import the call handler module ---
   const callHandler = require('./lib/callhandler');
   // ------------------------------------------
 
@@ -90,6 +91,8 @@ const {
   setInterval(clearTempDir, 5 * 60 * 1000);
 
   //===================SESSION-AUTH============================
+const { loadSession } = require("./lib/session")  
+await loadSession(config.SESSION_ID)
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 9090;
@@ -99,11 +102,11 @@ const whatsappChannelId = "120363369453603973@newsletter";
 const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
 
   //=============================================
+
   async function connectToWA() {
-  await loadSession(config.SESSION_ID)
   console.log("Connecting to WhatsApp ⏳️...");
-  const { state, saveCreds } = await useMultiFileAuthState("./session")
-  const { version } = await fetchLatestBaileysVersion()
+  const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/')
+  var { version } = await fetchLatestBaileysVersion()
 
   const conn = makeWASocket({
           logger: P({ level: 'silent' }),
