@@ -2,6 +2,39 @@ const config = require('../config');
 const { cmd } = require('../command');
 
 cmd({
+    on: "body"
+},
+async (client, message) => {
+
+if (config.CUSTOM_REACT !== "true") return;
+
+try {
+
+const jid = message.key.remoteJid;
+const isGroup = jid.endsWith("@g.us");
+
+// Mode filter
+if (config.CUSTOM_REACT_MODE === "group" && !isGroup) return;
+if (config.CUSTOM_REACT_MODE === "private" && isGroup) return;
+
+// pick emoji
+const emojis = config.CUSTOM_REACT_EMOJIS.split(",");
+const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+await client.sendMessage(jid, {
+react: {
+text: emoji,
+key: message.key
+}
+});
+
+} catch (e) {
+console.log("🔴 Auto React Error:", e);
+}
+
+});
+
+cmd({
     pattern: "custom-react",
     alias: ["customreact"],
     react: "🔥",
@@ -66,7 +99,7 @@ if (input.startsWith("emoji")) {
 const emojis = match.replace(/emoji/i,"").trim();
 
 if (!emojis) {
-return reply("*⚠️ Example:*\n.custom-react emoji 😂,🔥,💀");
+return reply("*🫟 Example: `.custom-react emoji 😂,🔥,💀`*");
 }
 
 config.CUSTOM_REACT_EMOJIS = emojis;
