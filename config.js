@@ -76,12 +76,8 @@ module.exports = {
     // =============================== 
     // ♻️ Antidelete Settings 
     // =============================== 
-    ANTI_DELETE_GC: process.env.ANTI_DELETE_GC || "true",     // Enable in Group Chats 
-    ANTI_DELETE_DM: process.env.ANTI_DELETE_DM || "true",     // Enable in Private Chats        
-
-    /* ANTI_DEL_PATH: "log"  = send deleted messages to bot inbox "same" = resend in same chat */ 
-    ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log",        
-
+    ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log", // "log" sends to bot owner, "chat" sends to chat
+    ANTI_DELETE: process.env.ANTI_DELETE || "true", // Enable or disable anti-delete feature globally
     // =============================== 
     // 🌍 Mode Settings 
     // =============================== 
@@ -98,10 +94,8 @@ module.exports = {
     // =============================== 
     // 🖥️ Channel React Settings 
     // =============================== 
-    channelReact: { 
-        enabled: true,            
-        emojis: ["🔥", "❤️", "😂", "🥳", "😁"] 
-    },        
+    CHANNEL_REACT: process.env.CHANNEL_REACT || "true",
+    CHANNEL_REACT_EMOJI: process.env.CHANNEL_REACT_EMOJI || "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍", 
 
     // =============================== 
     // 🧠 OpenAI Settings 
