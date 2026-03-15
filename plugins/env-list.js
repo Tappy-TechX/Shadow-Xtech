@@ -17,8 +17,9 @@ cmd({
 },
 async (conn, mek, m, { from, quoted, reply, isCreator }) => {
     try {
+
         if (!isCreator) {
-            return reply("*_🚫 Owner Only Command! You're not authorized to view bot configurations._*");
+            return reply("🚫 *Owner Only Command!* You're not authorized to view bot configurations.");
         }
 
         let envSettings = `
@@ -58,7 +59,7 @@ async (conn, mek, m, { from, quoted, reply, isCreator }) => {
 │
 ├─❏ *🎨 MEDIA*
 │  ├─∘ *Alive Img:* ${config.ALIVE_IMG}
-│  ├─∘ *Menu Video:* https://files.catbox.moe/tmynfd.mp4
+│  ├─∘ *Menu Img:* ${config.MENU_IMAGE_URL}
 │  ├─∘ *Alive Msg:* ${config.LIVE_MSG}
 │  └─∘ *Sticker Pack:* ${config.STICKER_NAME}
 │
@@ -66,6 +67,7 @@ async (conn, mek, m, { from, quoted, reply, isCreator }) => {
 │  ├─∘ *Auto Typing:* ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
 │  ├─∘ *Auto Record:* ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
 │  ├─∘ *Anti-Del Path:* ${config.ANTI_DEL_PATH}
+│  ├─∘ *Anti-Delete:* ${isEnabled(config.ANTI_DELETE) ? "✅" : "❌"}
 │  └─∘ *Dev Number:* ${config.DEV}
 │
 ╰───『 *${config.DESCRIPTION}* 』───❏
@@ -74,10 +76,8 @@ async (conn, mek, m, { from, quoted, reply, isCreator }) => {
         await conn.sendMessage(
             from,
             {
-                video: { url: "https://files.catbox.moe/tmynfd.mp4" },
-                mimetype: "video/mp4",
+                image: { url: "https://files.catbox.moe/73zei0.jpg" },
                 caption: envSettings,
-                gifPlayback: true, // makes it loop like a GIF
                 contextInfo: {
                     mentionedJid: [m.sender],
                     forwardingScore: 999,
@@ -89,6 +89,6 @@ async (conn, mek, m, { from, quoted, reply, isCreator }) => {
 
     } catch (error) {
         console.error('Env command error:', error);
-        reply(`*_🔴 Error displaying config: ${error.message}*`);
+        reply(`❌ Error displaying config: ${error.message}`);
     }
 });
