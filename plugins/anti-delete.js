@@ -32,12 +32,12 @@ cmd({
             case 'set gc':
                 const gcStatus = await getAnti('gc');
                 await setAnti('gc', !gcStatus);
-                return reply(`*🔄 _AntiDelete for Group Chats is now ${!gcStatus ? 'ENABLED' : 'DISABLED'}._*`);
+                return reply(`*🔄 _AntiDelete for Group Chats is now ${!gcStatus ? '🟢 ENABLED' : '🔴 DISABLED'}._*`);
 
             case 'set dm':
                 const dmStatus = await getAnti('dm');
                 await setAnti('dm', !dmStatus);
-                return reply(`*🔄 _AntiDelete for Direct Messages is now ${!dmStatus ? 'ENABLED' : 'DISABLED'}._*`);
+                return reply(`*🔄 _AntiDelete for Direct Messages is now ${!dmStatus ? '🟢 ENABLED' : '🔴 DISABLED'}._*`);
 
             case 'set all':
                 await setAnti('gc', true);
