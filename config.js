@@ -35,7 +35,7 @@ module.exports = {
     MENTION_REPLY: process.env.MENTION_REPLY || "false", 
     CUSTOM_REACT: process.env.CUSTOM_REACT || "false", 
     CUSTOM_REACT_EMOJIS: process.env.CUSTOM_REACT_EMOJIS || "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍",     
-    CUSTOM_REACT_MODE: process.env.CUSTOM_REACT_MODE || "all"   
+    CUSTOM_REACT_MODE: process.env.CUSTOM_REACT_MODE || "all",
 
     // =============================== 
     // 🤖 Bot Identity 
