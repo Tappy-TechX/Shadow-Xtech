@@ -1,5 +1,5 @@
 const { cmd } = require('../command');
-const { getAnti, setAnti, initializeAntiDeleteSettings } = require('../data/antilib');
+const { getAnti, setAnti, initializeAntiDeleteSettings } = require('../data/antidel');
 
 // Initialize settings
 initializeAntiDeleteSettings();
