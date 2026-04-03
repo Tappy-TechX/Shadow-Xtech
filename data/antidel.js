@@ -23,6 +23,7 @@ let isInitialized = false;
 
 async function initializeAntiDeleteSettings() {
     if (isInitialized) return;
+
     try {
         await AntiDelDB.sync();
         await AntiDelDB.findOrCreate({
@@ -39,8 +40,10 @@ async function setAnti(type, status) {
     try {
         await initializeAntiDeleteSettings();
         const record = await AntiDelDB.findByPk(1);
+
         if (type === 'gc') record.gc_status = status;
         else if (type === 'dm') record.dm_status = status;
+
         await record.save();
         return true;
     } catch (error) {
@@ -64,6 +67,7 @@ async function getAllAntiDeleteSettings() {
     try {
         await initializeAntiDeleteSettings();
         const record = await AntiDelDB.findByPk(1);
+
         return {
             gc_status: record.gc_status,
             dm_status: record.dm_status
