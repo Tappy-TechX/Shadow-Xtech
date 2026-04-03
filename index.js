@@ -43,7 +43,8 @@ const {
   const Crypto = require('crypto')
   const path = require('path')
   const prefix = config.PREFIX
-
+  
+  const { saveMessage } = require('./lib/store');
   // --- NEW: Import the call handler module ---
   const callHandler = require('./lib/callhandler');
   // ------------------------------------------
@@ -210,14 +211,23 @@ const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs
 
   //==============================
 
-  conn.ev.on('messages.update', async updates => {
-    for (const update of updates) {
-      if (update.update.message === null) {
-        console.log("Delete Detected:", JSON.stringify(update, null, 2));
-        await AntiDelete(conn, updates);
+  // ✅ Save all messages
+  conn.ev.on('messages.upsert', async ({ messages }) => {
+      for (const mek of messages) {
+          if (!mek.message) continue;
+          saveMessage(mek, mek.key.remoteJid);
       }
-    }
   });
+
+  // ✅ Detect deletes
+  conn.ev.on('messages.update', async (updates) => {
+      for (const update of updates) {
+          if (update.update?.message === null || update.update?.messageStubType) {
+              console.log("Delete Detected:", JSON.stringify(update, null, 2));
+              await AntiDelete(conn, [update]);
+          }
+      }
+  }); 
   //==============================
 
   conn.ev.on("group-participants.update", (update) => GroupEvents(conn, update));
