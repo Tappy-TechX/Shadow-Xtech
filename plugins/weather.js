@@ -76,7 +76,7 @@ async (conn, mek, m, { from, q, reply, sender }) => {
                     isForwarded: true,
                     forwardedNewsletterMessageInfo: {
                         newsletterJid: '120363369453603973@newsletter',
-                        newsletterName: "𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ",
+                        newsletterName: "𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ",
                         serverMessageId: 143
                     },
                     externalAdReply: {
