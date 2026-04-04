@@ -1,109 +1,107 @@
-const config = require('../config');
 const { cmd } = require('../command');
-const ytSearch = require('yt-search');
-const ytdl = require('ytdl-core');
-const fs = require('fs-extra');
-const fetch = require('node-fetch'); // Needed for thumbnail fetch
-
-// NEW IMPORTS (from your first code)
-const axios = require("axios");
+const axios = require('axios');
 const {
   generateWAMessageContent,
-  generateWAMessageFromContent,
-} = require("@whiskeysockets/baileys");
+  generateWAMessageFromContent
+} = require('@whiskeysockets/baileys');
 
 cmd({
-    pattern: "yts",
-    alias: ["ytsearch"],
-    use: ".yts <query>",
-    react: "🔎",
-    desc: "Search YouTube videos and get details, then download audio/video.",
-    category: "search",
-    filename: __filename
+  pattern: "yts",
+  desc: "Search YouTube videos",
+  category: "search",
+  use: ".yts <query>",
+  filename: __filename
 },
+async (conn, mek, m, { from, q, reply, react }) => {
+  try {
+    if (!q) return reply("❗ Please provide a search query");
 
-async (conn, mek, m, { from, q, reply }) => {
+    // 🔎 Searching reaction
+    await react("🔎");
 
-    if (!q) return reply("❌ Please provide a search query");
+    const apiUrl = `https://yts.giftedtech.co.ke/?q=${encodeURIComponent(q)}`;
+    const res = await axios.get(apiUrl, { timeout: 60000 });
 
-    try {
-        const apiUrl = `https://yts.giftedtech.co.ke/?q=${encodeURIComponent(q)}`;
-        const res = await axios.get(apiUrl, { timeout: 100000 });
-        const results = res.data?.videos;
+    const results = res.data?.videos;
 
-        if (!Array.isArray(results) || results.length === 0) {
-            return reply("❌ No results found");
-        }
-
-        const videos = results.slice(0, 5);
-
-        const cards = await Promise.all(
-            videos.map(async (vid) => ({
-                header: {
-                    title: `🎬 *${vid.name}*`,
-                    hasMediaAttachment: true,
-                    imageMessage: (
-                        await generateWAMessageContent(
-                            { image: { url: vid.thumbnail } },
-                            {
-                                upload: conn.waUploadToServer,
-                            },
-                        )
-                    ).imageMessage,
-                },
-                body: {
-                    text: `📺 Duration: ${vid.duration}\n👁️ Views: ${vid.views}${vid.published ? `\n📅 Published: ${vid.published}` : ""}`,
-                },
-                footer: { text: `> ${config.FOOTER || "Bot"}` },
-                nativeFlowMessage: {
-                    buttons: [
-                        {
-                            name: "cta_copy",
-                            buttonParamsJson: JSON.stringify({
-                                display_text: "Copy Link",
-                                copy_code: vid.url,
-                            }),
-                        },
-                        {
-                            name: "cta_url",
-                            buttonParamsJson: JSON.stringify({
-                                display_text: "Watch on YouTube",
-                                url: vid.url,
-                            }),
-                        },
-                    ],
-                },
-            }))
-        );
-
-        const message = generateWAMessageFromContent(
-            from,
-            {
-                viewOnceMessage: {
-                    message: {
-                        messageContextInfo: {
-                            deviceListMetadata: {},
-                            deviceListMetadataVersion: 2,
-                        },
-                        interactiveMessage: {
-                            body: { text: `🔍 YouTube Results for: *${q}*` },
-                            footer: {
-                                text: `📂 Displaying first *${videos.length}* videos`,
-                            },
-                            carouselMessage: { cards },
-                        },
-                    },
-                },
-            },
-            { quoted: mek }
-        );
-
-        await conn.relayMessage(from, message.message, {
-            messageId: message.key.id,
-        });
-
-    } catch (error) {
-        console.error("YTS Error:", error);
-        return reply("❌ Error fetching results. Try again later.");
+    if (!Array.isArray(results) || results.length === 0) {
+      await react("❌");
+      return reply("❌ No results found.");
     }
+
+    const videos = results.slice(0, 5);
+
+    const cards = await Promise.all(
+      videos.map(async (vid) => ({
+        header: {
+          title: `🎬 *${vid.name}*`,
+          hasMediaAttachment: true,
+          imageMessage: (
+            await generateWAMessageContent(
+              { image: { url: vid.thumbnail } },
+              { upload: conn.waUploadToServer }
+            )
+          ).imageMessage,
+        },
+        body: {
+          text: `📺 Duration: ${vid.duration}
+👁️ Views: ${vid.views}${vid.published ? `\n📅 Published: ${vid.published}` : ""}`,
+        },
+        footer: {
+          text: "> *YouTube Search*",
+        },
+        nativeFlowMessage: {
+          buttons: [
+            {
+              name: "cta_copy",
+              buttonParamsJson: JSON.stringify({
+                display_text: "Copy Link",
+                copy_code: vid.url,
+              }),
+            },
+            {
+              name: "cta_url",
+              buttonParamsJson: JSON.stringify({
+                display_text: "Watch on YouTube",
+                url: vid.url,
+              }),
+            },
+          ],
+        },
+      }))
+    );
+
+    const message = generateWAMessageFromContent(
+      from,
+      {
+        viewOnceMessage: {
+          message: {
+            interactiveMessage: {
+              body: {
+                text: `🔍 YouTube Results for: *${q}*`,
+              },
+              footer: {
+                text: `📂 Showing ${videos.length} results`,
+              },
+              carouselMessage: {
+                cards,
+              },
+            },
+          },
+        },
+      },
+      { quoted: mek }
+    );
+
+    await conn.relayMessage(from, message.message, {
+      messageId: message.key.id,
+    });
+
+    await react("✅");
+
+  } catch (error) {
+    console.error("YTS Error:", error);
+    await react("❌");
+    return reply("❌ Error fetching results. Try again later.");
+  }
 });
