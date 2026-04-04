@@ -1,131 +1,150 @@
 const { cmd } = require("../command");
-const config = require("../config");
+const axios = require("axios");
+const { sendButtons } = require("gifted-btns");
 
-// Quoted contact
+// Quoted contact for button context
 const quotedContact = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "⚙️ Channel | Info 🚀",
-            vcard: `BEGIN:VCARD
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast",
+  },
+  message: {
+    contactMessage: {
+      displayName: "⚙️ Channel | Info 🚀",
+      vcard: `BEGIN:VCARD
 VERSION:3.0
 FN:SCIFI
 ORG:Shadow-Xtech BOT;
 TEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001
-END:VCARD`
-        }
-    }
+END:VCARD`,
+    },
+  },
 };
 
-cmd({
+// Helper: WhatsApp readmore
+const generateReadMore = (text, maxLength = 200) => {
+  if (!text) return "";
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLength) return `\n\n📄 *Description:*\n${trimmed}`;
+  const visible = trimmed.slice(0, maxLength);
+  const hidden = trimmed.slice(maxLength);
+  const readmore = "\u200B".repeat(4000); // triggers WhatsApp "Read More"
+  return `\n\n📄 *Description:*\n${visible}${readmore}${hidden}`;
+};
+
+cmd(
+  {
     pattern: "cid",
     alias: ["newsletter", "id"],
     react: "📡",
     desc: "Get WhatsApp Channel info from link",
     category: "whatsapp",
-    filename: __filename
-},
-async (conn, mek, m, { from, q, reply, sender }) => {
+    filename: __filename,
+  },
+  async (conn, mek, m, { from, q, reply, sender, GiftedTechApi, GiftedApiKey, react }) => {
     try {
+      const input = q?.trim();
+      if (!input) {
+        await react("❌");
+        return reply(
+          `❌ Provide a channel link.\nUsage: *cid* https://whatsapp.com/channel/KEY`
+        );
+      }
 
-        if (!q) {
-            return reply("❎ Please provide a WhatsApp Channel link.\n\n*Example:* .cid https://whatsapp.com/channel/xxxxxxxxx");
-        }
+      const channelMatch = input.match(/whatsapp\.com\/channel\/([A-Za-z0-9_-]+)/i);
+      if (!channelMatch) {
+        await react("❌");
+        return reply(
+          "❌ Invalid channel link. Provide a valid WhatsApp channel link.\nExample: https://whatsapp.com/channel/ABC123"
+        );
+      }
 
-        // Extract Channel ID
-        const match = q.match(/whatsapp\.com\/channel\/([\w-]+)/);
-        if (!match) {
-            return reply("⚠️ *Invalid channel link format.*\n\nCorrect format:\nhttps://whatsapp.com/channel/xxxxxxxxx");
-        }
+      await react("🔍");
+      const inviteKey = channelMatch[1];
+      const channelUrl = `https://whatsapp.com/channel/${inviteKey}`;
 
-        const inviteCode = match[1];
+      // Fetch channel metadata
+      const meta = await Gifted.newsletterMetadata("invite", inviteKey);
+      if (!meta || !meta.id) {
+        await react("❌");
+        return reply("❌ Could not fetch channel info. The link may be invalid or the channel no longer exists.");
+      }
 
-        // Fetch metadata from WhatsApp
-        let metadata;
-        try {
-            metadata = await conn.newsletterMetadata("invite", inviteCode);
-        } catch (err) {
-            console.error("Metadata fetch error:", err);
-            return reply("❌ Failed to fetch channel data. The link may be invalid or private.");
-        }
+      const channelJid = meta.id;
+      const tm = meta.thread_metadata || {};
+      const name = tm.name?.text || "Unknown Channel";
+      const rawDesc = tm.description?.text || "";
+      const verification = tm.verification || "";
+      const isVerified = verification === "VERIFIED";
+      const stateType = meta.state?.type || "";
+      const isActive = stateType === "ACTIVE";
+      const subCount = parseInt(tm.subscribers_count || "0", 10);
+      const followers =
+        subCount >= 1_000_000
+          ? `${(subCount / 1_000_000).toFixed(1)}M`
+          : subCount >= 1_000
+          ? `${(subCount / 1_000).toFixed(1)}K`
+          : subCount > 0
+          ? subCount.toLocaleString()
+          : "N/A";
 
-        if (!metadata) {
-            return reply("❌ Channel not found.");
-        }
+      // Fetch channel picture via API
+      let picUrl = null;
+      try {
+        const apiUrl = `${GiftedTechApi}/api/stalk/wachannel?apikey=${GiftedApiKey}&url=${encodeURIComponent(channelUrl)}`;
+        const apiRes = await axios.get(apiUrl, { timeout: 10000 });
+        picUrl = apiRes.data?.result?.img || null;
+      } catch (apiErr) {
+        console.error("cid pic error:", apiErr.message);
+      }
 
-        // Safely fetch values
-        const channelId = metadata.id || "N/A";
-        const channelName = metadata.name || metadata.subject || "Unknown Channel";
-        const subscribers = metadata.subscribers || metadata.followerCount || metadata.participantsCount || 0;
+      const descSection = generateReadMore(rawDesc);
 
-        // Format followers nicely
-        const formattedSubscribers = Number(subscribers).toLocaleString("en-US");
+      const text =
+        `📢 *Channel Info*\n\n` +
+        `🔖 *Name:* ${name}\n` +
+        `🟢 *Status:* ${isActive ? "Active" : stateType || "Unknown"}\n` +
+        `${isVerified ? "✅ *Verified:* Yes\n" : "❌ *Verified:* No\n"}` +
+        `👥 *Followers:* ${followers}\n` +
+        `🆔 *JID:* \`${channelJid}\`` +
+        descSection;
 
-        // Current Date & Time (English)
-        const now = new Date();
+      const buttons = [
+        {
+          name: "cta_copy",
+          buttonParamsJson: JSON.stringify({
+            display_text: "🏷️ Copy JID",
+            copy_code: channelJid,
+          }),
+        },
+        {
+          name: "cta_url",
+          buttonParamsJson: JSON.stringify({
+            display_text: "🌐 Follow Channel",
+            url: channelUrl,
+            merchant_url: channelUrl,
+          }),
+        },
+      ];
 
-        const formattedDate = now.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }).replace(",", " •");
+      const sendOpts = {
+        text,
+        footer: "> Powered By Shadow-Xtech",
+        buttons,
+        quoted: quotedContact,
+      };
 
-        const formattedTime = now.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true
-        });
+      if (picUrl) {
+        sendOpts.image = { url: picUrl };
+      }
 
-        // Stylish Output
-        const stylishText =
-`*— 乂 Channel Information —*
-
-🆔 *Channel ID:* ${channelId}
-📌 *Channel Name:* ${channelName}
-👥 *Followers:* ${formattedSubscribers}
-
-📅 ${formattedDate}
-⏰ ${formattedTime}`;
-
-        await conn.sendMessage(from, {
-            text: stylishText,
-            footer: "Shadow-Xtech | Channel Scanner",
-            buttons: [
-                {
-                    buttonId: `copyid_${channelId}`,
-                    buttonText: { displayText: "📋 Copy Channel ID" },
-                    type: 1
-                }
-            ],
-            headerType: 1,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363369453603973@newsletter',
-                    newsletterName: "𝐒ʜᴀᴅᴏᴡ 𝐗ᴛᴇᴄʜ",
-                    serverMessageId: 143
-                },
-                externalAdReply: {
-                    title: "🛰️ Shadow-Xtech | Channel Sync",
-                    body: "Fast • Secure • Connected",
-                    thumbnailUrl: 'https://files.catbox.moe/3l3qgq.jpg',
-                    sourceUrl: config.whatsappChannelLink || q,
-                    mediaType: 1,
-                    renderLargerThumbnail: false
-                }
-            }
-        }, { quoted: quotedContact });
-
+      await sendButtons(conn, from, sendOpts);
+      await react("✅");
     } catch (error) {
-        console.error("❌ Error in .cid plugin:", error);
-        reply("⚠️ Unexpected error occurred while fetching channel info.");
+      console.error("cid error:", error);
+      await react("❌");
+      await reply(`❌ Error fetching channel info: ${error.message}`);
     }
-});
+  }
+);
