@@ -57,6 +57,8 @@
     "dotenv": "^16.0.0",
 
     "sequelize": "^6.37.5",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+
+    "gifted-btns": "^1.0.2"
   }
 }
