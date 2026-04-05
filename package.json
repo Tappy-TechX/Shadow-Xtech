@@ -59,6 +59,7 @@
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",
 
+    "gifted-baileys": "2.5.8",
     "gifted-btns": "^1.0.2"
   }
 }

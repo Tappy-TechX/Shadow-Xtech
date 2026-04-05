@@ -19,7 +19,7 @@ const {
     jidDecode,
     fetchLatestBaileysVersion,
     Browsers
-  } = require('@whiskeysockets/baileys')
+  } = require('gifted-baileys')
 
 
   const l = console.log
