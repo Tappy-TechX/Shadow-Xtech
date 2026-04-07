@@ -1,5 +1,5 @@
 const { cmd } = require('../command');
-const { downloadTiktok } = require("@mrnima/tiktok-downloader");
+const { facebook } = require("@mrnima/facebook-downloader");
 
 const whatsappChannelLink = 'https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10';
 
@@ -12,35 +12,37 @@ const quotedContact = {
     },
     message: {
         contactMessage: {
-            displayName: "⚙️ TikTok | Stream 📸",
+            displayName: "⚙️ Facebook | Stream 🎥",
             vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD"
         }
     }
 };
 
 cmd({
-    pattern: "tiktok",
-    alias: ["ttdl", "tt", "tiktokdl"],
-    desc: "Download TikTok video without watermark",
+    pattern: "facebook",
+    alias: ["fb", "fbdl", "fbvideo"],
+    desc: "Download Facebook video",
     category: "downloader",
-    react: "🎵",
+    react: "📘",
     filename: __filename
 }, async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("❗ Please provide a TikTok video link.");
-        if (!q.includes("tiktok.com")) return reply("🚫 Invalid TikTok link.");
 
-        reply("⏳ Downloading video, please wait...");
+        if (!q) return reply("❗ Please provide a Facebook video link.");
+        if (!q.includes("facebook.com") && !q.includes("fb.watch"))
+            return reply("🚫 Invalid Facebook link.");
 
-        const result = await downloadTiktok(q);
+        reply("⏳ Downloading Facebook video, please wait...");
+
+        const result = await facebook(q);
 
         if (!result || !result.video) {
-            return reply("⚠️ Failed to fetch TikTok video.");
+            return reply("⚠️ Failed to fetch Facebook video.");
         }
 
-        const videoUrl = result.video.noWatermark || result.video.watermark;
+        const videoUrl = result.video;
 
-        const caption = `*_📥 Downloaded By Shadow -Xtech_*`;
+        const caption = `*_📥 Downloaded By Shadow-Xtech_*`;
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
@@ -55,9 +57,9 @@ cmd({
                     serverMessageId: 143
                 },
                 externalAdReply: {
-                    title: "⚙️ Shadow-Xtech | TikPulse",
-                    body: "Trend • Loop • Share",
-                    thumbnailUrl: "https://files.catbox.moe/ubexsx.jpg",
+                    title: "⚙️ Shadow-Xtech | FB Stream",
+                    body: "Watch • Download • Share",
+                    thumbnailUrl: "https://files.catbox.moe/obdwt8.jpg",
                     sourceUrl: whatsappChannelLink,
                     mediaType: 1,
                     renderLargerThumbnail: false
@@ -66,7 +68,7 @@ cmd({
         }, { quoted: quotedContact });
 
     } catch (e) {
-        console.error("🔴 Error in TikTok downloader command:", e);
+        console.error("🔴 Error in Facebook downloader command:", e);
         reply(`❌ An error occurred:\n${e.message}`);
     }
 });
