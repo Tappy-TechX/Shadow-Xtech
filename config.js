@@ -90,7 +90,12 @@ module.exports = {
     // =============================== 
     DEV: process.env.DEV || "254759000340",  
     DATABASE_URL: process.env.DATABASE_URL || "postgresql://neondb_owner:npg_AeNhu3a2VFOM@ep-bitter-bird-an8g7zvq-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=verify-full&channel_binding=require",
-          
+    
+    // =============================== 
+    // 🎁 GiftedTech API Settings
+    // =============================== 
+    GIFTED_API_KEY: process.env.GIFTED_API_KEY || '_0u5aff45,_0l1876s8qc',
+    GIFTED_TECH_API: process.env.GIFTED_TECH_API || 'https://api.giftedtech.co.ke',     
 
     // =============================== 
     // 🖥️ Channel React Settings 
