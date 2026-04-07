@@ -12,18 +12,24 @@ cmd({
   alias: ["yt-search"],
   desc: "Search YouTube videos",
   category: "search",
-  react: "🔍",
+  react: "🔎",
   filename: __filename,
 },
 async (conn, mek, m, {
   from,
   q,
-  reply,
-  react
+  reply
 }) => {
 
+  // ⏳ Loading reaction      
+  await conn.sendMessage(from, {       
+      react: { text: "⏳", key: mek.key }       
+  });
+
   if (!q) {
-    await react("❌");
+    await conn.sendMessage(from, {
+      react: { text: "❌", key: mek.key }
+    });
     return reply("Please provide a search query");
   }
 
@@ -33,7 +39,9 @@ async (conn, mek, m, {
     const results = res.data?.videos;
 
     if (!Array.isArray(results) || results.length === 0) {
-      await react("❌");
+      await conn.sendMessage(from, {
+        react: { text: "❌", key: mek.key }
+      });
       return reply("No results found.");
     }
 
@@ -109,11 +117,18 @@ async (conn, mek, m, {
       messageId: message.key.id,
     });
 
-    await react("✅");
+    // 🔎 Success reaction
+    await conn.sendMessage(from, {
+      react: { text: "🔎", key: mek.key }
+    });
 
   } catch (error) {
     console.error("YTS Error:", error);
-    await react("❌");
+
+    await conn.sendMessage(from, {
+      react: { text: "❌", key: mek.key }
+    });
+
     return reply("Oops! Something went wrong.");
   }
 });
