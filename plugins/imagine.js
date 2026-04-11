@@ -14,7 +14,7 @@ async (conn, mek, m, { reply, q }) => {
 
     reply("🎨 Generating image... please wait");
 
-    const API_KEY = "sk-05HU0gUsnzN7hYL5fEF1ureraNCWgTWSk8nv8Wkbl0o1y6Am"; // ⚠️ put your key here
+    const API_KEY = "sk-iPm0SrrSPUPF5xpu3RHKcArDytF2cp0B39NMkGY5VT82fqGA"; // ⚠️ put your key here
 
     const res = await axios.post(
       "https://api.stability.ai/v2beta/stable-image/generate/core",
