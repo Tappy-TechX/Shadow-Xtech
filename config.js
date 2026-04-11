@@ -83,6 +83,7 @@ module.exports = {
     // 🌍 Mode Settings 
     // =============================== 
     MODE: process.env.MODE || "public", 
+    CHATBOT_MODE: process.env.CHATBOT_MODE || "false",
     PUBLIC_MODE: process.env.PUBLIC_MODE || "true",        
 
     // =============================== 
