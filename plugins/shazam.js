@@ -1,142 +1,88 @@
+const { cmd } = require('../command');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
-const { cmd } = require('../command');
-const config = require('../config');
 
 const AUDD_API_KEY = '9c76cbc93b23b3cf8732264977ad470e';
 
 cmd({
     pattern: "shazam",
     alias: ["musicid", "findsong"],
-    use: '.shazam (reply audio OR song name)',
-    desc: "Identify music from audio or search by name",
-    category: "media",
-    react: "🎧",
+    desc: "Identify songs using AudD API",
+    category: "music",
     filename: __filename
 },
-async (conn, mek, m, { from, quoted, q, reply }) => {
+async (conn, mek, m, { reply, q }) => {
+
     try {
 
-        const mime = quoted?.mimetype || "";
-
         // =========================
-        // AUDIO SHAZAM
+        // 1. Reply to audio/video
         // =========================
-        if (quoted && mime.includes("audio")) {
+        const quoted = m.quoted || m.msg?.contextInfo?.quotedMessage;
 
-            await conn.sendMessage(from, { react: { text: "🔍", key: mek.key } });
+        if (quoted && (quoted.audioMessage || quoted.videoMessage)) {
 
-            const audioBuffer = await quoted.download();
-            const tempPath = './temp_song.mp3';
-            fs.writeFileSync(tempPath, audioBuffer);
+            reply("🎧 Identifying song... please wait");
+
+            const filePath = await conn.downloadAndSaveMediaMessage(m.quoted || m);
 
             const form = new FormData();
-            form.append('api_token', AUDD_API_KEY);
-            form.append('file', fs.createReadStream(tempPath));
-            form.append('return', 'apple_music,spotify');
+            form.append("file", fs.createReadStream(filePath));
+            form.append("api_token", AUDD_API_KEY);
+            form.append("return", "apple_music,spotify");
 
-            const res = await axios.post('https://api.audd.io/', form, {
+            const res = await axios.post("https://api.audd.io/", form, {
                 headers: form.getHeaders()
             });
 
-            fs.unlinkSync(tempPath);
+            fs.unlinkSync(filePath);
 
-            const result = res.data.result;
+            const data = res.data.result;
 
-            if (!result) {
-                await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-                return reply("*🔴 No match found for this audio.*");
-            }
+            if (!data) return reply("❌ No song found");
 
-            const title = result.title || "Unknown Title";
-            const artist = result.artist || "Unknown Artist";
-            const album = result.album || "N/A";
-            const year = result.release_date?.split("-")[0] || "N/A";
-            const label = result.label || "N/A";
+            return reply(
+`🎵 Song Found!
 
-            const songName = `${title} by ${artist}`;
+🎶 Title: ${data.title}
+👤 Artist: ${data.artist}
+💿 Album: ${data.album || "Unknown"}
+📅 Release: ${data.release_date || "Unknown"}
 
-            const thumbnail =
-                result.spotify?.album?.images?.[0]?.url ||
-                result.apple_music?.artwork?.url ||
-                null;
-
-            const msg = `
-🎵 *Shazam Result*
-
-🎧 ${songName}
-💽 Album: ${album}
-📅 Year : ${year}
-🏷️ Label: ${label}
-
-🔎 Source: Shazam (Audd.io)
-            `.trim();
-
-            if (thumbnail) {
-                await conn.sendMessage(from, {
-                    image: { url: thumbnail },
-                    caption: msg
-                });
-            } else {
-                reply(msg);
-            }
-
-            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-            return;
+🔗 Spotify: ${data.spotify?.external_urls?.spotify || "N/A"}
+🍎 Apple Music: ${data.apple_music?.url || "N/A"}`
+            );
         }
 
         // =========================
-        // SONG NAME SEARCH
+        // 2. Text search fallback
         // =========================
-        if (q) {
+        if (!q) return reply("❗ Reply to a voice note or type a song name");
 
-            await conn.sendMessage(from, { react: { text: "🔎", key: mek.key } });
+        reply("🔍 Searching song...");
 
-            const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&limit=1`;
-            const res = await axios.get(url);
+        const response = await axios.post("https://api.audd.io/", {
+            api_token: AUDD_API_KEY,
+            q: q
+        });
 
-            const data = res.data.results?.[0];
+        const result = response.data.result;
 
-            if (!data) {
-                await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-                return reply("*🔴 No song found for that name.*");
-            }
+        if (!result) return reply("❌ No match found");
 
-            const songName = `${data.trackName} by ${data.artistName}`;
+        return reply(
+`🎵 Song Found!
 
-            const msg = `
-🎵 *Song Result*
+🎶 Title: ${result.title}
+👤 Artist: ${result.artist}
+💿 Album: ${result.album || "Unknown"}
 
-🎧 ${songName}
-💽 Album: ${data.collectionName}
-📅 Year : ${data.releaseDate?.split("T")[0] || "N/A"}
-▶️ Preview Available
+🔗 Spotify: ${result.spotify?.external_urls?.spotify || "N/A"}`
+        );
 
-🔎 Source: iTunes Search
-            `.trim();
-
-            if (data.artworkUrl100) {
-                await conn.sendMessage(from, {
-                    image: { url: data.artworkUrl100 },
-                    caption: msg
-                });
-            } else {
-                reply(msg);
-            }
-
-            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-            return;
-        }
-
-        // =========================
-        // NO INPUT
-        // =========================
-        return reply("*🎧 Reply to an audio OR type a song name.*");
-
-    } catch (e) {
-        console.error("Shazam Command Error:", e);
-        await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
-        reply(`*🔴 Error: ${e.message}*`);
+    } catch (err) {
+        console.log(err);
+        reply("⚠️ Error identifying song");
     }
 });
