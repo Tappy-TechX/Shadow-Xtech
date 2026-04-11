@@ -4,21 +4,34 @@ const axios = require('axios');
 
 const whatsappChannelLink = "https://whatsapp.com/channel/0029VasHgfG4tRrwjAUyTs10";
 
-cmd({
-  on: "body"
-}, async (conn, m, { isGroup }) => {
+cmd({ on: "body" }, async (conn, m, { isGroup }) => {
   try {
 
     // ❌ Only works if enabled + group chat
     if (config.MENTION_REPLY !== 'true' || !isGroup) return;
 
-    const mentioned = m.mentionedJid || [];
+    // 🔥 Bot JID (fixed safe format)
+    const botNumber =
+      (conn.user.id || conn.user.jid).split("@")[0] + "@s.whatsapp.net";
 
-    // 🤖 Bot JID
-    const botNumber = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+    // 📩 Get message text safely
+    const msg =
+      m.message?.conversation ||
+      m.message?.extendedTextMessage?.text ||
+      "";
 
-    // 🚨 ONLY trigger when bot is mentioned
-    if (!mentioned.includes(botNumber)) return;
+    // 👥 Mentions (multiple fallbacks for reliability)
+    const mentioned =
+      m.mentionedJid ||
+      m.message?.extendedTextMessage?.contextInfo?.mentionedJid ||
+      [];
+
+    // 🚨 FINAL FIX: detect bot mention reliably
+    const botTag =
+      mentioned.includes(botNumber) ||
+      msg.includes(botNumber.split("@")[0]);
+
+    if (!botTag) return;
 
     const voiceClips = [
       "https://files.catbox.moe/wbd7ib.mp3",
@@ -42,7 +55,7 @@ cmd({
     const randomThumbnailUrl = pickRandom(thumbnails);
 
     const generateWaveformString = (durationSec) => {
-      const template = ['၊','၊','|','|','၊','|','။','|','|','|','|','။','၊','\u200B','\u200B','\u200B','၊','|'];
+      const template = ['၊','|','။','|','၊','|','။','|','|','|','\u200B'];
 
       const waveformArray = template.map(s =>
         Math.random() < 0.4 ? pickRandom(template) : s
@@ -93,7 +106,8 @@ cmd({
   } catch (e) {
     console.error(e);
 
-    const ownerJid = conn.user.id.split(":")[0] + "@s.whatsapp.net";
+    const ownerJid = (conn.user.id || conn.user.jid).split("@")[0] + "@s.whatsapp.net";
+
     await conn.sendMessage(ownerJid, {
       text: `*Bot Error in Mention Handler:*\n${e.message}`
     });
