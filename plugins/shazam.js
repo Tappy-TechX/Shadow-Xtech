@@ -18,31 +18,17 @@ cmd({
 async (conn, mek, m, { from, quoted, q, reply }) => {
     try {
 
-        // ==============================
-        // FIXED QUOTED HANDLING
-        // ==============================
-        const msgQuoted = quoted || m.quoted || m;
-        const mime = msgQuoted?.mimetype || msgQuoted?.msg?.mimetype || "";
+        const mime = quoted?.mimetype || "";
 
-        const isAudio =
-            mime.includes("audio") ||
-            mime.includes("ogg") ||
-            mime.includes("voice");
-
-        // ==============================
-        // 1. AUDIO SHAZAM MODE
-        // ==============================
-        if (msgQuoted && isAudio) {
+        // =========================
+        // AUDIO SHAZAM
+        // =========================
+        if (quoted && mime.includes("audio")) {
 
             await conn.sendMessage(from, { react: { text: "🔍", key: mek.key } });
 
-            const audioBuffer = await msgQuoted.download();
-
-            if (!audioBuffer) {
-                return reply("❌ Unable to read audio file.");
-            }
-
-            const tempPath = `./temp_song_${Date.now()}.mp3`;
+            const audioBuffer = await quoted.download();
+            const tempPath = './temp_song.mp3';
             fs.writeFileSync(tempPath, audioBuffer);
 
             const form = new FormData();
@@ -63,31 +49,28 @@ async (conn, mek, m, { from, quoted, q, reply }) => {
                 return reply("*🔴 No match found for this audio.*");
             }
 
-            const {
-                title,
-                artist,
-                album,
-                release_date,
-                label,
-                spotify,
-                apple_music
-            } = result;
+            const title = result.title || "Unknown Title";
+            const artist = result.artist || "Unknown Artist";
+            const album = result.album || "N/A";
+            const year = result.release_date?.split("-")[0] || "N/A";
+            const label = result.label || "N/A";
+
+            const songName = `${title} by ${artist}`;
 
             const thumbnail =
-                spotify?.album?.images?.[0]?.url ||
-                apple_music?.artwork?.url ||
+                result.spotify?.album?.images?.[0]?.url ||
+                result.apple_music?.artwork?.url ||
                 null;
 
             const msg = `
-🎵 *Song Found*
+🎵 *Shazam Result*
 
-🎧 Title  : ${title}
-👤 Artist : ${artist}
-💽 Album  : ${album || 'N/A'}
-📅 Year   : ${release_date || 'N/A'}
-🏷️ Label  : ${label || 'N/A'}
+🎧 ${songName}
+💽 Album: ${album}
+📅 Year : ${year}
+🏷️ Label: ${label}
 
-${spotify?.external_urls?.spotify ? `🔗 ${spotify.external_urls.spotify}` : ''}
+🔎 Source: Shazam (Audd.io)
             `.trim();
 
             if (thumbnail) {
@@ -100,13 +83,12 @@ ${spotify?.external_urls?.spotify ? `🔗 ${spotify.external_urls.spotify}` : ''
             }
 
             await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-
             return;
         }
 
-        // ==============================
-        // 2. SONG NAME SEARCH MODE
-        // ==============================
+        // =========================
+        // SONG NAME SEARCH
+        // =========================
         if (q) {
 
             await conn.sendMessage(from, { react: { text: "🔎", key: mek.key } });
@@ -121,14 +103,17 @@ ${spotify?.external_urls?.spotify ? `🔗 ${spotify.external_urls.spotify}` : ''
                 return reply("*🔴 No song found for that name.*");
             }
 
-            const msg = `
-🎵 *Song Search Result*
+            const songName = `${data.trackName} by ${data.artistName}`;
 
-🎧 Title  : ${data.trackName}
-👤 Artist : ${data.artistName}
-💽 Album  : ${data.collectionName}
-📅 Year   : ${data.releaseDate?.split("T")[0] || "N/A"}
-🔗 Preview: ${data.previewUrl || "N/A"}
+            const msg = `
+🎵 *Song Result*
+
+🎧 ${songName}
+💽 Album: ${data.collectionName}
+📅 Year : ${data.releaseDate?.split("T")[0] || "N/A"}
+▶️ Preview Available
+
+🔎 Source: iTunes Search
             `.trim();
 
             if (data.artworkUrl100) {
@@ -141,18 +126,17 @@ ${spotify?.external_urls?.spotify ? `🔗 ${spotify.external_urls.spotify}` : ''
             }
 
             await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
-
             return;
         }
 
-        // ==============================
-        // 3. NO INPUT
-        // ==============================
+        // =========================
+        // NO INPUT
+        // =========================
         return reply("*🎧 Reply to an audio OR type a song name.*");
 
-    } catch (err) {
-        console.error("SHZAM ERROR:", err);
+    } catch (e) {
+        console.error("Shazam Command Error:", e);
         await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
-        reply(`*🔴 Error: ${err.message}*`);
+        reply(`*🔴 Error: ${e.message}*`);
     }
 });
