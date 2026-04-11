@@ -30,7 +30,7 @@ async (conn, mek, m, { from, q, reply }) => {
   }  
   
   try {  
-    const apiUrl = `https://api.giftedtech.co.ke/api/api/search/google?apikey=gifted&query=${encodeURIComponent(q)}`;  
+    const apiUrl = `${GiftedTechApi}/api/search/google?apikey=${GiftedApiKey}&query=${encodeURIComponent(q)}`;  
     const res = await axios.get(apiUrl, { timeout: 60000 });  
   
     if (  
