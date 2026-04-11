@@ -1,12 +1,15 @@
 const { cmd } = require('../command');  
 const config = require('../config');  
-  
+
 const axios = require("axios");  
 const {  
   generateWAMessageContent,  
   generateWAMessageFromContent,  
 } = require("gifted-baileys");  
-  
+
+const API_KEY = "AIzaSyAxGr0RkdqPMpAm7tJbyF_TOEinyWlkYsU";
+const CX = "30ffb3bd32c7546c6";
+
 cmd({  
   pattern: "google",  
   alias: ["ggle", "gglesearch", "googlesearch"],  
@@ -16,39 +19,35 @@ cmd({
   filename: __filename,  
 },  
 async (conn, mek, m, { from, q, reply }) => {  
-  
+
   // ⏳ Loading reaction  
   await conn.sendMessage(from, {  
     react: { text: "⏳", key: mek.key }  
   });  
-  
+
   if (!q) {  
     await conn.sendMessage(from, {  
       react: { text: "❌", key: mek.key }  
     });  
     return reply("*Please provide a search query*");  
   }  
-  
+
   try {  
-    const apiUrl = `${GiftedTechApi}/api/search/google?apikey=${GiftedApiKey}&query=${encodeURIComponent(q)}`;  
+    const apiUrl = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&key=${API_KEY}&cx=${CX}`;
+    
     const res = await axios.get(apiUrl, { timeout: 60000 });  
-  
-    if (  
-      !res.data?.success ||  
-      !Array.isArray(res.data?.results) ||  
-      res.data.results.length === 0  
-    ) {  
+
+    if (!res.data?.items || res.data.items.length === 0) {  
       await conn.sendMessage(from, {  
         react: { text: "❌", key: mek.key }  
       });  
       return reply("*No results found. Try a different query.*");  
     }  
-  
-    const results = res.data.results.slice(0, 5);  
-  
-    const defaultImg =  
-      "https://files.catbox.moe/79m9dv.jpg";  
-  
+
+    const results = res.data.items.slice(0, 5);  
+
+    const defaultImg = "https://files.catbox.moe/79m9dv.jpg";  
+
     const cards = await Promise.all(  
       results.map(async (result) => ({  
         header: {  
@@ -62,7 +61,7 @@ async (conn, mek, m, { from, q, reply }) => {
           ).imageMessage,  
         },  
         body: {  
-          text: `📝 ${result.description || "No description available"}`,  
+          text: `📝 ${result.snippet || "No description available"}`,  
         },  
         footer: {  
           text: `> *${config.BOT_NAME || "BOT"}*`,  
@@ -87,7 +86,7 @@ async (conn, mek, m, { from, q, reply }) => {
         },  
       }))  
     );  
-  
+
     const message = generateWAMessageFromContent(  
       from,  
       {  
@@ -111,23 +110,23 @@ async (conn, mek, m, { from, q, reply }) => {
       },  
       { quoted: mek }  
     );  
-  
+
     await conn.relayMessage(from, message.message, {  
       messageId: message.key.id,  
     });  
-  
+
     // ✅ Success reaction  
     await conn.sendMessage(from, {  
       react: { text: "✅", key: mek.key }  
     });  
-  
+
   } catch (error) {  
-    console.error("Google Search Error:", error);  
-  
+    console.error("Google Search Error:", error?.response?.data || error.message);  
+
     await conn.sendMessage(from, {  
       react: { text: "❌", key: mek.key }  
     });  
-  
+
     return reply("*🔴 Failed to perform Google search. Please try again.*");  
   }  
 });
