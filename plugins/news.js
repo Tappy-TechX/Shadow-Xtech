@@ -1,130 +1,51 @@
+const axios = require('axios');
 const { cmd } = require('../command');
-const config = require('../config');
-const axios = require("axios");
-const {
-  generateWAMessageContent,
-  generateWAMessageFromContent,
-} = require("gifted-baileys");
 
 cmd({
-  pattern: "news",
-  desc: "Get latest news headlines (interactive)",
-  category: "news",
-  react: "🗞️",
-  filename: __filename,
+    pattern: "news",
+    desc: "Get the latest news headlines.",
+    category: "news",
+    react: "🗞️", // initial reaction
+    filename: __filename
 },
-async (conn, mek, m, {
-  from,
-  reply
-}) => {
+async (conn, mek, m, { from, reply, react }) => {
+    try {
+        // Show loading reaction
+        await react("♻️");
 
-  // ⏳ Loading reaction
-  await conn.sendMessage(from, {
-    react: { text: "⏳", key: mek.key }
-  });
+        const apiKey = "0f2c43ab11324578a7b1709651736382";
+        const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`);
+        const articles = response.data.articles;
 
-  try {
-    const apiKey = "0f2c43ab11324578a7b1709651736382";
+        if (!articles.length) {
+            await react("❌"); // error reaction
+            return reply("*No news articles found.*");
+        }
 
-    const res = await axios.get(
-      `https://newsapi.org/v2/top-headlines?country=us&pageSize=5&apiKey=${apiKey}`,
-      { timeout: 100000 }
-    );
+        // Send each article as a separate message with image and title
+        for (let i = 0; i < Math.min(articles.length, 5); i++) {
+            const article = articles[i];
+            let message = `
+📰 *${article.title}*
+⚠️ _${article.description || "No description"}_
+🔗 _${article.url}_
 
-    const articles = res.data?.articles;
+> © Powered By Shadow-Xtech
+            `;
 
-    if (!Array.isArray(articles) || articles.length === 0) {
-      await conn.sendMessage(from, {
-        react: { text: "❌", key: mek.key }
-      });
-      return reply("No news found.");
+            if (article.urlToImage) {
+                await conn.sendMessage(from, { image: { url: article.urlToImage }, caption: message });
+            } else {
+                await conn.sendMessage(from, { text: message });
+            }
+        };
+
+        // Success reaction after sending all articles
+        await react("✅");
+
+    } catch (e) {
+        console.error("Error fetching news:", e);
+        await react("❌"); // error reaction
+        reply("*Could not fetch news. Please try again later.*");
     }
-
-    const cards = await Promise.all(
-      articles.slice(0, 5).map(async (article) => ({
-        header: {
-          title: `📰 *${article.title}*`,
-          hasMediaAttachment: true,
-          imageMessage: article.urlToImage
-            ? (
-                await generateWAMessageContent(
-                  { image: { url: article.urlToImage } },
-                  { upload: conn.waUploadToServer }
-                )
-              ).imageMessage
-            : undefined,
-        },
-        body: {
-          text: `📌 ${article.description || "No description available"}${
-            article.publishedAt
-              ? `\n📅 ${new Date(article.publishedAt).toLocaleString()}`
-              : ""
-          }`,
-        },
-        footer: {
-          text: `> *${config.BOT_NAME || "BOT"}*`,
-        },
-        nativeFlowMessage: {
-          buttons: [
-            {
-              name: "cta_url",
-              buttonParamsJson: JSON.stringify({
-                display_text: "Read Full Article",
-                url: article.url,
-              }),
-            },
-            {
-              name: "cta_copy",
-              buttonParamsJson: JSON.stringify({
-                display_text: "Copy Link",
-                copy_code: article.url,
-              }),
-            },
-          ],
-        },
-      }))
-    );
-
-    const message = generateWAMessageFromContent(
-      from,
-      {
-        viewOnceMessage: {
-          message: {
-            messageContextInfo: {
-              deviceListMetadata: {},
-              deviceListMetadataVersion: 2,
-            },
-            interactiveMessage: {
-              body: {
-                text: `🗞️ Latest News Headlines`,
-              },
-              footer: {
-                text: `📂 Showing ${cards.length} articles`,
-              },
-              carouselMessage: { cards },
-            },
-          },
-        },
-      },
-      { quoted: mek }
-    );
-
-    await conn.relayMessage(from, message.message, {
-      messageId: message.key.id,
-    });
-
-    // ✅ Success reaction
-    await conn.sendMessage(from, {
-      react: { text: "🗞️", key: mek.key }
-    });
-
-  } catch (error) {
-    console.error("NEWS Error:", error);
-
-    await conn.sendMessage(from, {
-      react: { text: "❌", key: mek.key }
-    });
-
-    return reply("Oops! Failed to fetch news.");
-  }
 });
