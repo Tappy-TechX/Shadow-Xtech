@@ -11,14 +11,24 @@ cmd({
 }, async (conn, m, store, { from, args, q, reply }) => {
   try {
     if (!q) {
-      return reply("❎ Please provide a TikTok username.\n\n*Example:* .tiktokstalk mrbeast");
+      return reply("*🔎 Please provide a TikTok username.*\n\n*Example:* .tiktokstalk mrbeast");
     }
+
+    // ⏳ Loading reaction
+    await conn.sendMessage(from, {
+      react: { text: "⏳", key: m.key }
+    });
 
     const apiUrl = `https://api.siputzx.my.id/api/stalk/tiktok?username=${encodeURIComponent(q)}`;
     const { data } = await axios.get(apiUrl);
 
     if (!data.status) {
-      return reply("❌ User not found. Please check the username and try again.");
+      // ❌ Error reaction
+      await conn.sendMessage(from, {
+        react: { text: "❌", key: m.key }
+      });
+
+      return reply("*🔴 User not found. Please check the username and try again.*");
     }
 
     const user = data.data.user;
@@ -45,12 +55,26 @@ cmd({
 🔗 *Profile URL:* https://www.tiktok.com/@${user.uniqueId}
 `;
 
-    const profileImage = { image: { url: user.avatarLarger }, caption: profileInfo };
+    const profileImage = {
+      image: { url: user.avatarLarger },
+      caption: profileInfo
+    };
 
     await conn.sendMessage(from, profileImage, { quoted: m });
+
+    // ✅ Success reaction
+    await conn.sendMessage(from, {
+      react: { text: "✔️", key: m.key }
+    });
+
   } catch (error) {
-    console.error("❌ Error in TikTok stalk command:", error);
-    reply("⚠️ An error occurred while fetching TikTok profile data.");
+    console.error("🔴 Error in TikTok stalk command:", error);
+
+    // ❌ Error reaction
+    await conn.sendMessage(from, {
+      react: { text: "❌", key: m.key }
+    });
+
+    reply("*⚠️ An error occurred while fetching TikTok profile data.*");
   }
 });
-
