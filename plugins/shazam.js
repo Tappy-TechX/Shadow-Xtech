@@ -1,92 +1,61 @@
-const { cmd } = require('../command');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
-const crypto = require('crypto');
+const { cmd } = require('../command');
+const config = require('../config');
 
-// ⚠️ Put your keys here (better: use config/env)
-const ACCESS_KEY = "c6b73f307c6cc612ff825f5eb55b0c76";
-const ACCESS_SECRET = "V8nn0YB64esfYk4E4yfscfVabQBSNCcJvPHaPDHk";
-const HOST = "identify-eu-west-1.acrcloud.com"; // change if your region differs
-
-function buildStringToSign(method, uri, accessKey, dataType, signatureVersion, timestamp) {
-    return [method, uri, accessKey, dataType, signatureVersion, timestamp].join("\n");
-}
-
-function sign(signString, secret) {
-    return crypto.createHmac('sha1', secret)
-        .update(Buffer.from(signString, 'utf-8'))
-        .digest().toString('base64');
-}
+const AUDD_API_KEY = '08e11fca53d60e4c81254e9dbc4f42b9'; // Replace this with your actual key
 
 cmd({
     pattern: "shazam",
     alias: ["musicid", "findsong"],
-    desc: "Identify songs using ACRCloud",
-    category: "music",
+    use: '.shazam (reply to audio)',
+    desc: "Identify music from audio using Shazam API",
+    category: "media",
     filename: __filename
-},
-async (conn, mek, m, { reply }) => {
-
+}, 
+async (conn, mek, m, { from, quoted, reply }) => {
     try {
-
-        const quoted = m.quoted || m.msg?.contextInfo?.quotedMessage;
-
-        if (!quoted || !quoted.audioMessage && !quoted.videoMessage) {
-            return reply("🎧 Reply to an audio/voice note to identify song");
+        const mime = (quoted?.mimetype || "");
+        if (!quoted || !mime.includes("audio")) {
+            return reply("🎵 Please reply to an audio or voice note.");
         }
 
-        reply("🎵 Identifying song...");
-
-        const filePath = await conn.downloadAndSaveMediaMessage(m.quoted || m);
-
-        const timestamp = Math.floor(Date.now() / 1000);
-
-        const dataType = "audio";
-        const signatureVersion = "1";
-        const httpMethod = "POST";
-        const httpUri = "/v1/identify";
-
-        const stringToSign = buildStringToSign(
-            httpMethod,
-            httpUri,
-            ACCESS_KEY,
-            dataType,
-            signatureVersion,
-            timestamp
-        );
-
-        const signature = sign(stringToSign, ACCESS_SECRET);
+        const audioBuffer = await quoted.download(); // Download the audio
+        const tempPath = './temp_song.mp3';
+        fs.writeFileSync(tempPath, audioBuffer);
 
         const form = new FormData();
-        form.append("sample", fs.createReadStream(filePath));
-        form.append("access_key", ACCESS_KEY);
-        form.append("data_type", dataType);
-        form.append("signature_version", signatureVersion);
-        form.append("signature", signature);
-        form.append("timestamp", timestamp);
+        form.append('api_token', AUDD_API_KEY);
+        form.append('file', fs.createReadStream(tempPath));
+        form.append('return', 'apple_music,spotify');
 
-        const res = await axios.post(`https://${HOST}/v1/identify`, form, {
+        const res = await axios.post('https://api.audd.io/', form, {
             headers: form.getHeaders()
         });
 
-        fs.unlinkSync(filePath);
+        fs.unlinkSync(tempPath); // Cleanup temp file
 
-        const music = res.data?.metadata?.music?.[0];
+        const result = res.data.result;
+        if (!result) {
+            return reply("❌ No match found for this audio.");
+        }
 
-        if (!music) return reply("❌ No song found");
+        const { title, artist, album, release_date, label, spotify } = result;
+        const msg = `
+🎵 *Song Recognized!*
+*Title:* ${title}
+*Artist:* ${artist}
+*Album:* ${album || 'N/A'}
+*Release:* ${release_date || 'N/A'}
+*Label:* ${label || 'N/A'}
+${spotify?.external_urls?.spotify ? `🔗 *Spotify:* ${spotify.external_urls.spotify}` : ''}
+        `.trim();
 
-        reply(
-`🎵 SONG FOUND!
+        reply(msg);
 
-🎶 Title: ${music.title}
-👤 Artist: ${music.artists?.map(a => a.name).join(", ")}
-💿 Album: ${music.album?.name || "Unknown"}
-📅 Year: ${music.release_date || "Unknown"}`
-        );
-
-    } catch (err) {
-        console.log(err.response?.data || err.message);
-        reply("⚠️ Error identifying song");
+    } catch (e) {
+        console.error("Shazam Command Error:", e);
+        reply(`❌ An error occurred: ${e.message}`);
     }
 });
