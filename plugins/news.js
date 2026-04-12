@@ -1,6 +1,5 @@
 const { cmd } = require('../command');
 const config = require('../config');
-
 const axios = require("axios");
 const {
   generateWAMessageContent,
@@ -9,45 +8,40 @@ const {
 
 cmd({
   pattern: "news",
-  alias: ["latest-news"],
-  desc: "Get latest news headlines",
+  desc: "Get latest news headlines (interactive)",
   category: "news",
   react: "🗞️",
   filename: __filename,
 },
 async (conn, mek, m, {
   from,
-  q,
   reply
 }) => {
 
-  // ⏳ Loading reaction      
-  await conn.sendMessage(from, {       
-      react: { text: "⏳", key: mek.key }       
+  // ⏳ Loading reaction
+  await conn.sendMessage(from, {
+    react: { text: "⏳", key: mek.key }
   });
 
   try {
     const apiKey = "0f2c43ab11324578a7b1709651736382";
 
-    // 🔍 Optional search query support
-    const apiUrl = q
-      ? `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&apiKey=${apiKey}`
-      : `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+    const res = await axios.get(
+      `https://newsapi.org/v2/top-headlines?country=us&pageSize=5&apiKey=${apiKey}`,
+      { timeout: 100000 }
+    );
 
-    const res = await axios.get(apiUrl, { timeout: 100000 });
-    const results = res.data?.articles;
+    const articles = res.data?.articles;
 
-    if (!Array.isArray(results) || results.length === 0) {
+    if (!Array.isArray(articles) || articles.length === 0) {
       await conn.sendMessage(from, {
         react: { text: "❌", key: mek.key }
       });
       return reply("No news found.");
     }
 
-    const articles = results.slice(0, 5);
-
     const cards = await Promise.all(
-      articles.map(async (article) => ({
+      articles.slice(0, 5).map(async (article) => ({
         header: {
           title: `📰 *${article.title}*`,
           hasMediaAttachment: true,
@@ -61,9 +55,9 @@ async (conn, mek, m, {
             : undefined,
         },
         body: {
-          text: `📄 ${article.description || "No description available"}${
+          text: `📌 ${article.description || "No description available"}${
             article.publishedAt
-              ? `\n📅 Published: ${new Date(article.publishedAt).toLocaleString()}`
+              ? `\n📅 ${new Date(article.publishedAt).toLocaleString()}`
               : ""
           }`,
         },
@@ -73,17 +67,17 @@ async (conn, mek, m, {
         nativeFlowMessage: {
           buttons: [
             {
-              name: "cta_copy",
-              buttonParamsJson: JSON.stringify({
-                display_text: "Copy Link",
-                copy_code: article.url,
-              }),
-            },
-            {
               name: "cta_url",
               buttonParamsJson: JSON.stringify({
                 display_text: "Read Full Article",
                 url: article.url,
+              }),
+            },
+            {
+              name: "cta_copy",
+              buttonParamsJson: JSON.stringify({
+                display_text: "Copy Link",
+                copy_code: article.url,
               }),
             },
           ],
@@ -102,10 +96,10 @@ async (conn, mek, m, {
             },
             interactiveMessage: {
               body: {
-                text: `🗞️ Latest News${q ? ` for: *${q}*` : ""}`,
+                text: `🗞️ Latest News Headlines`,
               },
               footer: {
-                text: `📂 Showing ${articles.length} articles`,
+                text: `📂 Showing ${cards.length} articles`,
               },
               carouselMessage: { cards },
             },
@@ -125,12 +119,12 @@ async (conn, mek, m, {
     });
 
   } catch (error) {
-    console.error("News Error:", error);
+    console.error("NEWS Error:", error);
 
     await conn.sendMessage(from, {
       react: { text: "❌", key: mek.key }
     });
 
-    return reply("Oops! Could not fetch news.");
+    return reply("Oops! Failed to fetch news.");
   }
 });
