@@ -11,7 +11,7 @@ cmd({
   filename: __filename
 }, async (conn, m, store, { from, args, reply }) => {
   try {
-    const query = args.join(" ") || "random";
+    const query = args.join(" ") || "Random";
 
     // ⏳ Loading reaction
     await conn.sendMessage(from, { react: { text: "⏳", key: m.key } });
