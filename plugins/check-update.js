@@ -40,8 +40,22 @@ cmd({
 
   try {
 
-    // 🕒 Dynamic Greeting System (Constant Greeting + Random Quote)
-    const hour = new Date().getHours();
+    // 🌍 Get Kenya Time (Africa/Nairobi)
+    const now = new Date();
+
+    const hour = parseInt(new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Africa/Nairobi',
+      hour: '2-digit',
+      hour12: false
+    }).format(now));
+
+    const kenyaTime = new Intl.DateTimeFormat('en-KE', {
+      timeZone: 'Africa/Nairobi',
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(now);
+
+    // 🕒 Dynamic Greeting System
     let greetingTitle;
     let greetingMessage;
 
@@ -163,6 +177,7 @@ Use *.update* to upgrade now.`;
 📟 RAM: ${ramUsage}MB / ${totalRam}MB
 ⚙️ Host: ${hostName}
 📅 Last Update: ${lastUpdate}
+🕒 *System Time:* ${kenyaTime}
 
 📝 *Latest Changelog*
 ${latestChangelog}
