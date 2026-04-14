@@ -163,7 +163,7 @@ Use *.update* to upgrade now.`;
     }
 
     const stylishText = 
-`${greetingTitle} — ${greetingMessage}
+`${greetingTitle} — *${greetingMessage}*
 👤 *User: ${pushname}*
 
 📌 *Bot Name:* 𝐒ʜᴀᴅᴏᴡ-𝐗ᴛᴇᴄʜ
@@ -172,20 +172,20 @@ Use *.update* to upgrade now.`;
 📂 *Plugins: ${pluginCount}*
 🔢 *Commands: ${totalCommands}*
 
-💾 *System Pulse*
-⏳ Uptime: ${uptime}
-📟 RAM: ${ramUsage}MB / ${totalRam}MB
-⚙️ Host: ${hostName}
-📅 Last Update: ${lastUpdate}
-🕒 *System Time:* ${kenyaTime}
+> 💾 *System Pulse*
+⏳ *Uptime: ${uptime}*
+📟 *RAM: ${ramUsage}MB / ${totalRam}MB*
+⚙️ *Host: ${hostName}*
+📅 *Last Update: ${lastUpdate}*
+🕒 *System Time: ${kenyaTime}*
 
-📝 *Latest Changelog*
-${latestChangelog}
+> 📝 *Latest Changelog*
+*${latestChangelog}*
 
-${updateMessage}
+*${updateMessage}*
 
 ⭐ Repo: https://github.com/Tappy-Black/Shadow-Xtech-V1
-🚀 Fork • Star • Support`;
+*🚀 Fork • Star • Support*`;
 
     await conn.sendMessage(from, {
       text: stylishText,
