@@ -65,6 +65,7 @@ module.exports = {
     ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "false", 
     AUTO_TYPING: process.env.AUTO_TYPING || "false", 
     AUTO_RECORDING: process.env.AUTO_RECORDING || "false", 
+    AUTO_TYPING_RECORDING: process.env.AUTO_TYPING_RECORDING || "false",
     READ_CMD: process.env.READ_CMD || "false",        
 
     // =============================== 
