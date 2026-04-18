@@ -54,80 +54,24 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
     }
 });
 //-----------------------------------------------------
-const {
-  getRawPrefix,
-  setPrefix,
-  resetPrefix,
-  DEFAULT_PREFIX,
-  NO_PREFIX,
-} = require('../lib/prefix');
-
-cmd(
-  {
-    pattern: 'setprefix',
-    alias: ['prefix'],
-    react: '🔧',
-    desc: 'Change bot command prefix',
-    category: 'settings',
+cmd({
+    pattern: "setprefix",
+    alias: ["prefix"],
+    react: "🔧",
+    desc: "Change the bot's command prefix.",
+    category: "settings",
     filename: __filename,
-  },
-  async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) {
-      return reply('❌ Only the owner can use this command.');
-    }
+}, async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) return reply("*_📛 Only the owner can use this command!_*");
 
-    const newPrefix = args[0];
+    const newPrefix = args[0]; // Get the new prefix from the command arguments
+    if (!newPrefix) return reply("*_❌ Please provide a new prefix. Example: `.setprefix !`_*");
 
-    // Show current prefix
-    if (!newPrefix) {
-      const current = getRawPrefix();
-      const display =
-        current === NO_PREFIX ? 'None (prefixless mode)' : current;
+    // Update the prefix in memory
+    config.PREFIX = newPrefix;
 
-      return reply(
-        `👑 Current prefix: *${display}*\n\n` +
-          `Usage:\n` +
-          `• .setprefix !\n` +
-          `• .setprefix none\n` +
-          `• .setprefix reset`
-      );
-    }
-
-    // Reset prefix
-    if (newPrefix.toLowerCase() === 'reset') {
-      const ok = resetPrefix();
-      return reply(
-        ok
-          ? `✅ Prefix reset to default: *${DEFAULT_PREFIX}*`
-          : '❌ Failed to reset prefix'
-      );
-    }
-
-    // Prefixless mode
-    if (newPrefix.toLowerCase() === NO_PREFIX) {
-      const ok = setPrefix('');
-      return reply(
-        ok
-          ? '✅ Bot is now in prefixless mode'
-          : '❌ Failed to enable prefixless mode'
-      );
-    }
-
-    // Validate length
-    if (newPrefix.length > 3) {
-      return reply('❌ Prefix must be 1–3 characters');
-    }
-
-    // Set prefix
-    const success = setPrefix(newPrefix);
-
-    return reply(
-      success
-        ? `✅ Prefix updated to: *${newPrefix}*`
-        : '❌ Failed to update prefix'
-    );
-  }
-);
+    return reply(`*_🟢 Prefix successfully changed to ${newPrefix}_*`);
+});
 //-----------------------------------------------------
 cmd({
     pattern: "mode",
@@ -457,6 +401,8 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
     }
 });
 //-----------------------------------------------------
+
+//-----------------------------------------------------
 cmd({
   pattern: "antilink",
   alias: ["antilinks"],
@@ -465,66 +411,22 @@ cmd({
   react: "🚫",
   filename: __filename
 }, async (conn, mek, m, { isGroup, isAdmins, isBotAdmins, args, reply }) => {
-
   try {
-    // 🔒 PERMISSIONS
     if (!isGroup) return reply('*_📛 This command can only be used in a group._*');
     if (!isBotAdmins) return reply('*_📛 Bot must be an admin to use this command._*');
     if (!isAdmins) return reply('*_📛 You must be an admin to use this command._*');
 
-    const option = args[0]?.toLowerCase();
-
-    // 📊 SHOW STATUS MENU
-    if (!option) {
-      return reply(`
-「 ANTI-LINK SETTINGS 」
- 🟢 Status: ${config.ANTI_LINK === "true" ? "ON" : "OFF"}
- ⚙️ Action: ${config.ANTI_LINK_ACTION || "warn"}
-
-📌 Usage:
-• .antilink on
-• .antilink off
-• .antilink warn
-• .antilink delete
-• .antilink remove`);
-    }
-
-    // 🟢 ENABLE
-    if (option === "on") {
+    if (args[0] === "on") {
       config.ANTI_LINK = "true";
-      return reply("🟢 Anti-Link has been ENABLED");
-    }
-
-    // 🔴 DISABLE
-    if (option === "off") {
+      reply("*_🟢 ANTI_LINK has been enabled._*");
+    } else if (args[0] === "off") {
       config.ANTI_LINK = "false";
-      return reply("🔴 Anti-Link has been DISABLED");
+      reply("*_🔴 ANTI_LINK has been disabled._*");
+    } else {
+      reply("*_💡Usage: `.antilink on/off`_*");
     }
-
-    // ⚠️ WARN MODE
-    if (option === "warn") {
-      config.ANTI_LINK_ACTION = "warn";
-      return reply("⚠️ Anti-Link set to WARN users");
-    }
-
-    // 🗑️ DELETE MODE
-    if (option === "delete") {
-      config.ANTI_LINK_ACTION = "delete";
-      return reply("🗑️ Anti-Link set to DELETE messages");
-    }
-
-    // 🚫 REMOVE MODE
-    if (option === "remove") {
-      config.ANTI_LINK_ACTION = "remove";
-      return reply("🚫 Anti-Link set to REMOVE users after 3 warnings");
-    }
-
-    // ❌ INVALID OPTION
-    return reply("*_❌ Invalid option! Use:_* on/off/warn/delete/remove");
-
-  } catch (err) {
-    console.error("Anti-link toggle error:", err);
-    reply("*_❌ Error updating Anti-Link settings._*");
+  } catch (e) {
+    reply(`Error: ${e.message}`);
   }
 });
 //-----------------------------------------------------
