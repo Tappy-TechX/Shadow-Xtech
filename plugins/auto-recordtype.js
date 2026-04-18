@@ -37,7 +37,7 @@ cmd({
 
 
 /**
- * AUTO TYPE + RECORD (SYNC 5s MODE)
+ * AUTO TYPE → THEN RECORD (SEQUENTIAL MODE)
  */
 cmd({
     on: "body"
@@ -45,16 +45,15 @@ cmd({
 
     if (config.AUTO_TYPING_RECORDING === 'true') {
 
-        // start both at same time
-        await Promise.all([
-            conn.sendPresenceUpdate('composing', from),
-            conn.sendPresenceUpdate('recording', from)
-        ]);
-
-        // keep BOTH active for 5 seconds
+        // 1️⃣ Typing first (5s)
+        await conn.sendPresenceUpdate('composing', from);
         await new Promise(res => setTimeout(res, 5000));
 
-        // optional: stop presence after 5s
+        // 2️⃣ Then recording (5s)
+        await conn.sendPresenceUpdate('recording', from);
+        await new Promise(res => setTimeout(res, 5000));
+
+        // 3️⃣ Stop presence
         await conn.sendPresenceUpdate('available', from);
     }
 });
