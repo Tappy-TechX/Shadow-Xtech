@@ -2,6 +2,9 @@ const config = require('../config');
 const { cmd } = require('../command');
 
 
+/**
+ * TOGGLE COMMAND
+ */
 cmd({
     pattern: "autorecordtype",
     alias: ["atr", "tyrec"],
@@ -11,24 +14,30 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, isOwner, reply }) => {
 
-    if (!isOwner) return reply("❌ Only owner can use this command!");
-
-    if (!config.AUTO_TYPING_RECORDING) {
-        config.AUTO_TYPING_RECORDING = "false";
+    if (!isOwner) {
+        await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+        return reply("❌ Only owner can use this command!");
     }
+
+    config.AUTO_TYPING_RECORDING = config.AUTO_TYPING_RECORDING || "false";
 
     if (config.AUTO_TYPING_RECORDING === "true") {
         config.AUTO_TYPING_RECORDING = "false";
-        reply("❌ Auto Typing + Recording DISABLED");
+
+        await conn.sendMessage(from, { react: { text: "🔴", key: mek.key } });
+        return reply("❌ Auto Typing + Recording DISABLED");
+
     } else {
         config.AUTO_TYPING_RECORDING = "true";
-        reply("✅ Auto Typing + Recording ENABLED");
+
+        await conn.sendMessage(from, { react: { text: "🟢", key: mek.key } });
+        return reply("✅ Auto Typing + Recording ENABLED");
     }
 });
 
+
 /**
- * AUTO TYPE + RECORD (COMBINED MODE)
- * Sends both "composing" and "recording" presence
+ * AUTO TYPE + RECORD (SYNC 5s MODE)
  */
 cmd({
     on: "body"
@@ -36,13 +45,16 @@ cmd({
 
     if (config.AUTO_TYPING_RECORDING === 'true') {
 
-        // typing first
-        await conn.sendPresenceUpdate('composing', from);
+        // start both at same time
+        await Promise.all([
+            conn.sendPresenceUpdate('composing', from),
+            conn.sendPresenceUpdate('recording', from)
+        ]);
 
-        // slight delay makes it more realistic
-        await new Promise(res => setTimeout(res, 500));
+        // keep BOTH active for 5 seconds
+        await new Promise(res => setTimeout(res, 5000));
 
-        // then recording
-        await conn.sendPresenceUpdate('recording', from);
+        // optional: stop presence after 5s
+        await conn.sendPresenceUpdate('available', from);
     }
 });
