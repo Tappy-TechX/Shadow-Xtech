@@ -54,24 +54,80 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
     }
 });
 //-----------------------------------------------------
-cmd({
-    pattern: "setprefix",
-    alias: ["prefix"],
-    react: "🔧",
-    desc: "Change the bot's command prefix.",
-    category: "settings",
+const {
+  getRawPrefix,
+  setPrefix,
+  resetPrefix,
+  DEFAULT_PREFIX,
+  NO_PREFIX,
+} = require('../lib/prefix');
+
+cmd(
+  {
+    pattern: 'setprefix',
+    alias: ['prefix'],
+    react: '🔧',
+    desc: 'Change bot command prefix',
+    category: 'settings',
     filename: __filename,
-}, async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*_📛 Only the owner can use this command!_*");
+  },
+  async (conn, mek, m, { from, args, isCreator, reply }) => {
+    if (!isCreator) {
+      return reply('❌ Only the owner can use this command.');
+    }
 
-    const newPrefix = args[0]; // Get the new prefix from the command arguments
-    if (!newPrefix) return reply("*_❌ Please provide a new prefix. Example: `.setprefix !`_*");
+    const newPrefix = args[0];
 
-    // Update the prefix in memory
-    config.PREFIX = newPrefix;
+    // Show current prefix
+    if (!newPrefix) {
+      const current = getRawPrefix();
+      const display =
+        current === NO_PREFIX ? 'None (prefixless mode)' : current;
 
-    return reply(`*_🟢 Prefix successfully changed to ${newPrefix}_*`);
-});
+      return reply(
+        `👑 Current prefix: *${display}*\n\n` +
+          `Usage:\n` +
+          `• .setprefix !\n` +
+          `• .setprefix none\n` +
+          `• .setprefix reset`
+      );
+    }
+
+    // Reset prefix
+    if (newPrefix.toLowerCase() === 'reset') {
+      const ok = resetPrefix();
+      return reply(
+        ok
+          ? `✅ Prefix reset to default: *${DEFAULT_PREFIX}*`
+          : '❌ Failed to reset prefix'
+      );
+    }
+
+    // Prefixless mode
+    if (newPrefix.toLowerCase() === NO_PREFIX) {
+      const ok = setPrefix('');
+      return reply(
+        ok
+          ? '✅ Bot is now in prefixless mode'
+          : '❌ Failed to enable prefixless mode'
+      );
+    }
+
+    // Validate length
+    if (newPrefix.length > 3) {
+      return reply('❌ Prefix must be 1–3 characters');
+    }
+
+    // Set prefix
+    const success = setPrefix(newPrefix);
+
+    return reply(
+      success
+        ? `✅ Prefix updated to: *${newPrefix}*`
+        : '❌ Failed to update prefix'
+    );
+  }
+);
 //-----------------------------------------------------
 cmd({
     pattern: "mode",
