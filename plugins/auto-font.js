@@ -36,7 +36,7 @@ cmd(
     // TURN ON FONT SYSTEM
     // ─────────────────────────────
     if (input === "on") {
-      config.AUTO_FONT = "gothic";
+      config.AUTO_FONT = "fraktur";
 
       return reply(
         "🟢 Font system *ENABLED*\n" +
