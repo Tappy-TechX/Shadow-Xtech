@@ -57,6 +57,7 @@ module.exports = {
     // =============================== 
     // 💬 Message Behavior 
     // =============================== 
+    AUTO_FONT: process.env.AUTO_FONT || "off",
     READ_MESSAGE: process.env.READ_MESSAGE || "false", 
     AUTO_REACT: process.env.AUTO_REACT || "false", 
     AUTO_REPLY: process.env.AUTO_REPLY || "false", 
