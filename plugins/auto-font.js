@@ -12,38 +12,73 @@ cmd(
   },
   async (conn, mek, m, { from, q, reply }) => {
 
-    // reaction
     await conn.sendMessage(from, {
       react: { text: "🎨", key: mek.key }
     });
 
-    // no input
-    if (!q) {
+    const input = (q || "").toLowerCase();
+
+    // ─────────────────────────────
+    // SHOW FONT LIST
+    // ─────────────────────────────
+    if (!input || input === "list") {
       let list = Object.keys(FONT_MAPS)
         .map(f => `• ${f}`)
         .join("\n");
 
       return reply(
-        `🎨 *Font Styles Available:*\n\n${list}\n\nUse:\n.font bold`
+        `🎨 *Available Fonts:*\n\n${list}\n\n` +
+        `🟢 Use:\n.font bold\n.font script\n.font on\n.font off`
       );
     }
 
-    const style = q.toLowerCase();
+    // ─────────────────────────────
+    // TURN ON FONT SYSTEM
+    // ─────────────────────────────
+    if (input === "on") {
+      config.AUTO_FONT = "gothic";
 
-    if (!FONT_MAPS[style] && style !== "off") {
+      return reply(
+        "🟢 Font system *ENABLED*\n" +
+        "Default font set to *gothic*"
+      );
+    }
+
+    // ─────────────────────────────
+    // TURN OFF FONT SYSTEM
+    // ─────────────────────────────
+    if (input === "off") {
+      config.AUTO_FONT = "off";
+
+      return reply(
+        "🔴 Font system *DISABLED*\n" +
+        "Back to normal text mode"
+      );
+    }
+
+    // ─────────────────────────────
+    // VALIDATE FONT STYLE
+    // ─────────────────────────────
+    if (!FONT_MAPS[input]) {
       await conn.sendMessage(from, {
         react: { text: "❌", key: mek.key }
       });
-      return reply("❌ Invalid font style");
+
+      return reply("❌ Invalid font style. Use .font list");
     }
 
-    // 🔥 IMPORTANT FIX (persistent runtime change)
-    config.AUTO_FONT = style;
+    // ─────────────────────────────
+    // SET FONT
+    // ─────────────────────────────
+    config.AUTO_FONT = input;
 
     await conn.sendMessage(from, {
       react: { text: "✅", key: mek.key }
     });
 
-    return reply(`✅ Font changed to *${style}*`);
+    return reply(
+      `✅ Font changed to *${input}*\n` +
+      `🧠 Current mode: ${config.AUTO_FONT}`
+    );
   }
 );
