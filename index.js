@@ -1,4 +1,4 @@
-const {
+Const {
   default: makeWASocket,
   useMultiFileAuthState,
   DisconnectReason,
@@ -25,7 +25,7 @@ const {
 const l = console.log;
 // NOTE: These modules are assumed to exist in './lib/' or './'
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions');
-const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data');
+const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage: saveMessageToDB } = require('./data');
 const fs = require('fs');
 const ff = require('fluent-ffmpeg');
 const P = require('pino');
@@ -53,8 +53,12 @@ const callHandler = require('./lib/callhandler');
 const { transformMessage } = require("./lib/font");
 // ------------------------------------------
 
-// --- Import antiedit modules ---
+// --- Import antiedit modules (UPDATED) ---
 const { saveMessage: saveEditedMessage, handleEdit } = require("./lib/antiedit");
+// ------------------------------------------
+
+// --- Import store module for anti-delete ---
+const { saveMessage: saveMessageToStore } = require('./lib/store');
 // ------------------------------------------
 
 const ownerNumber = ['254759000340'];
@@ -229,30 +233,39 @@ async function connectToWA() {
   conn.ev.on('creds.update', saveCreds);
 
   //==============================
-  // Anti-Delete Functionality
-  conn.ev.on('messages.update', async updates => {
-    for (const update of updates) {
-      if (update.update.message === null) {
-        console.log("Delete Detected:", JSON.stringify(update, null, 2));
-        await AntiDelete(conn, updates);
-      }
+  // ANTI-DELETE FUNCTIONALITY (UPDATED)
+  // Save all messages for anti-delete
+  conn.ev.on('messages.upsert', async (m) => {
+    const messages = m.messages;
+    for (const msg of messages) {
+      if (!msg.message) continue;
+      saveMessageToStore(msg, msg.key.remoteJid);
+    }
+  });
+
+  // Detect deletions
+  conn.ev.on('messages.update', async (updates) => {
+    try {
+      await AntiDelete(conn, updates);
+    } catch (e) {
+      console.error("AntiDelete Error:", e);
     }
   });
   //==============================
 
-  // Anti-Edit Functionality
+  // ANTI-EDIT FUNCTIONALITY (UPDATED)
+  // Store original messages
   conn.ev.on("messages.upsert", async ({ messages }) => {
-    for (const m of messages) {
-      if (!m.key.fromMe && m.message) {
-        // Save the original message for comparison later
-        await saveEditedMessage(m.key.id, m);
+    for (const msg of messages) {
+      if (!msg.key.fromMe && msg.message) {
+        saveEditedMessage(msg.key.id, msg);
       }
     }
   });
 
-  conn.ev.on("messages.update", async (u) => {
-    // Pass the connection object and the update to handleEdit
-    await handleEdit(conn, { messages: u });
+  // Detect edits
+  conn.ev.on("messages.update", async (updates) => {
+    await handleEdit(conn, updates);
   });
   //==============================
 
@@ -293,7 +306,7 @@ async function connectToWA() {
       await conn.sendMessage(user, { text: text, react: { text: '💜', key: mek.key } }, { quoted: mek });
     }
     await Promise.all([
-      saveMessage(mek),
+      saveMessageToDB(mek),
     ]);
     const m = sms(conn, mek);
     const type = getContentType(mek.message);
