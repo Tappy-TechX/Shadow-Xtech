@@ -25,7 +25,7 @@ const {
 const l = console.log;
 // NOTE: These modules are assumed to exist in './lib/' or './'
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions');
-const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage } = require('./data');
+const { AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount } = require('./data');
 const fs = require('fs');
 const ff = require('fluent-ffmpeg');
 const P = require('pino');
@@ -34,7 +34,7 @@ const GroupEvents = require('./lib/groupevents');
 const qrcode = require('qrcode-terminal');
 const StickersTypes = require('wa-sticker-formatter');
 const util = require('util');
-const { sms, downloadMediaMessage, AntiDelete } = require('./lib');
+const { sms, downloadMediaMessage } = require('./lib');
 const FileType = require('file-type');
 const axios = require('axios');
 const { File } = require('megajs');
@@ -53,8 +53,10 @@ const callHandler = require('./lib/callhandler');
 const { transformMessage } = require("./lib/font");
 // ------------------------------------------
 
-// --- Import antiedit modules ---
-const { saveMessage: saveEditedMessage, handleEdit } = require("./lib/antiedit");
+// --- NEW IMPORTS FOR ANTIDELETE & ANTIEDIT ---
+const { saveMessage } = require("./lib/store");
+const { AntiDelete } = require("./lib/antidel");
+const { handleEdit } = require("./lib/antiedit");
 // ------------------------------------------
 
 const ownerNumber = ['254759000340'];
@@ -228,34 +230,27 @@ async function connectToWA() {
   });
   conn.ev.on('creds.update', saveCreds);
 
-  //==============================
-  // Anti-Delete Functionality
-  conn.ev.on('messages.update', async updates => {
-    for (const update of updates) {
-      if (update.update.message === null) {
-        console.log("Delete Detected:", JSON.stringify(update, null, 2));
-        await AntiDelete(conn, updates);
-      }
-    }
-  });
-  //==============================
-
-  // Anti-Edit Functionality
+  // ==============================
+  // NEW: SAVE ALL INCOMING MESSAGES
+  // ==============================
   conn.ev.on("messages.upsert", async ({ messages }) => {
-    for (const m of messages) {
-      if (!m.key.fromMe && m.message) {
-        // Save the original message for comparison later
-        await saveEditedMessage(m.key.id, m);
-      }
+    for (const msg of messages) {
+      if (!msg.message) continue;
+      saveMessage(msg, msg.key.remoteJid);
     }
   });
 
-  conn.ev.on("messages.update", async (u) => {
-    // Pass the connection object and the update to handleEdit
-    await handleEdit(conn, { messages: u });
+  // ==============================
+  // NEW: HANDLE DELETE & EDIT (combined listener)
+  // ==============================
+  conn.ev.on("messages.update", async (updates) => {
+    await AntiDelete(conn, updates);
+    await handleEdit(conn, updates);
   });
-  //==============================
 
+  // ==============================
+  // Other group events and message processing (unchanged)
+  // ==============================
   conn.ev.on("group-participants.update", (update) => GroupEvents(conn, update));
 
   //=============readstatus=======
@@ -292,9 +287,7 @@ async function connectToWA() {
       const text = `${config.AUTO_STATUS_MSG}`;
       await conn.sendMessage(user, { text: text, react: { text: '💜', key: mek.key } }, { quoted: mek });
     }
-    await Promise.all([
-      saveMessage(mek),
-    ]);
+    // The old saveMessage call has been removed (now handled in the separate messages.upsert listener)
     const m = sms(conn, mek);
     const type = getContentType(mek.message);
     const content = JSON.stringify(mek.message);
