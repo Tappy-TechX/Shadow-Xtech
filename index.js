@@ -54,7 +54,7 @@ const { transformMessage } = require("./lib/font");
 // ------------------------------------------
 
 // --- Import antiedit modules ---
-const { saveMessage: saveEditedMessage, handleEdit } = require("./lib/Antiedit");
+const { saveMessage: saveEditedMessage, handleEdit } = require("./lib/antiedit");
 // ------------------------------------------
 
 const ownerNumber = ['254759000340'];
