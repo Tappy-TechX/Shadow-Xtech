@@ -81,6 +81,8 @@ module.exports = {
     // =============================== 
     ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log", // "log" sends to bot owner, "chat" sends to chat
     ANTI_DELETE: process.env.ANTI_DELETE || "true", // Enable or disable anti-delete feature globally
+    ANTI_EDIT: process.env.ANTI_EDIT || "true",
+    
     // =============================== 
     // 🌍 Mode Settings 
     // =============================== 
