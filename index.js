@@ -1,7 +1,3 @@
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 9090;
-
 const {
   default: makeWASocket,
   useMultiFileAuthState,
@@ -57,8 +53,8 @@ const callHandler = require('./lib/callhandler');
 const { transformMessage } = require("./lib/font");
 // ------------------------------------------
 
-// --- Import Antiedit module ---
-const { saveMessage: saveMessageForEdit, handleEdit } = require("./lib/antiedit");
+// --- Import antiedit modules ---
+const { saveMessage: saveEditedMessage, handleEdit } = require("./lib/antiedit");
 // ------------------------------------------
 
 const ownerNumber = ['254759000340'];
@@ -115,6 +111,10 @@ if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
     });
   });
 }
+
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 9090;
 
 // Define WhatsApp Channel details
 const whatsappChannelId = "120363369453603973@newsletter";
@@ -229,7 +229,7 @@ async function connectToWA() {
   conn.ev.on('creds.update', saveCreds);
 
   //==============================
-
+  // Anti-Delete Functionality
   conn.ev.on('messages.update', async updates => {
     for (const update of updates) {
       if (update.update.message === null) {
@@ -237,9 +237,22 @@ async function connectToWA() {
         await AntiDelete(conn, updates);
       }
     }
-    // --- Handle message edits ---
-    await handleEdit(conn, { messages: updates });
-    // ----------------------------
+  });
+  //==============================
+
+  // Anti-Edit Functionality
+  conn.ev.on("messages.upsert", async ({ messages }) => {
+    for (const m of messages) {
+      if (!m.key.fromMe && m.message) {
+        // Save the original message for comparison later
+        await saveEditedMessage(m.key.id, m);
+      }
+    }
+  });
+
+  conn.ev.on("messages.update", async (u) => {
+    // Pass the connection object and the update to handleEdit
+    await handleEdit(conn, { messages: u });
   });
   //==============================
 
