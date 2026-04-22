@@ -13,10 +13,10 @@ cmd({
     category: "misc",
     filename: __filename
 }, async (client, message, args, { reply, isOwner }) => {
-    if (!isOwner) return reply("This command is only for the bot owner.");
+    if (!isOwner) return reply("*📌 This command is only for the bot owner.*");
 
     try {
-        await reply("🔍 Checking for Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ updates...");
+        await reply("*🔍 Checking for Shadow-Xtech updates...*");
 
         // Fetch the latest commit hash from GitHub
         const { data: commitData } = await axios.get("https://api.github.com/repos/Tappy-TechX/Shadow-Xtech/commits/main");
@@ -29,7 +29,7 @@ cmd({
             return reply("✅ Your Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ bot is already up-to-date!");
         }
 
-        await reply("🚀 Updating Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ Bot...");
+        await reply("*🚀 Updating Shadow-Xtech Bot...*");
 
         // Download the latest code
         const zipPath = path.join(__dirname, "latest.zip");
@@ -37,13 +37,13 @@ cmd({
         fs.writeFileSync(zipPath, zipData);
 
         // Extract ZIP file
-        await reply("📦 Extracting the latest code...");
+        await reply("*📦 Extracting the latest code...*");
         const extractPath = path.join(__dirname, 'latest');
         const zip = new AdmZip(zipPath);
         zip.extractAllTo(extractPath, true);
 
         // Copy updated files, preserving config.js and app.json
-        await reply("🔄 Replacing files...");
+        await reply("*🔄 Replacing files...*");
         const sourcePath = path.join(extractPath, "Shadow-Xtech-main");
         const destinationPath = path.join(__dirname, '..');
         copyFolderSync(sourcePath, destinationPath);
@@ -55,7 +55,7 @@ cmd({
         fs.unlinkSync(zipPath);
         fs.rmSync(extractPath, { recursive: true, force: true });
 
-        await reply("✅ Update complete! Restarting the bot...");
+        await reply("*✅ Update complete! Restarting the bot...*");
         process.exit(0);
     } catch (error) {
         console.error("Update error:", error);
