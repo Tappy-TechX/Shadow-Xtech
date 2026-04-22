@@ -1,3 +1,7 @@
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 9090;
+
 const {
   default: makeWASocket,
   useMultiFileAuthState,
@@ -51,6 +55,10 @@ const callHandler = require('./lib/callhandler');
 
 // --- Import transformMessage ---
 const { transformMessage } = require("./lib/font");
+// ------------------------------------------
+
+// --- Import Antiedit module ---
+const { saveMessage: saveMessageForEdit, handleEdit } = require("./lib/antiedit");
 // ------------------------------------------
 
 const ownerNumber = ['254759000340'];
@@ -107,10 +115,6 @@ if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
     });
   });
 }
-
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 9090;
 
 // Define WhatsApp Channel details
 const whatsappChannelId = "120363369453603973@newsletter";
@@ -233,6 +237,9 @@ async function connectToWA() {
         await AntiDelete(conn, updates);
       }
     }
+    // --- Handle message edits ---
+    await handleEdit(conn, { messages: updates });
+    // ----------------------------
   });
   //==============================
 
