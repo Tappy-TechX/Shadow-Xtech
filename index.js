@@ -66,7 +66,17 @@ const {
   setInterval(clearTempDir, 5 * 60 * 1000);
   
   //===================SESSION-AUTH============================
-const { loadSession } = require("./lib/session");
+//===================SESSION-AUTH============================
+if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
+if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
+const sessdata = config.SESSION_ID.replace("trend-x~", '');
+const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
+filer.download((err, data) => {
+if(err) throw err
+fs.writeFile(__dirname + '/sessions/creds.json', data, () => {
+console.log("Session downloaded ✅")
+})})}
+
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 9090;
@@ -74,7 +84,6 @@ const port = process.env.PORT || 9090;
   //=============================================
   
   async function connectToWA() {
-  await loadSession();
   console.log("Connecting to WhatsApp ⏳️...");
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/session/')
   var { version } = await fetchLatestBaileysVersion()
