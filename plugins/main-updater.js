@@ -79,7 +79,7 @@ cmd({
     }
 });
 
-// Copy folders while preserving config.js & app.json
+// 🔥 SAFE COPY FUNCTION (PROTECTS USER DATA)
 function copyFolderSync(source, target) {
     if (!fs.existsSync(target)) {
         fs.mkdirSync(target, { recursive: true });
@@ -91,9 +91,15 @@ function copyFolderSync(source, target) {
         const srcPath = path.join(source, item);
         const destPath = path.join(target, item);
 
-        // Preserve custom config files
-        if (item === "config.js" || item === "app.json") {
-            console.log(`Skipping ${item}`);
+        // 🚨 PROTECTED FILES & FOLDERS (DO NOT OVERWRITE)
+        if (
+            item === "config.js" ||
+            item === "app.json" ||
+            item === "settings.json" ||
+            item === "data" ||
+            item === "node_modules"
+        ) {
+            console.log(`Skipping protected: ${item}`);
             continue;
         }
 
