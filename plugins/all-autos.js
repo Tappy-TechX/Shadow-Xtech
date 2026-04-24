@@ -127,28 +127,7 @@ async (conn, mek, m, { from, args, isCreator, reply }) => {
     }
 });
 //-----------------------------------------------------
-cmd({
-    pattern: "always-online",
-    alias: ["alwaysonline"],
-    react: "⚡",
-    desc: "Enable or disable the always online mode",
-    category: "settings",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, isCreator, reply }) => {
-    if (!isCreator) return reply("*_📛 Only the owner can use this command!_*");
 
-    const status = args[0]?.toLowerCase();
-    if (status === "on") {
-        config.ALWAYS_ONLINE = "true";
-        await reply("*_🟢 always online mode is now enabled._*");
-    } else if (status === "off") {
-        config.ALWAYS_ONLINE = "false";
-        await reply("*_🔴 always online mode is now disabled._*");
-    } else {
-        await reply(`*🛠️ Example: . always-online on_*`);
-    }
-});
 //-----------------------------------------------------
 cmd({
     pattern: "auto-recording",
