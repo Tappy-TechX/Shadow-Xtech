@@ -4,7 +4,7 @@
     "WELCOME": "true",
     "ANTI_DELETE": "true",
     "AUTO_STATUS_SEEN": "true",
-    "FONT": "off"
+    "AUTO_FONT": "off"
   },
   "users": {}
 }
