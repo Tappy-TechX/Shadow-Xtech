@@ -1,3 +1,10 @@
 {
-  "ANTICALL": false
+  "global": {
+    "ANTI_LINK": "true",
+    "ANTI_DELETE": "true",
+    "WELCOME": "true",
+    "AUTO_STATUS_SEEN": "true",
+    "ANTICALL": false
+  },
+  "users": {}
 }
