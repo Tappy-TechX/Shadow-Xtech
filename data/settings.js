@@ -1,100 +1,62 @@
 const fs = require("fs");
-if (fs.existsSync("config.env")) require("dotenv").config({ path: "./config.env" });
+const path = require("path");
 
-const { getGlobal } = require("./data/settings");
+const dir = path.join(__dirname, "../data");
+const file = path.join(dir, "settings.json");
 
-// fallback env reader
-const env = (key, def) => process.env[key] ?? def;
+// ensure folder exists
+if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+}
 
-// smart config loader (settings.json > env > default)
-function getConfig(key, fallback) {
-    const globalValue = getGlobal(key);
-    if (globalValue !== undefined) return globalValue;
+let cache = null;
 
-    return env(key, fallback);
+function load() {
+    if (cache) return cache;
+
+    if (!fs.existsSync(file)) {
+        const init = { global: {}, users: {} };
+        fs.writeFileSync(file, JSON.stringify(init, null, 2));
+        cache = init;
+        return cache;
+    }
+
+    cache = JSON.parse(fs.readFileSync(file));
+    return cache;
+}
+
+function save(data) {
+    cache = data;
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+// 🔥 GLOBAL SETTINGS
+function getGlobal(key) {
+    return load().global[key];
+}
+
+// 🔥 SELF-HEALING SET (IMPORTANT FIX)
+function setGlobal(key, value) {
+    const db = load();
+    db.global[key] = value;
+    save(db);
+}
+
+// USER SETTINGS
+function getUser(jid, key) {
+    return load().users?.[jid]?.[key];
+}
+
+function setUser(jid, key, value) {
+    const db = load();
+    if (!db.users[jid]) db.users[jid] = {};
+    db.users[jid][key] = value;
+    save(db);
 }
 
 module.exports = {
-
-    // ===============================
-    // 🔐 Session
-    // ===============================
-    SESSION_ID: getConfig(
-        "SESSION_ID",
-        "Shadow-Xtech~TIZS1bRB#tdEuL2kc47iAhItPKKQ_XaqkKLXp8zcqfR9_BoFxsQ8"
-    ),
-
-    // ===============================
-    // 📊 Status Settings
-    // ===============================
-    AUTO_STATUS_SEEN: getConfig("AUTO_STATUS_SEEN", "true"),
-    AUTO_STATUS_REPLY: getConfig("AUTO_STATUS_REPLY", "false"),
-    AUTO_STATUS_REACT: getConfig("AUTO_STATUS_REACT", "true"),
-    AUTO_STATUS_MSG: getConfig("AUTO_STATUS_MSG", "*Seen Your Status By Shadow-Xtech 🩷*"),
-
-    // ===============================
-    // 👥 Group Settings
-    // ===============================
-    WELCOME: getConfig("WELCOME", "true"),
-    ADMIN_EVENTS: getConfig("ADMIN_EVENTS", "false"),
-    ANTI_LINK: getConfig("ANTI_LINK", "true"),
-    DELETE_LINKS: getConfig("DELETE_LINKS", "false"),
-    ANTI_LINK_KICK: getConfig("ANTI_LINK_KICK", "false"),
-
-    // ===============================
-    // 💬 Mention & Reactions
-    // ===============================
-    MENTION_REPLY: getConfig("MENTION_REPLY", "false"),
-    CUSTOM_REACT: getConfig("CUSTOM_REACT", "false"),
-    CUSTOM_REACT_EMOJIS: getConfig(
-        "CUSTOM_REACT_EMOJIS",
-        "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍"
-    ),
-    CUSTOM_REACT_MODE: getConfig("CUSTOM_REACT_MODE", "all"),
-
-    // ===============================
-    // 🤖 Bot Identity
-    // ===============================
-    PREFIX: getConfig("PREFIX", "."),
-    BOT_NAME: getConfig("BOT_NAME", "SHADOW-XTECH"),
-    STICKER_NAME: getConfig("STICKER_NAME", "SHADOW-XTECH"),
-    OWNER_NUMBER: getConfig("OWNER_NUMBER", "254759000340"),
-    OWNER_NAME: getConfig("OWNER_NAME", "Black-Tappy"),
-    DESCRIPTION: getConfig("DESCRIPTION", "*© Powered By Black-Tappy*"),
-
-    // ===============================
-    // 🛡️ Security Settings
-    // ===============================
-    ANTI_BAD: getConfig("ANTI_BAD", "false"),
-    ANTI_VV: getConfig("ANTI_VV", "true"),
-    ANTICALL: getConfig("ANTICALL", "false"),
-
-    // ===============================
-    // ♻️ Anti Features
-    // ===============================
-    ANTI_DEL_PATH: getConfig("ANTI_DEL_PATH", "log"),
-    ANTI_DELETE: getConfig("ANTI_DELETE", "true"),
-    ANTI_EDIT: getConfig("ANTI_EDIT", "true"),
-
-    // ===============================
-    // 🌍 Mode Settings
-    // ===============================
-    MODE: getConfig("MODE", "public"),
-    CHATBOT_MODE: getConfig("CHATBOT_MODE", "false"),
-    PUBLIC_MODE: getConfig("PUBLIC_MODE", "true"),
-
-    // ===============================
-    // 👨🏾‍💻 Developer
-    // ===============================
-    DEV: getConfig("DEV", "254759000340"),
-    DATABASE_URL: getConfig("DATABASE_URL", "postgresql://..."),
-
-    // ===============================
-    // 🧠 API Keys
-    // ===============================
-    GIFTED_API_KEY: getConfig("GIFTED_API_KEY", "_0u5aff45,_0l1876s8qc"),
-    GIFTED_TECH_API: getConfig("GIFTED_TECH_API", "https://api.giftedtech.co.ke"),
-
-    OPENAI_API_KEY:
-        process.env.OPENAI_API_KEY || "sk-proj-xxxx"
+    getGlobal,
+    setGlobal,
+    getUser,
+    setUser
 };
