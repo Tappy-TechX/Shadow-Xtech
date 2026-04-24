@@ -4,7 +4,7 @@ const path = require("path");
 const dir = path.join(__dirname, "../data");
 const file = path.join(dir, "settings.json");
 
-// ensure folder exists
+// Ensure data folder exists
 if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
 }
@@ -15,7 +15,11 @@ function load() {
     if (cache) return cache;
 
     if (!fs.existsSync(file)) {
-        const init = { global: {}, users: {} };
+        const init = {
+            global: {},
+            users: {}
+        };
+
         fs.writeFileSync(file, JSON.stringify(init, null, 2));
         cache = init;
         return cache;
@@ -30,26 +34,29 @@ function save(data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-// 🔥 GLOBAL SETTINGS
+// Global settings
 function getGlobal(key) {
     return load().global[key];
 }
 
-// 🔥 SELF-HEALING SET (IMPORTANT FIX)
 function setGlobal(key, value) {
     const db = load();
     db.global[key] = value;
     save(db);
 }
 
-// USER SETTINGS
+// User settings
 function getUser(jid, key) {
     return load().users?.[jid]?.[key];
 }
 
 function setUser(jid, key, value) {
     const db = load();
-    if (!db.users[jid]) db.users[jid] = {};
+
+    if (!db.users[jid]) {
+        db.users[jid] = {};
+    }
+
     db.users[jid][key] = value;
     save(db);
 }
