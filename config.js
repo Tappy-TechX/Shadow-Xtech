@@ -6,7 +6,7 @@ if (fs.existsSync("config.env")) {
 
 const { getGlobal, setGlobal } = require("./data/settings");
 
-// Default values
+// Default config values
 const defaults = {
     SESSION_ID: "Shadow-Xtech~TIZS1bRB#tdEuL2kc47iAhItPKKQ_XaqkKLXp8zcqfR9_BoFxsQ8",
 
@@ -17,11 +17,13 @@ const defaults = {
 
     WELCOME: "true",
     ADMIN_EVENTS: "false",
+
     ANTI_LINK: "true",
     DELETE_LINKS: "false",
     ANTI_LINK_KICK: "false",
 
     MENTION_REPLY: "false",
+
     CUSTOM_REACT: "false",
     CUSTOM_REACT_EMOJIS:
         "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍",
@@ -34,7 +36,8 @@ const defaults = {
     OWNER_NAME: "Black-Tappy",
     DESCRIPTION: "*© Powered By Black-Tappy*",
 
-    AUTO_FONT: "off", // FIXED
+    // FIXED FONT KEY
+    AUTO_FONT: "off",
 
     ANTI_BAD: "false",
     ANTI_VV: "true",
@@ -55,23 +58,23 @@ const defaults = {
     GIFTED_TECH_API: "https://api.giftedtech.co.ke"
 };
 
-// Dynamic config reader
+// Dynamic config
 module.exports = new Proxy(defaults, {
     get(target, key) {
         const settingKey = String(key);
 
-        // settings.json priority
+        // 1. settings.json priority
         const savedValue = getGlobal(settingKey);
         if (savedValue !== undefined) {
             return savedValue;
         }
 
-        // env fallback
+        // 2. config.env fallback
         if (process.env[settingKey] !== undefined) {
             return process.env[settingKey];
         }
 
-        // auto-save missing defaults
+        // 3. Save missing default automatically
         if (target[settingKey] !== undefined) {
             setGlobal(settingKey, target[settingKey]);
             return target[settingKey];
