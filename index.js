@@ -43,7 +43,17 @@ const bodyparser = require('body-parser');
 const os = require('os');
 const Crypto = require('crypto');
 const path = require('path');
-const prefix = config.PREFIX;
+
+// ✅ CHANGE 1: Dynamic prefix getter - always reads current config value
+const getPrefix = () => {
+    try {
+        delete require.cache[require.resolve('./config')];
+        const freshConfig = require('./config');
+        return freshConfig.PREFIX || '.';
+    } catch (err) {
+        return config.PREFIX || '.';
+    }
+};
 
 // --- Import the call handler module ---
 const callHandler = require('./lib/callhandler');
@@ -176,7 +186,10 @@ async function connectToWA() {
       // Select a random fancy message
       const randomFancyMessage = fancyMessages[Math.floor(Math.random() * fancyMessages.length)];
 
-      // Construct the welcome message caption (Updated as requested)
+      // ✅ CHANGE 4: Use getPrefix() in welcome message
+      const currentPrefixDisplay = getPrefix();
+
+      // Construct the welcome message caption
       const caption = `
 ╭───────◇
 │ *✨ Connection Successful! Shadow-Xtech is Online ✨*
@@ -196,7 +209,7 @@ async function connectToWA() {
 │   Click [**Here**]
 ├─ ⭐ *Give Us a Star:*
 │   Star Us [**Here**] !
-╰─🛠️ *Prefix:* \`${prefix}\`
+╰─🛠️ *Prefix:* \`${currentPrefixDisplay}\`
 
 > _© *Powered By Black-Tappy*_`;
 
@@ -294,9 +307,13 @@ async function connectToWA() {
     const from = mek.key.remoteJid;
     const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : [];
     const body = (type === 'conversation') ? mek.message.conversation : (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text : (type == 'imageMessage') && mek.message.imageMessage.caption ? mek.message.imageMessage.caption : (type == 'videoMessage') && mek.message.videoMessage.caption ? mek.message.videoMessage.caption : '';
-    const isCmd = body.startsWith(prefix);
+    
+    // ✅ CHANGE 2: Use getPrefix() dynamically for command detection
+    const currentPrefix = getPrefix();
+    const isCmd = currentPrefix ? body.startsWith(currentPrefix) : true;
     var budy = typeof mek.text == 'string' ? mek.text : false;
-    const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : '';
+    const command = isCmd ? body.slice(currentPrefix.length).trim().split(' ').shift().toLowerCase() : '';
+    
     const args = body.trim().split(/ +/).slice(1);
     const q = args.join(' ');
     const text = args.join(' ');
@@ -414,7 +431,8 @@ async function connectToWA() {
     // take commands
 
     const events = require('./command');
-    const cmdName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : false;
+    // ✅ CHANGE 3: Use currentPrefix.length instead of hardcoded 1
+    const cmdName = isCmd ? body.slice(currentPrefix.length).trim().split(" ")[0].toLowerCase() : false;
     if (isCmd) {
       const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName));
       if (cmd) {
