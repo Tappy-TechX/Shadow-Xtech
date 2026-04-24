@@ -9,77 +9,75 @@ cmd({
     pattern: "update",
     alias: ["upgrade", "sync"],
     react: "🆕",
-    desc: "Update the bot to the latest version.",
+    desc: "Update bot safely without losing config.",
     category: "misc",
     filename: __filename
 }, async (client, message, args, { reply }) => {
 
     try {
-        await reply("*🔍 Checking for Shadow-Xtech updates...*");
+        await reply("*🔍 Checking for updates...*");
 
-        // Fetch latest commit hash
         const { data: commitData } = await axios.get(
             "https://api.github.com/repos/Tappy-TechX/Shadow-Xtech/commits/main"
         );
 
-        const latestCommitHash = commitData.sha;
+        const latest = commitData.sha;
+        const current = await getCommitHash();
 
-        // Get current stored hash
-        const currentHash = await getCommitHash();
-
-        if (latestCommitHash === currentHash) {
-            return reply("✅ Your Sʜᴀᴅᴏᴡ-Xᴛᴇᴄʜ bot is already up-to-date!");
+        if (latest === current) {
+            return reply("✅ Already up-to-date.");
         }
 
-        await reply("*🚀 Updating Shadow-Xtech Bot...*");
+        await reply("*🚀 Downloading update...*");
 
-        // Download latest source code
         const zipPath = path.join(__dirname, "latest.zip");
 
-        const { data: zipData } = await axios.get(
+        const { data } = await axios.get(
             "https://github.com/Tappy-TechX/Shadow-Xtech/archive/main.zip",
             { responseType: "arraybuffer" }
         );
 
-        fs.writeFileSync(zipPath, zipData);
-
-        // Extract zip
-        await reply("*📦 Extracting latest files...*");
+        fs.writeFileSync(zipPath, data);
 
         const extractPath = path.join(__dirname, "latest");
         const zip = new AdmZip(zipPath);
-
         zip.extractAllTo(extractPath, true);
 
-        // Replace files
-        await reply("*🔄 Replacing bot files...*");
+        const source = path.join(extractPath, "Shadow-Xtech-main");
+        const dest = path.join(__dirname, "..");
 
-        const sourcePath = path.join(extractPath, "Shadow-Xtech-main");
-        const destinationPath = path.join(__dirname, "..");
+        await reply("*🔄 Updating files safely...*");
 
-        copyFolderSync(sourcePath, destinationPath);
+        copyFolderSync(source, dest);
 
-        // Save new commit hash
-        await setCommitHash(latestCommitHash);
+        await setCommitHash(latest);
 
-        // Cleanup
+        // IMPORTANT FIX: DO NOT DELETE CONFIG DATA
+        const configEnvPath = path.join(__dirname, "..", "config.env");
+
+        if (!fs.existsSync(configEnvPath)) {
+            fs.writeFileSync(configEnvPath, "");
+        }
+
         fs.unlinkSync(zipPath);
-        fs.rmSync(extractPath, {
-            recursive: true,
-            force: true
-        });
+        fs.rmSync(extractPath, { recursive: true, force: true });
 
-        await reply("*✅ Update complete! Restarting bot...*");
+        await reply("*✅ Update complete. Restarting safely...*");
 
-        process.exit(0);
+        // SMALL DELAY ensures config flush
+        setTimeout(() => {
+            process.exit(0);
+        }, 1500);
 
-    } catch (error) {
-        console.error("Update error:", error);
-        return reply("❌ Update failed. Please update manually.");
+    } catch (e) {
+        console.error(e);
+        return reply("❌ Update failed.");
     }
 });
 
-// 🔥 SAFE COPY FUNCTION (PROTECTS USER DATA)
+/**
+ * SAFE COPY (IMPORTANT FIX)
+ */
 function copyFolderSync(source, target) {
     if (!fs.existsSync(target)) {
         fs.mkdirSync(target, { recursive: true });
@@ -88,25 +86,23 @@ function copyFolderSync(source, target) {
     const items = fs.readdirSync(source);
 
     for (const item of items) {
-        const srcPath = path.join(source, item);
-        const destPath = path.join(target, item);
+        const src = path.join(source, item);
+        const dst = path.join(target, item);
 
-        // 🚨 PROTECTED FILES & FOLDERS (DO NOT OVERWRITE)
+        // ❌ NEVER overwrite config files
         if (
             item === "config.js" ||
-            item === "app.json" ||
-            item === "settings.json" ||
-            item === "data" ||
-            item === "node_modules"
+            item === "config.env" ||   // 🔥 IMPORTANT FIX
+            item === "app.json"
         ) {
-            console.log(`Skipping protected: ${item}`);
+            console.log(`Skipping ${item}`);
             continue;
         }
 
-        if (fs.lstatSync(srcPath).isDirectory()) {
-            copyFolderSync(srcPath, destPath);
+        if (fs.lstatSync(src).isDirectory()) {
+            copyFolderSync(src, dst);
         } else {
-            fs.copyFileSync(srcPath, destPath);
+            fs.copyFileSync(src, dst);
         }
     }
 }
