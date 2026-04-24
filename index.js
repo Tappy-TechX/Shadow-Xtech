@@ -185,7 +185,7 @@ async function connectToWA() {
 ├─ ⚙️ *Mode:* ${config.MODE}
 ├─ ⚡ *Latency:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${speed}ms
 ├─ 📶 *Connection:* ${statusEmojis[Math.floor(Math.random() * statusEmojis.length)]} ${status}
-╰─*${randomFancyMessage}*
+╰─ *${randomFancyMessage}*
 ╭───────◇
 │ *⚡ Lightning Fast Response 🚀*
 ╰───────◇
@@ -213,8 +213,8 @@ async function connectToWA() {
             serverMessageId: -1,
           },
           externalAdReply: {
-            title: "Shadow-Xtech Bot",
-            body: "Powered By Black-Tappy",
+            title: "⚙️ Shadow-Xtech Connected",
+            body: "fast • reliable • stable",
             thumbnailUrl: 'https://files.catbox.moe/h8aep1.jpeg',
             sourceUrl: whatsappChannelLink,
             mediaType: 1,
