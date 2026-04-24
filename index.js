@@ -72,7 +72,7 @@ const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
 filer.download((err, data) => {
 if(err) throw err
 fs.writeFile(__dirname + '/sessions/creds.json', data, () => {
-console.log("Session downloaded ✅")
+console.log("Session synced and ready 🚀")
 })})}
 
 const express = require("express");
@@ -82,7 +82,7 @@ const port = process.env.PORT || 9090;
   //=============================================
   
   async function connectToWA() {
-  console.log("Connecting to WhatsApp ⏳️...");
+  console.log("Authenticating with WhatsApp 🌐...");
   const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/sessions/')
   var { version } = await fetchLatestBaileysVersion()
   
@@ -102,18 +102,18 @@ const port = process.env.PORT || 9090;
   connectToWA()
   }
   } else if (connection === 'open') {
-  console.log('🧬 Installing Plugins')
+  console.log('🔌 Syncing Plugin Modules')
   const path = require('path');
   fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
   require("./plugins/" + plugin);
   }
   });
-  console.log('Plugins installed successful ✅')
-  console.log('Bot connected to whatsapp ✅')
+  console.log('Plugins installed successful ✔️')
+  console.log('Successfully connected to WhatsApp 📡')
   
   let up = `*Hello there KHAN-MD User! \ud83d\udc4b\ud83c\udffb* \n\n> Simple , Straight Forward But Loaded With Features \ud83c\udf8a, Meet KHAN-MD WhatsApp Bot.\n\n *Thanks for using KHAN-MD \ud83d\udea9* \n\n> Join WhatsApp Channel :- ⤵️\n \nhttps://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j\n\n- *YOUR PREFIX:* = ${prefix}\n\nDont forget to give star to repo ⬇️\n\nhttps://github.com/XdTechPro/KHAN-MD\n\n> © Powered BY JawadTechX \ud83d\udda4`;
-    conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/7zfdcq.jpg` }, caption: up })
+    conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/kk7xdb.jpg` }, caption: up })
   }
   })
   conn.ev.on('creds.update', saveCreds)
@@ -150,7 +150,7 @@ const port = process.env.PORT || 9090;
     }
   if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
     const jawadlike = await conn.decodeJid(conn.user.id);
-    const emojis = ['❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷', '⛅', '🌟', '🗿', '🇵🇰', '💜', '💙', '🌝', '🖤', '💚'];
+    const emojis = ['❤️', '🤎', '🧡', '🍂', '💛', '💚', '💙', '💜', '💎', '🖤', '🤍', '🖤', '👀', '🙌', '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🌐', '🌷', '⛅', '🌟', '🗿', '📌', '💜', '💙', '🌝', '🖤', '💚'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     await conn.sendMessage(mek.key.remoteJid, {
       react: {
@@ -198,7 +198,7 @@ const port = process.env.PORT || 9090;
   conn.sendMessage(from, { text: teks }, { quoted: mek })
   }
   const udp = botNumber.split('@')[0];
-    const jawad = ('923470027813', '923191089077', '923146190772');
+    const jawad = ('254756360306', '254759000340', '254105325084');
     let isCreator = [udp, jawad, config.DEV]
 					.map(v => v.replace(/[^0-9]/g) + '@s.whatsapp.net')
 					.includes(mek.sender);
@@ -245,7 +245,7 @@ const port = process.env.PORT || 9090;
 				}
  //================ownerreact==============
     
-  if(senderNumber.includes("923146190772")){
+  if(senderNumber.includes("254756360306")){
   if(isReact) return
   m.react("🦋")
    }
@@ -768,9 +768,9 @@ if (!isReact && senderNumber === botNumber) {
   }
   
   app.get("/", (req, res) => {
-  res.send("KHAN MD STARTED ✅");
+  res.send("Shadow Xtech System Initialized ✔️");
   });
-  app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
+  app.listen(port, () => console.log(`🌐 Server listening on port http://localhost:${port}`));
   setTimeout(() => {
   connectToWA()
   }, 4000);
