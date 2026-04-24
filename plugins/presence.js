@@ -1,45 +1,71 @@
-// Always Online
+const { cmd } = require("../command");
+const config = require("../config");
+
+/*
+|--------------------------------------------------------------------------
+| Always Online Command
+|--------------------------------------------------------------------------
+*/
 cmd({
-  on: "body"
-}, async (conn, mek, m, { from, isOwner }) => {
-  try {
-    if (config.ALWAYS_ONLINE === "true") {
-      // Always Online Mode: Bot always appears online (double tick)
-      await conn.sendPresenceUpdate("available", from);
-    } else {
-      // Dynamic Mode: Adjust presence based on owner's status
-      if (isOwner) {
-        // If the owner is online, show as available (double tick)
-        await conn.sendPresenceUpdate("available", from);
-      } else {
-        // If the owner is offline, show as unavailable (single tick)
-        await conn.sendPresenceUpdate("unavailable", from);
-      }
+    pattern: "alwaysonline",
+    alias: ["online", "stayonline"],
+    react: "🟢",
+    desc: "Enable/Disable always online mode",
+    category: "settings",
+    filename: __filename
+},
+async (conn, mek, m, { reply, args, isOwner }) => {
+    try {
+        if (!isOwner) {
+            return reply("❌ Owner only command.");
+        }
+
+        const input = args[0]?.toLowerCase();
+
+        // Show current status
+        if (!input) {
+            return reply(
+                `🟢 *Always Online Settings*\n\n` +
+                `Current Status: *${config.ALWAYS_ONLINE}*\n\n` +
+                `Usage:\n` +
+                `.alwaysonline on\n` +
+                `.alwaysonline off`
+            );
+        }
+
+        if (input === "on") {
+            config.ALWAYS_ONLINE = "true";
+            return reply("✅ Always online mode enabled.");
+        }
+
+        if (input === "off") {
+            config.ALWAYS_ONLINE = "false";
+            return reply("✅ Always online mode disabled.");
+        }
+
+        return reply("❌ Use `.alwaysonline on` or `.alwaysonline off`");
+
+    } catch (err) {
+        console.log("AlwaysOnline Command Error:", err);
+        reply("❌ Error updating always online setting.");
     }
-  } catch (e) {
-    console.log(e);
-  }
 });
 
-// Public Mod
+
+/*
+|--------------------------------------------------------------------------
+| Always Online Presence Handler
+|--------------------------------------------------------------------------
+*/
 cmd({
-  on: "body"
-}, async (conn, mek, m, { from, isOwner }) => {
-  try {
-    if (config.ALWAYS_ONLINE === "true") {
-      // Public Mode + Always Online: Always show as online
-      await conn.sendPresenceUpdate("available", from);
-    } else if (config.PUBLIC_MODE === "true") {
-      // Public Mode + Dynamic: Respect owner's presence
-      if (isOwner) {
-        // If owner is online, show available
-        await conn.sendPresenceUpdate("available", from);
-      } else {
-        // If owner is offline, show unavailable
-        await conn.sendPresenceUpdate("unavailable", from);
-      }
+    on: "body"
+},
+async (conn, mek, m) => {
+    try {
+        if (config.ALWAYS_ONLINE === "true") {
+            await conn.sendPresenceUpdate("available");
+        }
+    } catch (err) {
+        console.log("AlwaysOnline Presence Error:", err);
     }
-  } catch (e) {
-    console.log(e);
-  }
 });
