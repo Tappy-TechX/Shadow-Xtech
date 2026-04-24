@@ -22,7 +22,7 @@ function convertToBool(text, fault = "true") {
 
 /**
  * =========================
- * DEFAULT CONFIG
+ * DEFAULT CONFI
  * =========================
  */
 const defaults = {
