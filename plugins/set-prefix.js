@@ -16,12 +16,12 @@ cmd({
 
     if (!args[0]) {
         return reply(
-            "*❌ Usage:* .setprefix <prefix>\n" +
+            "*❌ Usage:* " + config.PREFIX + "setprefix <prefix>\n" +
             "*Examples:*\n" +
-            "`.setprefix !`\n" +
-            "`.setprefix 1`\n" +
-            "`.setprefix #`\n" +
-            "`.setprefix none` (no prefix)"
+            "`" + config.PREFIX + "setprefix !`\n" +
+            "`" + config.PREFIX + "setprefix 1`\n" +
+            "`" + config.PREFIX + "setprefix #`\n" +
+            "`" + config.PREFIX + "setprefix none` (no prefix)"
         );
     }
 
@@ -32,28 +32,39 @@ cmd({
         newPrefix = "";
     }
 
-    // Update in memory
-    config.PREFIX = newPrefix;
-
     try {
         const configPath = path.join(__dirname, '..', 'config.js');
         let file = fs.readFileSync(configPath, 'utf8');
 
         // Replace PREFIX line safely
         if (file.includes('PREFIX')) {
-            file = file.replace(
-                /PREFIX\s*:\s*["'`].*?["'`]/,
-                `PREFIX: "${newPrefix}"`
-            );
+            if (newPrefix === "") {
+                file = file.replace(
+                    /PREFIX\s*:\s*["'`].*?["'`]/,
+                    'PREFIX: ""'
+                );
+            } else {
+                file = file.replace(
+                    /PREFIX\s*:\s*["'`].*?["'`]/,
+                    `PREFIX: "${newPrefix}"`
+                );
+            }
         } else {
             return reply("*⚠️ Could not find PREFIX in config file!*");
         }
 
         fs.writeFileSync(configPath, file);
 
+        // Update in memory immediately
+        config.PREFIX = newPrefix;
+        
+        // Clear the require cache so index.js picks up the change
+        delete require.cache[require.resolve('../config')];
+
         return reply(
             `*🟢 Prefix successfully changed!*\n\n` +
-            `*New Prefix:* ${newPrefix === "" ? "None (no prefix)" : newPrefix}`
+            `*New Prefix:* ${newPrefix === "" ? "None (no prefix)" : newPrefix}\n\n` +
+            `*ℹ️ Note:* The change is immediate. You can now use the new prefix.`
         );
 
     } catch (err) {
