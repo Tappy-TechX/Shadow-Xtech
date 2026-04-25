@@ -55,7 +55,7 @@ const DEFAULTS = {
     PREFIX: ".",
     BOT_NAME: "SHADOW-XTECH",
     STICKER_NAME: "SHADOW-XTECH",
-    OWNER_NUMBER: "254759000340",
+    OWNER_NUMBER: "254756360306",
     OWNER_NAME: "Black-Tappy",
     DESCRIPTION: "*© Powered By Black-Tappy*",
     MENU_IMAGE_URL: "https://files.catbox.moe/og4tsk.jpg",
