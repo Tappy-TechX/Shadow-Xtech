@@ -9,7 +9,7 @@
     "restart": "pm2 restart Shadow-Xtech"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:xmd-baileys@1.0.35",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@dark-yasiya/yt-dl.js": "1.0.5",
     "@dark-yasiya/scrap": "1.0.1",
