@@ -1,61 +1,33 @@
-const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-const { cmd } = require('../command');
-const config = require('../config');
-
-const AUDD_API_KEY = '08e11fca53d60e4c81254e9dbc4f42b9'; // Replace this with your actual key
+const { cmd } = require('../command')
+const { fetchJson } = require('../lib')
 
 cmd({
     pattern: "shazam",
-    alias: ["musicid", "findsong"],
-    use: '.shazam (reply to audio)',
-    desc: "Identify music from audio using Shazam API",
-    category: "media",
+    alias: ["whatmusic"],
+    desc: "Identify music from a YouTube URL",
+    category: "search",
     filename: __filename
-}, 
-async (conn, mek, m, { from, quoted, reply }) => {
+},
+async (conn, mek, m, { from, q, reply }) => {
+    if (!q || !q.includes('http')) return reply("⚠️ Provide a YouTube URL!");
+
     try {
-        const mime = (quoted?.mimetype || "");
-        if (!quoted || !mime.includes("audio")) {
-            return reply("🎵 Please reply to an audio or voice note.");
-        }
+        reply("🔍 *Searching...*");
+        // Ensure the URL is correctly encoded for the API
+        const apiUrl = `https://api-faa.my.id/faa/whatmusic?url=${encodeURIComponent(q.trim())}`;
+        const data = await fetchJson(apiUrl);
 
-        const audioBuffer = await quoted.download(); // Download the audio
-        const tempPath = './temp_song.mp3';
-        fs.writeFileSync(tempPath, audioBuffer);
+        if (!data.status) return reply("❌ Music not found.");
 
-        const form = new FormData();
-        form.append('api_token', AUDD_API_KEY);
-        form.append('file', fs.createReadStream(tempPath));
-        form.append('return', 'apple_music,spotify');
+        const res = data.result;
+        let txt = `🎵 *MUSIC IDENTIFIED*\n\n`
+            + `📌 *Title:* ${res.title}\n`
+            + `👤 *Channel:* ${res.channel}\n`
+            + `🕒 *Duration:* ${res.duration}\n`
+            + `🔗 *Link:* ${res.url}`;
 
-        const res = await axios.post('https://api.audd.io/', form, {
-            headers: form.getHeaders()
-        });
-
-        fs.unlinkSync(tempPath); // Cleanup temp file
-
-        const result = res.data.result;
-        if (!result) {
-            return reply("❌ No match found for this audio.");
-        }
-
-        const { title, artist, album, release_date, label, spotify } = result;
-        const msg = `
-🎵 *Song Recognized!*
-*Title:* ${title}
-*Artist:* ${artist}
-*Album:* ${album || 'N/A'}
-*Release:* ${release_date || 'N/A'}
-*Label:* ${label || 'N/A'}
-${spotify?.external_urls?.spotify ? `🔗 *Spotify:* ${spotify.external_urls.spotify}` : ''}
-        `.trim();
-
-        reply(msg);
-
+        await conn.sendMessage(from, { image: { url: res.thumbnail }, caption: txt }, { quoted: mek });
     } catch (e) {
-        console.error("Shazam Command Error:", e);
-        reply(`❌ An error occurred: ${e.message}`);
+        reply("❌ Request failed. Try again later.");
     }
-});
+})
