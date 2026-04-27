@@ -5,57 +5,44 @@ cmd({
   pattern: "lyrics",
   alias: ["lyric", "songlyrics", "lyr"],
   react: '🎵',
-  desc: "Get lyrics of songs (top 5)",
+  desc: "Get lyrics of a song",
   category: "music",
   use: ".lyrics <song name>",
   filename: __filename
 }, async (conn, mek, m, { from, reply, text: q }) => {
   try {
 
-    if (!q) return reply("🎵 Usage: .lyrics <song name>\nExample: .lyrics Blinding Lights");
+    if (!q) return reply("*🎵 Usage: .lyrics <song name>*\n*Example: .lyrics Under the influence*");
 
-    await reply("⏳ Searching top 5 lyrics...");
+    await reply("*⏳ Searching for lyrics...*");
 
-    // STEP 1: Search songs
-    const searchRes = await axios.get(
-      `https://api.lyrics.ovh/suggest/${encodeURIComponent(q)}`
+    const res = await axios.get(
+      `https://discardapi.dpdns.org/api/music/lyrics?apikey=qasim&song=${encodeURIComponent(q)}`,
+      { timeout: 15000 }
     );
 
-    const songs = searchRes.data.data.slice(0, 5);
-    if (!songs.length) return reply(`❌ No results found for "${q}"`);
+    const messageData = res.data?.result?.message;
+    if (!messageData?.lyrics) return reply(`*❌ No lyrics found for "${q}".*`);
 
-    // STEP 2: Loop through top 5
-    for (let i = 0; i < songs.length; i++) {
-      const song = songs[i];
+    const { artist, lyrics, image, title, url } = messageData;
 
-      try {
-        const lyricsRes = await axios.get(
-          `https://api.lyrics.ovh/v1/${encodeURIComponent(song.artist.name)}/${encodeURIComponent(song.title)}`
-        );
+    const lyricsOutput = lyrics.length > 4096 ? lyrics.slice(0, 4093) + '...' : lyrics;
 
-        let lyrics = lyricsRes.data.lyrics || "Lyrics not found.";
+    const caption =
+      `🎵 *Title: ${title}*\n` +
+      `👤 *Artist:* ${artist}\n` +
+      `🔗 *URL:* ${url}\n\n` +
+      `📝 *Lyrics:*\n${lyricsOutput}\n\n` +
+      `> *© Powered By Shadow-Xtech*`;
 
-        if (lyrics.length > 2000) {
-          lyrics = lyrics.slice(0, 1997) + "...";
-        }
-
-        const caption =
-          `🎵 *${song.title}*\n` +
-          `👤 *Artist:* ${song.artist.name}\n\n` +
-          `📝 *Lyrics:*\n${lyrics}\n\n` +
-          `> *popkid*`;
-
-        await conn.sendMessage(from, { text: caption }, { quoted: mek });
-
-      } catch {
-        await conn.sendMessage(from, {
-          text: `❌ Couldn't fetch lyrics for ${song.title} - ${song.artist.name}`
-        }, { quoted: mek });
-      }
+    if (image) {
+      await conn.sendMessage(from, { image: { url: image }, caption }, { quoted: mek });
+    } else {
+      await conn.sendMessage(from, { text: caption }, { quoted: mek });
     }
 
   } catch (error) {
     console.error("lyrics error:", error);
-    await reply(`❌ Error: ${error.message || error}`);
+    await reply(`*❌ Error: ${error.message || error}*`);
   }
 });
