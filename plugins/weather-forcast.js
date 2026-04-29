@@ -136,12 +136,12 @@ async (conn, mek, m, { from, args, text, reply, sender }) => {
   
         const message = `  
 ━━━━━━━━━━━━━━━━━━
-  ${icon} *Weather Report For* 
- 📍 *${cityName}${region ? ', ' + region : ''}, ${country}*
+  ${icon} *Weather For* 📍 *${cityName}${region ? ', ' + region : ''}, ${country}*
+  
  ${icon} *${conditionText}*  
- 🌡️ *Temp:* ${tempC}°C / ${tempF}°F  
- 🤔 *Feels Like:* ${feelsC}°C / ${feelsF}°F  
- 📊 *High/Low:* ${maxC}°C / ${minC}°C   
+ 🌡️ *Temp:* ${tempC}°C/${tempF}°F  
+ 🤔 *Feels Like:* ${feelsC}°C/${feelsF}°F  
+ 📊 *High/Low:* ${maxC}°C/${minC}°C   
  💧 *Humidity:* ${humidity}%  
  🌬️ *Wind:* ${windKmph} km/h ${windDir}  
  👁️ *Visibility:* ${visibility} km  
