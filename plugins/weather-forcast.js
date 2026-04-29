@@ -135,9 +135,9 @@ async (conn, mek, m, { from, args, text, reply, sender }) => {
         }).join('\n');  
   
         const message = `  
-━━━━━━━━━━━━━━━━━━
   ${icon} *Weather For* 📍 *${cityName}${region ? ', ' + region : ''}, ${country}*
-  
+━━━━━━━━━━━━━━━━━━  
+
  ${icon} *${conditionText}*  
  🌡️ *Temp:* ${tempC}°C/${tempF}°F  
  🤔 *Feels Like:* ${feelsC}°C/${feelsF}°F  
