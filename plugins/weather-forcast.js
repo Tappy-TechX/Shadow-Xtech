@@ -122,47 +122,46 @@ async (conn, mek, m, { from, args, text, reply }) => {
         const forecastLine = slots.map(h => {
             const t = parseInt(h.time) / 100;
             const label = t === 6 ? '🌅 6AM' : t === 12 ? '☀️ 12PM' : '🌆 6PM';
-            return `│  ${label} → ${h.tempC}°C  ${getWeatherIcon(h.weatherDesc[0].value)}`;
+            return `│  ${label} = ${h.tempC}°C  ${getWeatherIcon(h.weatherDesc[0].value)}`;
         }).join('\n');
 
         // Build message
         const weatherMsg = `
-╭══════════════════╗
+━━━━━━━━━━━━━━━━━━
   ${icon} *WEATHER REPORT*
-╚══════════════════╝
+━━━━━━━━━━━━━━━━━━
 
 📍 *${cityName}${region ? ', ' + region : ''}, ${country}*
 
-╭─❖ *CURRENT CONDITIONS* ❖
-│
-│ ${icon} *${conditionText}*
-│ 🌡️ *Temp:* ${tempC}°C / ${tempF}°F
-│ 🤔 *Feels Like:* ${feelsC}°C / ${feelsF}°F
-│ 📊 *High/Low:* ${maxC}°C / ${minC}°C
-│
-╭─❖ *ATMOSPHERE* ❖
-│
-│ 💧 *Humidity:* ${humidity}%
-│ 🌬️ *Wind:* ${windKmph} km/h ${windDir}
-│ 👁️ *Visibility:* ${visibility} km
-│ 🌡️ *Pressure:* ${pressure} hPa
-│ ☁️ *Cloud Cover:* ${cloudCover}%
-│ 🌧️ *Precipitation:* ${precipMM} mm
-│ ☀️ *UV Index:* ${getUVLabel(uvIndex)}
-│
-╭─❖ *SUN & MOON* ❖
-│
-│ 🌅 *Sunrise:* ${sunrise}
-│ 🌇 *Sunset:* ${sunset}
-│ 🌙 *Moon Phase:* ${moonPhase}
-│
-╭─❖ *TODAY'S FORECAST* ❖
-│
-${forecastLine}
-│
-╰──────────────────❖
+━━━━━━━━━━━━━━━━━━
 
-> 🤖 *POPKID XMD* | Weather powered by wttr.in
+ ${icon} *${conditionText}*
+ 🌡️ *Temp:* ${tempC}°C / ${tempF}°F
+ 🤔 *Feels Like:* ${feelsC}°C / ${feelsF}°F
+ 📊 *High/Low:* ${maxC}°C / ${minC}°C
+
+━━━━━━━━━━━━━━━━━━
+
+ 💧 *Humidity:* ${humidity}%
+ 🌬️ *Wind:* ${windKmph} km/h ${windDir}
+ 👁️ *Visibility:* ${visibility} km
+ 🌡️ *Pressure:* ${pressure} hPa
+ ☁️ *Cloud Cover:* ${cloudCover}%
+ 🌧️ *Precipitation:* ${precipMM} mm
+ ☀️ *UV Index:* ${getUVLabel(uvIndex)}
+
+━━━━━━━━━━━━━━━━━━
+
+ 🌅 *Sunrise:* ${sunrise}
+ 🌇 *Sunset:* ${sunset}
+ 🌙 *Moon Phase:* ${moonPhase}
+
+━━━━━━━━━━━━━━━━━━
+*Today's Forecast*
+${forecastLine}
+
+━━━━━━━━━━━━━━━━━━
+> © *Powered By Shadow-Xtech* 
 `.trim();
 
         await conn.sendMessage(from, { text: weatherMsg }, { quoted: mek });
