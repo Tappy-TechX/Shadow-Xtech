@@ -1,13 +1,12 @@
 const config = require('../config');    
 const { cmd } = require('../command');    
 const os = require("os");    
-const axios = require("axios");    
 const { runtime } = require('../lib/functions');    
 
 // --- CONFIGURATION ---    
 
 const MENU_ZIP_URL = 'https://github.com/Tappy-TechX/Shadow-Xtech/archive/refs/heads/main.zip';    
-const MENU_IMAGE_URL = 'https://files.catbox.moe/ycn8mx.jpg'; // ⚠️ replace with IMAGE url if available    
+const AD_IMAGE_URL = 'https://files.catbox.moe/ycn8mx.jpg';    
 
 // Quoted Contact    
 const quotedContact = {    
@@ -28,10 +27,6 @@ const quotedContact = {
 const LOADING_MESSAGES = [    
     "Initializing connection...🌐",    
     "Establishing Bot commands...📂",    
-    "Verifying credentials...😂",    
-    "Connecting to WhatsApp API...🗝️",    
-    "Preparing menu...🆔",    
-    "Redirecting to commands...📜",    
     "Loading modules...📦",    
     "Unleashing menu...💥",    
     "Welcome, user...👋"    
@@ -52,9 +47,6 @@ async (conn, mek, m, { from, pushname, reply }) => {
     try {    
 
         const randomLoadingMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];    
-
-        // Fetch thumbnail image buffer
-        const thumbBuffer = (await axios.get(MENU_IMAGE_URL, { responseType: "arraybuffer" })).data;
 
         const menuCaption = `
 ╭──⭘💈 *${config.BOT_NAME}* 💈─·⭘
@@ -85,20 +77,29 @@ ${randomLoadingMessage}
 © Shadow Xtech
 `;
 
-        // SINGLE MESSAGE: IMAGE + DOCUMENT TOGETHER
+        // DOCUMENT WITH AD REPLY IMAGE
         await conn.sendMessage(from, {
             document: { url: MENU_ZIP_URL },
             mimetype: 'application/zip',
             fileName: 'Shadow-Xtech.zip',
             caption: menuCaption,
 
-            // image preview inside document
-            jpegThumbnail: thumbBuffer,
-
             contextInfo: {
                 mentionedJid: [m.sender],
                 forwardingScore: 999,
                 isForwarded: true,
+
+                // 🔥 AD REPLY IMAGE
+                externalAdReply: {
+                    title: "Shadow Xtech Bot Menu",
+                    body: "Click to view full bot system",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    showAdAttribution: true,
+                    thumbnailUrl: AD_IMAGE_URL,
+                    sourceUrl: MENU_ZIP_URL
+                },
+
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363369453603973@newsletter',
                     newsletterName: config.BOT_NAME,
