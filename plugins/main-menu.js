@@ -48,8 +48,7 @@ async (conn, mek, m, { from, pushname, reply }) => {
 
         const randomLoadingMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];    
 
-        const menuCaption = `
-╭──⭘💈 *${config.BOT_NAME}* 💈─·⭘
+        const menuCaption = `╭──⭘💈 *${config.BOT_NAME}* 💈─·⭘
 ┆ 👤 Owner : *${config.OWNER_NAME}*
 ┆ ⚙️ Prefix : *[${config.PREFIX}]*
 ┆ 🌐 Platform : *Heroku*
@@ -57,9 +56,7 @@ async (conn, mek, m, { from, pushname, reply }) => {
 ┆ ⏱️ Runtime : *${runtime(process.uptime())}*
 ┆ 🎲 Mode : *${config.MODE}*
 ╰────────────────┈⊷
-
-${randomLoadingMessage}
-
+> ${randomLoadingMessage}
 ╭━━〔 *MAIN MENU* 〕━━⬣
 ┃ 📥 .download
 ┃ 🎵 .lyrics
@@ -73,8 +70,7 @@ ${randomLoadingMessage}
 ┃ 🔓 .unban
 ┃ ⚙️ .mode
 ╰━━━━━━━━━━━━━━━⬣
-
-© Shadow Xtech
+> © Powdered By Shadow Xtech
 `;
 
         // DOCUMENT WITH META AI QUOTED CONTACT
