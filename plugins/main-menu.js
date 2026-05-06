@@ -1,493 +1,213 @@
-const config = require('../config'); 
-const { cmd, commands } = require('../command'); 
-const os = require("os"); 
-const { runtime } = require('../lib/functions');  
+const config = require('../config');
+const { cmd } = require('../command');
+const fs = require("fs");
+const path = require("path");
+const { runtime } = require('../lib/functions');
 
-// --- CONFIGURATION ---
+// ===============================
+// DATABASE SETUP
+// ===============================
 
-// Video URL for the menu 
+const dbPath = path.join(__dirname, '../lib/menu.json');
+
+function getMenuType() {
+    if (!fs.existsSync(dbPath)) {
+        fs.writeFileSync(dbPath, JSON.stringify({ menuType: "video" }, null, 2));
+    }
+    const data = JSON.parse(fs.readFileSync(dbPath));
+    return data.menuType || "video";
+}
+
+function setMenuType(type) {
+    fs.writeFileSync(dbPath, JSON.stringify({ menuType: type }, null, 2));
+}
+
+// ===============================
+// CONFIG
+// ===============================
+
 const MENU_VIDEO_URL = 'https://files.catbox.moe/eubadj.mp4';
 
-// Quoted Contact Object
-const quotedContact = { 
-    key: { 
-        fromMe: false, 
-        participant: "0@s.whatsapp.net", 
-        remoteJid: "status@broadcast" 
-    }, 
-    message: { 
-        contactMessage: { 
-            displayName: "⚙️ System | Menu 📜", 
-            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254 700 000001\nEND:VCARD" 
-        } 
-    } 
-};
+// ===============================
+// MENU PAGES
+// ===============================
 
-// Fancy loading messages
-const LOADING_MESSAGES = [ 
-    "Initializing connection...🌐", 
-    "Establishing Bot commands...📂", 
-    "Verifying credentials...😂", 
-    "Connecting to WhatsApp API...🗝️", 
-    "Preparing menu...🆔", 
-    "Redirecting to commands...📜", 
-    "Connecting to servers...🛰️", 
-    "Fetching command list...📝", 
-    "Authenticating user...👤", 
-    "Compiling menu...⚙️", 
-    "Displaying menu now...✅", 
-    "Waking up the bot...😴", 
-    "Brewing some coffee...☕", 
-    "Checking for updates...🔄", 
-    "Loading all modules...📦", 
-    "Unleashing the menu...💥", 
-    "Accessing mainframe...💻", 
-    "Decrypting command protocols...🛡️", 
-    "Calibrating response time...⚡", 
-    "Generating menu interface...🎨", 
-    "Welcome, user...👋" 
+const MENU_PAGES = [
+`📥 *DOWNLOAD MENU*
+facebook
+tiktok
+ytmp3
+ytmp4
+play`,
+
+`👥 *GROUP MENU*
+add
+kick
+promote
+demote`,
+
+`🎉 *FUN MENU*
+joke
+roast
+8ball
+ship`,
+
+`🤖 *AI MENU*
+ai
+gpt
+imagine`,
+
+`⚡ *MAIN MENU*
+ping
+owner
+alive
+runtime`
 ];
 
-// --- END OF CONFIGURATION ---
+// ===============================
+// SET MENU COMMAND
+// ===============================
 
-cmd({ 
-    pattern: "menu", 
-    alias: ["allmenu", "fullmenu"], 
-    use: '.menu', 
-    desc: "Show all bot commands", 
-    category: "menu", 
-    react: "📜", 
-    filename: __filename 
-}, async (conn, mek, m, { from, reply }) => { 
-    try { 
-        // 1. Acknowledge the command immediately
-        await reply("📜 Fetching commands... Please wait a moment!");  
+cmd({
+    pattern: "setmenu",
+    desc: "Change menu style",
+    category: "owner",
+    use: ".setmenu <type>",
+    filename: __filename
+}, async (conn, mek, m, { reply, text }) => {
 
-        // Select dynamic values
-        const randomLoadingMessage = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];  
+    if (!text) {
+        return reply(`❌ Choose menu type:
 
-        // Compose menu caption 
-        const menuCaption = `╭──⭘💈 *${config.BOT_NAME}* 💈─·⭘
-┆ ◦ 
-┆ ◦ • 👑 Owner : *${config.OWNER_NAME}*
-┆ ◦ • ⚙️ Prefix : *[${config.PREFIX}]*
-┆ ◦ • 🌐 Platform : *Heroku*
-┆ ◦ • 📦 Version : ${config.version}
-┆ ◦ • ⏱️ Runtime : *_${runtime(process.uptime())}_*
-┆ ◦ • 🎲 Mode : *${config.MODE}*
-┆ ◦ • 🎀 Dev : *Black-Tappy*
-┆ ◦ • 🚀 Version : *4.0.0 Mᴇᴛᴀ*
-╰────────────────┈⊷
-> ${randomLoadingMessage}
-╭──·๏[📥 *ᴅᴏᴡɴʟᴏᴀᴅ ᴍᴇɴᴜ* 📥]
-┆ ◦ 
-┆ ◦  🟦 facebook
-┆ ◦  📁 mediafire
-┆ ◦  🎵 tiktok
-┆ ◦  🎶 tiktokdl
-┆ ◦  🎧 tt
-┆ ◦  🎼 ttdl
-┆ ◦  🐦 twitter
-┆ ◦  📷 insta
-┆ ◦  📸 ig
-┆ ◦  🎦 instagram 
-┆ ◦  📦 apk
-┆ ◦  🖼️ img
-┆ ◦  🌄 imgscan
-┆ ◦  🌇 imagine
-┆ ◦  🌅 imagine 2 
-┆ ◦  🌃 imagine 3
-┆ ◦  🌆 flux
-┆ ◦  🌉 flux-ai
-┆ ◦  🪙 ad
-┆ ◦  💸 blur
-┆ ◦  💵 grey
-┆ ◦  💴 invert
-┆ ◦  💶 jail
-┆ ◦  💷 imgjoke
-┆ ◦  💳 nokia
-┆ ◦  💎 rmbg
-┆ ◦  🧻 wanted
-┆ ◦  ▶️ ringtone 
-┆ ◦  📌 pins
-┆ ◦  🔵 pindl
-┆ ◦  📍 pinterestdl
-┆ ◦  🎶 spotify
-┆ ◦  🎧 play
-┆ ◦  🎧 song
-┆ ◦  🎧 song 2
-┆ ◦  📸 video
-┆ ◦  🎬 video 2
-┆ ◦  📺 mp4
-┆ ◦  🎵 ytmp3
-┆ ◦  📹 ytmp4
-┆ ◦  🎬 movie
-┆ ◦  ☁️ gdrive
-┆ ◦  🌐 tourl
-┆ ◦  🔹 tiny
-┆ ◦  🎁 shazam
-┆ ◦  🪩 news
-┆ ◦  🪀 xstalk
-┆ ◦  📶 ytpost
-┆ ◦  ⚜️ yts
-┆ ◦  🍁 ytstalk
-┆ ◦ 
-╰────┈⊷
+video
+document
+carousel
+footer
+text
+auto`);
+    }
 
-╭──·๏[👥 *ɢʀᴏᴜᴘ ᴍᴇɴᴜ* 👥]
-┆ ◦ 
-┆ ◦  ❌ antilink 
-┆ ◦  👑 adminevents
-┆ ◦  🤴 admin
-┆ ◦  🤬 antibadword
-┆ ◦  📛 antilink-kick
-┆ ◦  🚫 deletelink
-┆ ◦  🟢 online 
-┆ ◦  💏 couplepp
-┆ ◦  📶 requestlist 
-┆ ◦  ⚜️ acceptall
-┆ ◦  ❔ leave
-┆ ◦  ❕ out
-┆ ◦  🐔 poll
-┆ ◦  🔚 endgc
-┆ ◦  🔗 grouplink
-┆ ◦  🚪 kickall
-┆ ◦  🚷 kickall2
-┆ ◦  🚫 kickall3
-┆ ◦  ➕ add
-┆ ◦  ➖ remove
-┆ ◦  👢 kick
-┆ ◦  ⬆️ promote
-┆ ◦  ⬇️ demote
-┆ ◦  🚮 dismiss
-┆ ◦  🔄 revoke
-┆ ◦  👋 setgoodbye
-┆ ◦  🎉 setwelcome
-┆ ◦  🗑️ delete
-┆ ◦  🖼️ getpic
-┆ ◦  ℹ️ ginfo
-┆ ◦  ⏳ disappear on
-┆ ◦  ⏳ disappear off
-┆ ◦  ⏳ disappear 7D,24H
-┆ ◦  📝 allreq
-┆ ◦  ✏️ updategname
-┆ ◦  📝 updategdesc
-┆ ◦  📩 joinrequests
-┆ ◦  📨 newgc
-┆ ◦  🏃 nikal
-┆ ◦  🔇 mute
-┆ ◦  🔊 unmute
-┆ ◦  🔒 lockgc
-┆ ◦  🔓 unlockgc
-┆ ◦  📩 invite
-┆ ◦  #️⃣ tag
-┆ ◦  🏷️ hidetag
-┆ ◦  @️⃣ tagall
-┆ ◦  👔 tagadmins
-╰───┈⊷
+    const type = text.toLowerCase();
+    const valid = ["video", "document", "carousel", "footer", "text", "auto"];
 
-╭──·๏[🎭 *ʀᴇᴀᴄᴛɪᴏɴ ᴍᴇɴᴜ* 🎭]
-┆ ◦ 
-┆ ◦  👊 bully @tag
-┆ ◦  🤗 cuddle @tag
-┆ ◦  😢 cry @tag
-┆ ◦  🤗 hug @tag
-┆ ◦  🐺 awoo @tag
-┆ ◦  💋 kiss @tag
-┆ ◦  👅 lick @tag
-┆ ◦  🖐️ pat @tag
-┆ ◦  😏 smug @tag
-┆ ◦  🔨 bonk @tag
-┆ ◦  🚀 yeet @tag
-┆ ◦  😊 blush @tag
-┆ ◦  😄 smile @tag
-┆ ◦  👋 wave @tag
-┆ ◦  ✋ highfive @tag
-┆ ◦  🤝 handhold @tag
-┆ ◦  🍜 nom @tag
-┆ ◦  🦷 bite @tag
-┆ ◦  🤗 glomp @tag
-┆ ◦  👋 slap @tag
-┆ ◦  💀 kill @tag
-┆ ◦  😊 happy @tag
-┆ ◦  😉 wink @tag
-┆ ◦  👉 poke @tag
-┆ ◦  💃 dance @tag
-┆ ◦  😬 cringe @tag
-┆ ◦ 
-╰─┈⊷
+    if (!valid.includes(type)) {
+        return reply("❌ Invalid type");
+    }
 
-╭──·๏[🎨 *ʟᴏɢᴏ ᴍᴀᴋᴇʀ* 🎨]
-┆ ◦
-┆ ◦  💡 neonlight
-┆ ◦  🎀 blackpink
-┆ ◦  🐉 dragonball
-┆ ◦  🍭 deadpool
-┆ ◦  😹 cat
-┆ ◦  🧃 thor
-┆ ◦  💸 angelwings
-┆ ◦  💡 bulb
-┆ ◦  🎭 3dcomic
-┆ ◦  🇺🇸 america
-┆ ◦  🍥 naruto
-┆ ◦  😢 sadgirl
-┆ ◦  ☁️ clouds
-┆ ◦  🚀 futuristic
-┆ ◦  📜 3dpaper
-┆ ◦  ✏️ eraser
-┆ ◦  🌇 sunset
-┆ ◦  🍃 leaf
-┆ ◦  🌌 galaxy
-┆ ◦  💀 sans
-┆ ◦  💥 boom
-┆ ◦  💻 hacker
-┆ ◦  😈 devilwings
-┆ ◦  🇳🇬 nigeria
-┆ ◦  💡 bulb
-┆ ◦  👼 angelwings
-┆ ◦  ♈ zodiac
-┆ ◦  💎 luxury
-┆ ◦  🎨 paint
-┆ ◦  ❄️ frozen
-┆ ◦  🏰 castle
-┆ ◦  🖋️ tatoo
-┆ ◦  🔫 valorant
-┆ ◦  🐻 bear
-┆ ◦  🔠 typography
-┆ ◦  🎂 birthday
-┆ ◦ 
-╰─┈⊷
+    setMenuType(type);
 
-╭──·๏[👑 *ᴏᴡɴᴇʀ ᴍᴇɴᴜ* 👑]
-┆ ◦ 
-┆ ◦  👑 owner
-┆ ◦  📜 menu
-┆ ◦  📑 allmenu
-┆ ◦  🎀 fullmenu
-┆ ◦  📊 vv
-┆ ◦  📸 vv2
-┆ ◦  📋 listcmd
-┆ ◦  📦 repo
-┆ ◦  🚫 block
-┆ ◦  ✅ unblock
-┆ ◦  🖼️ fullpp
-┆ ◦  🖼️ setpp
-┆ ◦  🔄 restart
-┆ ◦  ⏹️ shutdown
-┆ ◦  🔄 updatecmd
-┆ ◦  ⚒️ setprefix 
-┆ ◦  ⚙️ mode
-┆ ◦  🟢 alwaysonline 
-┆ ◦  💬 autotyping 
-┆ ◦  🎧 autorecording 
-┆ ◦  📷 autostatusview 
-┆ ◦  💚 autostatusreact 
-┆ ◦  🔁 autostatusreply
-┆ ◦  ❤️ autoreact
-┆ ◦  📚 autoread
-┆ ◦  🔊 autovoice
-┆ ◦  📨 autoreply
-┆ ◦  ✴️ autosticker 
-┆ ◦  ❌ antilink 
-┆ ◦  🗑️ antidelete 
-┆ ◦  ⛔ delete
-┆ ◦  🚮 clearchats
-┆ ◦  💚 alive
-┆ ◦  🏓 ping
-┆ ◦  🆔 gjid
-┆ ◦  🆔 jid
-┆ ◦  📖 bible
-┆ ◦ 
-╰─┈⊷
+    reply(`✅ Menu saved as *${type}* permanently`);
+});
 
-╭──·๏[🎉 *ғᴜɴ ᴍᴇɴᴜ* 🎉]
-┆ ◦ 
-┆ ◦  🤪 happy
-┆ ◦  🤬 angry
-┆ ◦  💻 hack
-┆ ◦  💘 ship
-┆ ◦  ♂️ boy
-┆ ◦  ♀️ girl
-┆ ◦  👨‍❤️‍👨 marige
-┆ ◦  ❤️ heart
-┆ ◦  😔 sad
-┆ ◦  😠 anger
-┆ ◦  😳 shy
-┆ ◦  😂 emoji
-┆ ◦  🧐 moon
-┆ ◦  😕 confused 
-┆ ◦  🖼️ setpp
-┆ ◦  🥵 hot
-┆ ◦  🏃 nikal
-┆ ◦  👨‍❤️‍💋‍👨 compatibility 
-┆ ◦  💯 compliment 
-┆ ◦  💒 lovetest
-┆ ◦  💖 romance 
-┆ ◦  👨‍👩‍👦 motivate
-┆ ◦  🤗 roast
-┆ ◦  🏃 nikal
-┆ ◦  🎱 8ball
-┆ ◦  💀 aura
-┆ ◦ 
-╰─┈⊷
+// ===============================
+// MENU COMMAND
+// ===============================
 
-╭──·๏[🔄 *ᴄᴏɴᴠᴇʀᴛ ᴍᴇɴᴜ* 🔄]
-┆ ◦ 
-┆ ◦  🏷️ sticker2image 
-┆ ◦  🏷️ stickertoimage
-┆ ◦  😀 emojimix
-┆ ◦  😁 emix
-┆ ◦  ✨ fancy
-┆ ◦  🖼️ take
-┆ ◦  🎵 tomp3
-┆ ◦  📸 sss
-┆ ◦  🗣️ tts
-┆ ◦  🌐 trt
-┆ ◦  🔢 convert
-┆ ◦  🔤 dbinary
-┆ ◦  🔗 toptt
-┆ ◦  🌐 tourl
-┆ ◦  🔁 repeat
-┆ ◦  📖 topdf
-┆ ◦  👤 profile 
-┆ ◦  💚 support
-┆ ◦ 
-╰─┈⊷
+cmd({
+    pattern: "menu",
+    alias: ["allmenu"],
+    desc: "Show menu",
+    category: "menu",
+    react: "📜",
+    filename: __filename
+}, async (conn, mek, m, { from, reply, text }) => {
 
-╭──·๏[🤖 *ᴀɪ ᴍᴇɴᴜ*🤖]
-┆ ◦ 
-┆ ◦  🧠 ai
-┆ ◦  ♍ aivoice
-┆ ◦  🤖 bot
-┆ ◦  🔵 gpt
-┆ ◦  📦 seek-ai
-┆ ◦  🌈 deep
-┆ ◦  🎧 dj
-┆ ◦  👑 blacktappy
-┆ ◦  🤵 define
-┆ ◦  🔍 bing
-┆ ◦  🎨 imagine
-┆ ◦  🖼️ imagine2
-┆ ◦ 
-╰─┈⊷
+    try {
 
-╭──·๏[⚡*ᴍᴀɪɴ ᴍᴇɴᴜ* ⚡]
-┆ ◦ 
-┆ ◦  🏓 ping
-┆ ◦  🚀 version
-┆ ◦  📡 countryinfo
-┆ ◦  💚 alive
-┆ ◦  ⏱️ runtime
-┆ ◦  ⏳ uptime
-┆ ◦  📦 repo
-┆ ◦  👑 owner
-┆ ◦  📜 menu
-┆ ◦  📜 listcmd
-┆ ◦  🔁 convert
-┆ ◦  ⚙️ setsudo
-┆ ◦  ❌ delsudo
-┆ ◦  🔖 listsudo
-┆ ◦  ⏫ update
-┆ ◦  ↕️ env
-┆ ◦  🔄 restart
-┆ ◦  🫆 prvacymenu
-┆ ◦  🔞 adultmenu
-┆ ◦  Ⓜ️ msg
-┆ ◦  🖥️ connect-msg 
-┆ ◦  👤 profile
-┆ ◦  🌡️ weather
-┆ ◦ 
-╰─┈⊷
+        let menuType = getMenuType();
 
-╭──·๏[🎎 *ᴀɴɪᴍᴇ ᴍᴇɴᴜ* 🎎] 
-┆ ◦ 
-┆ ◦  🫧 anime
-┆ ◦  🌈 anime 1
-┆ ◦  🌊 anime 2
-┆ ◦  🌀 anime 3
-┆ ◦  ⚡ anime 4
-┆ ◦  💧 anime 5
-┆ ◦  🔥 animegirl 
-┆ ◦  ☀️ animegirl 1
-┆ ◦  🌫️ animegirl 2
-┆ ◦  ⛅ animegirl 3
-┆ ◦  ⭐ animegirl 4
-┆ ◦  🌌 animegirl 5
-┆ ◦  ✅ truth
-┆ ◦  😨 dare
-┆ ◦  🐶 dog
-┆ ◦  🐺 awoo
-┆ ◦  👧 garl
-┆ ◦  👰 waifu
-┆ ◦  🐱 neko
-┆ ◦  🧙 megumin
-┆ ◦  🐱 neko
-┆ ◦  👗 maid
-┆ ◦  👧 loli
-┆ ◦  📰 animenews
-┆ ◦  🦊 foxgirl
-┆ ◦  🍥 naruto
-┆ ◦ 
-╰─┈⊷
+        // ===============================
+        // AUTO DETECT DEVICE
+        // ===============================
+        const isAndroid = (m.message?.extendedTextMessage?.contextInfo?.deviceListMetadataVersion !== undefined);
 
-╭──·๏[ℹ️*ᴏᴛʜᴇʀ ᴍᴇɴᴜ* ℹ️]
-┆ ◦ 
-┆ ◦  🟢 poststatus
-┆ ◦  ⚪ post
-┆ ◦  📅 cid(channel-info)
-┆ ◦  🔢 chr(channel-react)
-┆ ◦  🎲 quote
-┆ ◦  🪙 randomwallpaper
-┆ ◦  🎨 wallpaper
-┆ ◦  ℹ️ jid
-┆ ◦  💻 getpp
-┆ ◦  🎲 rw
-┆ ◦  💑 pair
-┆ ◦  💑 pair2
-┆ ◦  ✨ fancy
-┆ ◦  🎨 logo <text>
-┆ ◦  📖 define
-┆ ◦  📰 news
-┆ ◦  🎬 movie
-┆ ◦  ☀️ weather
-┆ ◦  📦 nsfw
-┆ ◦  📩 send
-┆ ◦  💾 save
-┆ ◦  🗞️ wikipedia
-┆ ◦  🌐 get
-┆ ◦  🔑 gpass
-┆ ◦  👤 githubstalk
-┆ ◦  🔍 yts
-┆ ◦  📧 tempmail
-┆ ◦  💌 checkmail
-┆ ◦  ✉️ tempnum
-┆ ◦  📩 templist
-┆ ◦  📮 otpbox
-┆ ◦ 
-╰─┈⊷
-> ${config.DESCRIPTION}`;  
+        if (menuType === "auto") {
+            menuType = isAndroid ? "document" : "video";
+        }
 
-        // 2. Send menu video and caption
-        await conn.sendMessage(from, { 
-            video: { url: MENU_VIDEO_URL }, 
-            caption: menuCaption, 
-            gifPlayback: true, 
-            mimetype: 'video/mp4', 
-            contextInfo: { 
-                mentionedJid: [m.sender], 
-                forwardingScore: 999, 
-                isForwarded: true, 
-                forwardedNewsletterMessageInfo: { 
-                    newsletterJid: '120363369453603973@newsletter', 
-                    newsletterName: config.BOT_NAME, 
-                    serverMessageId: 143 
-                } 
-            } 
-        }, { quoted: quotedContact });  
+        const page = parseInt(text) || 1;
+        const totalPages = MENU_PAGES.length;
 
-    } catch (e) { 
-        // Refined error handling
-        console.error("Menu Command Error:", e); 
-        reply(`❌ An error occurred while displaying the menu. Please try again later. Error details logged.`); 
-    }   
+        const header = `💈 *${config.BOT_NAME}*
+👑 ${config.OWNER_NAME}
+⏱ ${runtime(process.uptime())}
+
+📄 Page ${page}/${totalPages}
+`;
+
+        const body = MENU_PAGES[page - 1] || MENU_PAGES[0];
+
+        const caption = header + "\n" + body + `\n\n> ${config.DESCRIPTION}`;
+
+        // ===============================
+        // MENU TYPES
+        // ===============================
+
+        // 🎥 VIDEO
+        if (menuType === "video") {
+            await conn.sendMessage(from, {
+                video: { url: MENU_VIDEO_URL },
+                caption,
+                gifPlayback: true
+            }, { quoted: mek });
+        }
+
+        // 📄 DOCUMENT
+        else if (menuType === "document") {
+            await conn.sendMessage(from, {
+                document: { url: MENU_VIDEO_URL },
+                mimetype: "application/pdf",
+                fileName: `${config.BOT_NAME} Menu`,
+                caption
+            }, { quoted: mek });
+        }
+
+        // 🧾 TEXT
+        else if (menuType === "text") {
+            await reply(caption);
+        }
+
+        // 🎯 FOOTER STYLE
+        else if (menuType === "footer") {
+            await conn.sendMessage(from, {
+                text: caption,
+                contextInfo: {
+                    externalAdReply: {
+                        title: config.BOT_NAME,
+                        body: "Advanced Menu System",
+                        thumbnailUrl: MENU_VIDEO_URL,
+                        sourceUrl: "https://github.com",
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
+            }, { quoted: mek });
+        }
+
+        // 🎠 CAROUSEL (PAGINATED BUTTONS)
+        else if (menuType === "carousel") {
+
+            await conn.sendMessage(from, {
+                text: caption,
+                footer: "Navigate menu",
+                buttons: [
+                    {
+                        buttonId: `.menu ${page - 1}`,
+                        buttonText: { displayText: "⬅️ Prev" },
+                        type: 1
+                    },
+                    {
+                        buttonId: `.menu ${page + 1}`,
+                        buttonText: { displayText: "➡️ Next" },
+                        type: 1
+                    }
+                ],
+                headerType: 1
+            }, { quoted: mek });
+        }
+
+    } catch (err) {
+        console.error(err);
+        reply("❌ Menu error");
+    }
 });
