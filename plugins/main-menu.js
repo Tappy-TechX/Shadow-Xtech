@@ -8,7 +8,7 @@ const { runtime } = require('../lib/functions');
 const MENU_ZIP_URL = 'https://github.com/Tappy-TechX/Shadow-Xtech/archive/refs/heads/main.zip';    
 const AD_IMAGE_URL = 'https://files.catbox.moe/ycn8mx.jpg';    
 
-// Quoted Contact    
+// Meta AI Quoted Contact
 const quotedContact = {    
     key: {    
         fromMe: false,    
@@ -18,7 +18,7 @@ const quotedContact = {
     message: {    
         contactMessage: {    
             displayName: "⚙️ System | Menu 📜",    
-            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:SCIFI\nORG:Shadow-Xtech BOT;\nTEL;type=CELL;type=VOICE;waid=254700000001:+254700000001\nEND:VCARD"    
+            vcard: "BEGIN:VCARD\nVERSION:3.0\nFN:Meta AI\nORG:Meta;\nTEL;type=CELL;type=VOICE;waid=13135550002:+1 (313) 555-0002\nEND:VCARD"    
         }    
     }    
 };    
@@ -77,7 +77,7 @@ ${randomLoadingMessage}
 © Shadow Xtech
 `;
 
-        // DOCUMENT WITH AD REPLY IMAGE
+        // DOCUMENT WITH META AI QUOTED CONTACT
         await conn.sendMessage(from, {
             document: { url: MENU_ZIP_URL },
             mimetype: 'application/zip',
